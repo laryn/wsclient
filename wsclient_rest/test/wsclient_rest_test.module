@@ -1,0 +1,44 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Web service client REST test module.
+ */
+
+/**
+ * Implements hook_default_wsclient_service().
+ */
+function wsclient_rest_test_default_wsclient_service() {
+  $service = new WSClientServiceDescription();
+  $service->name = 'google';
+  $service->label = 'Google Ajax APIs';
+  $service->url = 'http://ajax.googleapis.com/ajax/services/';
+  $service->type = 'REST';
+
+  // Add info about the REST service, which the user has to provide via the UI.
+  $operation['label'] = 'Translate text';
+  $operation['url'] = 'language/translate';
+  $operation['parameter']['q'] = array('type' => 'text', 'label' => 'Text');
+  $operation['parameter']['langpair'] = array(
+    'type' => 'text',
+    'label' => 'Language pair',
+    'description' => 'The language pair used for translating, such as de|en.',
+  );
+  // We have to specify the version 1.0
+  $operation['parameter']['v'] = array('type' => 'hidden', 'default value' => '1.0');
+
+  $operation['provides']['responseData'] = array(
+    'type' => 'struct',
+    'label' => 'Translation result',
+    'property info' => array(
+      'translatedText' => array(
+        'type' => 'text',
+        'label' => 'Translated text',
+      ),
+    ),
+  );
+  $service->settings['operations']['translate'] = $operation;
+  $services[$service->name] = $service;
+  return $services;
+}

@@ -5,5 +5,5 @@ package = Services
 version = VERSION
 core = 7.x
 files[] = wsclient_soap.module
-files[] = wsclient_soap.test
+files[] = tests/wsclient_soap.test
 dependencies[] = wsclient

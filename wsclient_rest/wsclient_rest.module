@@ -61,12 +61,13 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
   }
 
   public function executeOperation($operation, $arguments) {
+    $operation_url = $this->service->settings['operations'][$operation]['url'];
     $client = $this->client();
     try {
-      return $client->get($this->service->url . $operation, $arguments);
+      return $client->get($this->service->url . $operation_url, $arguments);
     }
     catch (RestClientException $e) {
-      throw new WSClientException('Error invoking the REST service %name: %error', array('%name' => $service->label, '%error' => $e->getMessage()));
+      throw new WSClientException('Error invoking the REST service %name: operation %operation: %error', array('%name' => $service->label, '%operation' => $operation, '%error' => $e->getMessage()));
     }
   }
 

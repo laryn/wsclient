@@ -2,46 +2,14 @@
 // $Id$
 
 /**
- * @file Rules Web Remote SOAP Support.
+ * @file
+ * Web service client SOAP support.
  */
 
 /**
- * Implements hook_default_rules_web_remote().
+ * Implements hook_wsclient_endpoint_types().
  */
-function rules_soap_default_rules_web_remote() {
-  $remote = new RulesWebRemote();
-  $remote->name = 'geocoder';
-  $remote->label = 'Geocoder.us';
-  $remote->url = 'http://geocoder.us/dist/eg/clients/GeoCoderPHP.wsdl';
-  $remote->type = 'soap';
-  
-  // Add info about the SOAP service, which the user has to provide via the UI.
-  $operation['label'] = 'Geocode an address';
-  $operation['parameter']['address'] = array('type' => 'text');
-  $operation['provides']['address_results'] = array(
-    'type' => 'list<struct>',
-    'property info' => array(
-      'number' => array('type' => 'integer'),
-      'zip' => array('type' => 'integer'),
-      'suffix' => array('type' => 'text'),
-      'prefix' => array('type' => 'text'),
-      'type' => array('type' => 'text'),
-      'street' => array('type' => 'text'),
-      'state' => array('type' => 'text'),
-      'city' => array('type' => 'text'),
-      'lat' => array('type' => 'decimal'),
-      'long' => array('type' => 'decimal'),
-    ),
-  );
-  $remote->settings['operations']['geocode_address'] = $operation;
-  $remotes[$remote->name] = $remote;
-  return $remotes;
-}
-
-/**
- * Implements hook_rules_endpoint_types().
- */
-function rules_soap_rules_endpoint_types() {
+function wsclient_soap_endpoint_types() {
   return array(
     'soap' => array(
       'label' => t('SOAP'),
@@ -53,28 +21,27 @@ function rules_soap_rules_endpoint_types() {
 /**
  * A remote endpoint types for invoking SOAP services.
  */
-class RulesSOAPEndpoint implements RulesWebRemoteEndpointInterface {
+class WSClientSOAPEndpoint implements WSClientEndpointInterface {
 
   /**
-   * @var RulesWebRemote
+   * @var WSClientServiceDescription
    */
-  protected $remote, $url;
+  protected $service;
 
-  /**
-   * @var RestClient
-   */
+  protected $url;
+
   protected  $client;
 
-  public function __construct(RulesWebRemote $remote) {
-    $this->remote = $remote;
-    $this->url = $remote->url;
+  public function __construct(WSClientServiceDescription $service) {
+    $this->service = $service;
+    $this->url = $service->url;
   }
 
   public function client() {
     if (!isset($this->client)) {
       $options['exceptions'] = TRUE;
-      if (!empty($this->remote->settings['options'])) {
-        $options += $this->remote->settings['options'];
+      if (!empty($this->service->settings['options'])) {
+        $options += $this->service->settings['options'];
       }
       // The url has to point to a WSDL file.
       $this->client = new SOAPClient($this->url, $options);
@@ -82,27 +49,47 @@ class RulesSOAPEndpoint implements RulesWebRemoteEndpointInterface {
     return $this->client;
   }
 
+  /**
+   * Calls the SOAP service.
+   *
+   * @param string $operation
+   *   The name of the operation to execute.
+   * @param array $arguments
+   *   Arguments to pass to the service with this operation.
+   */
+  public function call($operation, $arguments) {
+    $operation_url = $this->service->settings['operations'][$operation]['url'];
+    $client = $this->client();
+    try {
+      $response = $client->__soapCall($operation, $arguments);
+      return $response;
+    }
+    catch (RestClientException $e) {
+      throw new WSClientException('Error invoking the SOAP service %name, operation %operation: %error', array('%name' => $service->label, '%operation' => $operation, '%error' => $e->getMessage()));
+    }
+  }
+
   // This endpoint type doesn't provide events.
   public function events() {}
   public function subscribe($event) {}
   public function unsubscribe($event) {}
-  
+
   // We don't provide any entites, just register rules data types.
   public function load($type, $id) {}
   public function entities() {}
 
-  
+
   public function dataTypes() {
-    if (!empty($this->remote->settings['data types'])) {
-      return $this->remote->settings['data types'];
+    if (!empty($this->service->settings['data types'])) {
+      return $this->service->settings['data types'];
     }
   }
 
   public function actions() {
     $actions = array();
-    foreach ($this->remote->settings['operations'] as $name => $operation) {
+    foreach ($this->service->settings['operations'] as $name => $operation) {
       $actions[$name] = $operation += array(
-        'base' => 'rules_soap_call',
+        'base' => 'wsclient_soap_call',
         'named parameter' => TRUE,
       );
       $actions[$name]['parameter'] = array();
@@ -112,7 +99,7 @@ class RulesSOAPEndpoint implements RulesWebRemoteEndpointInterface {
       }
       $actions[$name]['parameter']['remote'] = array(
         'type' => 'hidden',
-        'default value' => $this->remote->name,
+        'default value' => $this->service->name,
       );
       $actions[$name]['parameter']['operation'] = array(
         'type' => 'hidden',
@@ -134,9 +121,9 @@ class RulesSOAPEndpoint implements RulesWebRemoteEndpointInterface {
 /**
  * Action callback: Invoke a SOAP operation.
  */
-function rules_soap_call($arguments, RulesPlugin $element) {
-  if ($remote = rules_web_remote_load($arguments['remote'])) {
-    $client = $remote->endpoint()->client();
+function wsclient_soap_call($arguments, RulesPlugin $element) {
+  if ($service = wsclient_service_load($arguments['remote'])) {
+    $client = $service->endpoint()->client();
     try {
       $soap_args = array();
       foreach ($arguments as $name => $data) {
@@ -149,10 +136,10 @@ function rules_soap_call($arguments, RulesPlugin $element) {
       return array('var' => $return);
     }
     catch (SoapFault $e) {
-      throw new RulesException('Error invoking the SOAP service of the remote %name: %error', array('%name' => $remote->label, '%error' => $e->getMessage()), $element, RulesLog::ERROR);
+      throw new WSClientException('Error invoking the SOAP service of the remote %name: %error', array('%name' => $service->label, '%error' => $e->getMessage()));
     }
   }
   else {
-    throw new RulesException('The remote site %name cannot be found.', array('%name' => $arguments['remote']), $element, RulesLog::ERROR);
+    throw new WSClientException('The web service %name cannot be found.', array('%name' => $arguments['remote']), $element, RulesLog::ERROR);
   }
 }

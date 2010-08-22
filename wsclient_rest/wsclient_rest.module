@@ -11,7 +11,7 @@
  */
 function wsclient_rest_wsclient_endpoint_types() {
   return array(
-    'REST' => array(
+    'rest' => array(
       'label' => t('REST'),
       'class' => 'WSClientRESTEndpoint',
     ),

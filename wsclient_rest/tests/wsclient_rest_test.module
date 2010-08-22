@@ -14,7 +14,7 @@ function wsclient_rest_test_default_wsclient_service() {
   $service->name = 'google';
   $service->label = 'Google Ajax APIs';
   $service->url = 'http://ajax.googleapis.com/ajax/services/';
-  $service->type = 'REST';
+  $service->type = 'rest';
 
   // Add info about the REST service, which the user has to provide via the UI.
   $operation['label'] = 'Translate text';

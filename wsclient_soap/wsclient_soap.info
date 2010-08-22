@@ -1,9 +1,9 @@
 ; $Id$
-name = Rules Web SOAP Support
-description = A prototype implementing a SOAP endpoint and a example remote site using it.
-package = Rules Use Cases
+name = Web service client SOAP
+description = Implements a SOAP endpoint to connect to SOAP services.
+package = Services
 version = VERSION
 core = 7.x
-files[] = rules_soap.module
-files[] = rules_soap.test
-dependencies[] = rules_web_remote
+files[] = wsclient_soap.module
+files[] = wsclient_soap.test
+dependencies[] = wsclient

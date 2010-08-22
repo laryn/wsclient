@@ -1,0 +1,189 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Web service client - module file.
+ */
+
+/**
+ * Implements of hook_menu().
+ */
+function wsclient_menu() {
+  $items['wsclient/%wsclient/notify'] = array(
+    'page callback' => 'wsclient_notify',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'wsclient.inc',
+  );
+  return $items;
+}
+
+function wsclient_access($service) {
+  return $service->access();
+}
+
+/**
+ * Implements of hook_entity_info().
+ */
+function wsclient_entity_info() {
+  return array(
+    'wsclient_service' => array(
+      'label' => t('Web service description'),
+      'entity class' => 'WsclientService',
+      'controller class' => 'EntityAPIController',
+      'base table' => 'wsclient_service',
+      'fieldable' => TRUE,
+      'entity keys' => array(
+        'id' => 'id',
+        'name' => 'name',
+      ),
+      'exportable' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Implements of hook_entity_info_alter().
+ */
+function wsclient_entity_info_alter(&$info) {
+  $services = entity_load('wsclient_service', FALSE);
+  // We register entities for all remote data types, however we skip the remote
+  // site pointing at ourself ('self') defined by the testing module, as this
+  // would result in issueing a page request during the entity info cache
+  // refresh on our site, which would result in a nice cache building endless
+  // loop.
+  unset($services['self']);
+
+  foreach ($services as $name => $service) {
+    foreach ($service->entities() as $type => $type_info) {
+      // Don't add in entity types, that stem from another site.
+      if (strpos($type, 'wsclient_service_') !== 0) {
+        $type_info += array('entity keys' => array(), 'label' => $type);
+        $info['wsclient_service_' . $name . '_' . $type] = array(
+          'label' => t('Web service %name %type', array('%name' => $service->label, '%type' => $type_info['label'])),
+          'entity keys' => $type_info['entity keys'],
+          'controller class' => 'WSClientServiceEntityController',
+          'wsclient' => array(
+            'remote' => $name,
+            'type' => $type,
+          ),
+          'fieldable' => FALSE,
+          'revision table' => FALSE,
+        );
+        foreach ($type_info['bundles'] as $bundle => $bundle_info) {
+          $info['wsclient_service_' . $name . '_' . $type]['bundles'][$bundle] = array_intersect_key($bundle_info, array_flip(array('label')));
+        }
+        // Apply defaults as entity_get_info().
+        $info['wsclient_service_' . $name . '_' . $type] += array(
+          'static cache' => TRUE,
+          'load hook' => 'wsclient_service_' . $name . '_' . $type . '_load',
+          'view modes' => array(),
+          'cacheable' => TRUE,
+          'translation' => array(),
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Implements of hook_entity_property_info().
+ */
+function wsclient_entity_property_info() {
+  $info = array();
+  foreach (entity_load('wsclient_service', FALSE) as $name => $service) {
+    foreach ($service->entities() as $type => $type_info) {
+      // Don't add in entity types, that stem from another site.
+      if (strpos($type, 'wsclient_service_') !== 0) {
+        $info['wsclient_service_' . $name . '_' . $type] = _wsclient_get_property_info($type_info);
+        foreach ($type_info['bundles'] as $bundle => $bundle_info) {
+          $info['wsclient_service_' . $name . '_' . $type]['bundles'][$bundle] = _wsclient_get_property_info($bundle_info);
+        }
+      }
+    }
+  }
+  return $info;
+}
+
+function _wsclient_get_property_info($type_info) {
+  $info = array_intersect_key($type_info, array_flip(array('properties')));
+  if (!empty($info['properties'])) {
+    foreach ($info['properties'] as &$property_info) {
+      // Filter out only allowed keys.
+      $property_info = array_intersect_key($property_info, array_flip(array('label', 'type', 'description', 'sanitize')));
+      if (empty($property_info['type']) || $property_info['type'] == 'text') {
+        // Make sure to sanitize text - don't trust given sanitize functions.
+        $property_info += array('sanitize' => 'check_plain');
+        if (!in_array($property_info['sanitize'], array('check_plain', 'filter_xss'))) {
+          $property_info['sanitize'] = 'check_plain';
+        }
+      }
+    }
+  }
+  return $info;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function wsclient_permission() {
+  $permissions['administer web services'] = array(
+    'title' => t('Administer web service descriptions'),
+    'description' => t('Administer web service descriptions that can be used to connect to other sites.'),
+  );
+  foreach (entity_load('wsclient_service', FALSE) as $name => $service) {
+    $permissions['interact with  ' . $name] = array(
+      'title' => t('Interact with web service %label', array('%label' => $service->label)),
+    );
+  }
+  return $permissions;
+}
+
+/**
+ * Gets all defined remote endpoint types.
+ */
+function wsclient_get_types() {
+  return rules_fetch_data('endpoint_types');
+}
+
+/**
+ * Load a single rules web remote.
+ *
+ * @return RulesWebRemote
+ *   The rules web remote site definition or FALSE.
+ */
+function wsclient_service_load($name) {
+  $return = entity_load('wsclient_service', array($name));
+  return reset($return);
+}
+
+/**
+ * Gets configured http auth settings.
+ */
+function wsclient_get_http_auth() {
+  if (($username = variable_get('wsclient_httpauth_username', NULL)) && $password = variable_get('wsclient_httpauth_password', NULL)) {
+    return array(
+      'method' => variable_get('wsclient_httpauth_method', CURLAUTH_BASIC),
+      'username' => $username,
+      'password' => $password,
+    );
+  }
+}
+
+/**
+ * Implements hook_rules_event_set_alter().
+ */
+function wsclient_rules_event_set_alter($event_name, RulesEventSet $event_set) {
+  // If a remote event is used make sure we are subscribed to it.
+  if (strpos($event_name, 'wsclient_') === 0) {
+    $info = $event_set->info();
+    if ($service = wsclient_service_load($info['wsclient']['remote'])) {
+      $event = $info['wsclient']['event'];
+      if (!$service->isSubscribedTo($event)) {
+        $service->subscribe($event);
+      }
+    }
+  }
+}

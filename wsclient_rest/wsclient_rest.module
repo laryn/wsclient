@@ -68,7 +68,7 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
     $operation_url = $this->service->settings['operations'][$operation]['url'];
     $client = $this->client();
     try {
-      $response = $client->get($this->service->url . $operation_url, $named_arguments);
+      $response = $client->get($this->service->url . $operation_url, $arguments);
       return $response['responseData'];
     }
     catch (RestClientException $e) {

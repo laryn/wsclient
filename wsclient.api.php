@@ -28,10 +28,10 @@
  *   - class: The actual implementation class for the endpoint type. This class
  *     has to implement the WSClientEndpointInterface. Required.
  *
- * @see hook_rules_endpoint_types_alter()
+ * @see hook_wsclient_endpoint_types_alter()
  * @see WSClientEndpointInterface
  */
-function hook_rules_endpoint_types() {
+function hook_wsclient_endpoint_types() {
   return array(
     'rules_web_hook' => array(
       'label' => t('Rules Web Hooks'),
@@ -45,11 +45,11 @@ function hook_rules_endpoint_types() {
  *
  * @param $types
  *   The remote endpoint type definitions as returned from
- *   hook_rules_endpoint_types().
+ *   hook_wsclient_endpoint_types().
  *
- * @see hook_rules_endpoint_types()
+ * @see hook_wsclient_endpoint_types()
  */
-function hook_rules_endpoint_types_alter(&$types) {
+function hook_wsclient_endpoint_types_alter(&$types) {
 
 }
 

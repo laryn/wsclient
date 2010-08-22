@@ -42,6 +42,12 @@ function wsclient_schema() {
         'not null' => TRUE,
         'description' => 'The url of the web service.',
       ),
+      'operations' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'serialize' => TRUE,
+        'description' => 'The operations this web service offers.',
+      ),
       'type' => array(
         'type' => 'varchar',
         'length' => '255',

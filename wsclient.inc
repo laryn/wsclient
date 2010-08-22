@@ -12,6 +12,7 @@
 class WSClientServiceDescription extends EntityDB {
 
   public $settings = array();
+  public $operations = array();
   public $name;
   public $label;
   public $url;
@@ -47,23 +48,28 @@ class WSClientServiceDescription extends EntityDB {
    *   sequential order according to the order of parameters.
    */
   public function invoke($operation, $arguments) {
-    $named_arguments = array();
-    $remaining_params = $this->settings['operations'][$operation]['parameter'];
-    // Assign named arguments and hidden parameters.
-    foreach ($this->settings['operations'][$operation]['parameter'] as $param => $info) {
-      if (isset($arguments[$param])) {
-        $named_arguments[$param] = $arguments[$param];
-        unset($arguments[$param]);
-        unset($remaining_params[$param]);
-      }
-      elseif ($info['type'] == 'hidden') {
-        $named_arguments[$param] = $info['default value'];
-        unset($remaining_params[$param]);
-      }
+    if (!isset($this->operations[$operation])) {
+      throw new WSClientException('Operation %operation does not exist for web service %service.', array('%operation' => $operation, '%service' => $this->name));
     }
-    // Assign the rest in sequential order.
-    foreach ($remaining_params as $param => $info) {
-      $named_arguments[$param] = array_shift($arguments);
+    $named_arguments = array();
+    if (isset($this->operations[$operation]['parameter'])) {
+      $remaining_params = $this->operations[$operation]['parameter'];
+      // Assign named arguments and hidden parameters.
+      foreach ($this->operations[$operation]['parameter'] as $param => $info) {
+        if (isset($arguments[$param])) {
+          $named_arguments[$param] = $arguments[$param];
+          unset($arguments[$param]);
+          unset($remaining_params[$param]);
+        }
+        elseif ($info['type'] == 'hidden') {
+          $named_arguments[$param] = $info['default value'];
+          unset($remaining_params[$param]);
+        }
+      }
+      // Assign the rest in sequential order.
+      foreach ($remaining_params as $param => $info) {
+        $named_arguments[$param] = array_shift($arguments);
+      }
     }
     return $this->endpoint()->call($operation, $named_arguments);
   }

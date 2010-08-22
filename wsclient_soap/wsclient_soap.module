@@ -86,7 +86,7 @@ class WSClientSOAPEndpoint implements WSClientEndpointInterface {
 
   public function actions() {
     $actions = array();
-    foreach ($this->service->settings['operations'] as $name => $operation) {
+    foreach ($this->service->operations as $name => $operation) {
       $actions[$name] = $operation += array(
         'base' => 'wsclient_soap_call',
         'named parameter' => TRUE,

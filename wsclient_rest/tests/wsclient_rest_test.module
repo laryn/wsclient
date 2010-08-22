@@ -38,7 +38,7 @@ function wsclient_rest_test_default_wsclient_service() {
       ),
     ),
   );
-  $service->settings['operations']['translate'] = $operation;
+  $service->operations['translate'] = $operation;
   $services[$service->name] = $service;
   return $services;
 }

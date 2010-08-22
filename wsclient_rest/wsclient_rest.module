@@ -65,14 +65,14 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
    *   Arguments to pass to the service with this operation.
    */
   public function call($operation, $arguments) {
-    $operation_url = $this->service->settings['operations'][$operation]['url'];
+    $operation_url = $this->service->operations[$operation]['url'];
     $client = $this->client();
     try {
       $response = $client->get($this->service->url . $operation_url, $arguments);
       return $response['responseData'];
     }
     catch (RestClientException $e) {
-      throw new WSClientException('Error invoking the REST service %name, operation %operation: %error', array('%name' => $service->label, '%operation' => $operation, '%error' => $e->getMessage()));
+      throw new WSClientException('Error invoking the REST service %name, operation %operation: %error', array('%name' => $this->service->label, '%operation' => $operation, '%error' => $e->getMessage()));
     }
   }
 
@@ -99,7 +99,7 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
 
   public function actions() {
     $actions = array();
-    foreach ($this->service->settings['operations'] as $name => $operation) {
+    foreach ($this->service->operations as $name => $operation) {
       $actions[$name] = $operation += array(
         'base' => 'wsclient_rest_call',
         'named parameter' => TRUE,

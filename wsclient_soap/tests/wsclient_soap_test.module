@@ -34,7 +34,7 @@ function wsclient_soap_test_default_wsclient_service() {
       'long' => array('type' => 'decimal'),
     ),
   );
-  $service->settings['operations']['geocode_address'] = $operation;
+  $service->operations['geocode_address'] = $operation;
   $services[$service->name] = $service;
   return $services;
 }

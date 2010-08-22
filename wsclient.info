@@ -8,5 +8,3 @@ files[] = wsclient.rules.inc
 files[] = wsclient.inc
 files[] = wsclient.module
 files[] = wsclient.install
-dependencies[] = rules
-dependencies[] = http_client

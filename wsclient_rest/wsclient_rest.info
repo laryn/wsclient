@@ -5,6 +5,6 @@ package = Services
 version = VERSION
 core = 7.x
 files[] = wsclient_rest.module
-files[] = wsclient_rest.test
+files[] = tests/wsclient_rest.test
 dependencies[] = wsclient
 dependencies[] = rest_client

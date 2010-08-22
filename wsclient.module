@@ -17,7 +17,7 @@ function wsclient_entity_info() {
   return array(
     'wsclient_service' => array(
       'label' => t('Web service description'),
-      'entity class' => 'WsclientService',
+      'entity class' => 'WSClientServiceDescription',
       'controller class' => 'EntityAPIController',
       'base table' => 'wsclient_service',
       'fieldable' => TRUE,

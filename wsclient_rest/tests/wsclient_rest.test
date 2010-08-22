@@ -17,36 +17,15 @@ class WSClientRESTTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    //parent::setUp('wsclient_rest_test');
-    parent::setUp();
+    parent::setUp('wsclient_rest_test');
   }
 
   /**
    * Tests invocing the google translation service.
    */
   function testServiceInvocation() {
-    $this->assertTrue(TRUE, 'hooray');
-    dpm('ahoi');
     $service = wsclient_service_load('google');
-    //$result = $service->translate('Hallo Welt', 'de|en');
-    //dpm($result);
-    //dpm($service);
-
-    /*list($result) = rules_action('rules_web_google_translate', array(
-           'param_langpair' => 'de|en',
-         ))->execute('Hallo Welt');
-    $this->assertEqual(drupal_strtolower($result['translatedText']), 'hello world', 'REST service invoked via the action.');
-
-    // Test making use of the provided variable.
-    $rule = rule(array('text' => array('type' => 'text')));
-    $rule->action('rules_web_google_translate', array(
-           'param_q:select' => 'text',
-           'param_langpair' => 'de|en',
-         ))
-         ->action('drupal_message', array('message:select' => 'responsedata:translatedText'))
-         ->execute('Hallo Welt');
-    RulesLog::logger()->checkLog();
-    $msg = drupal_get_messages();
-    $this->assertEqual(drupal_strtolower(array_pop($msg['status'])), 'hello world', 'REST service has been invoked.');*/
+    $result = $service->translate('Hallo Welt', 'de|en');
+    $this->assertEqual(drupal_strtolower($result['translatedText']), 'hello world', 'REST service invocation was successful.');
   }
 }

@@ -36,7 +36,7 @@ class WSClientServiceDescription extends EntityDBExtendable {
     if (method_exists($this->endpoint(), 'access')) {
       return $this->endpoint()->access($account);
     }
-    return user_access('interact with remote ' . $this->name, $account);
+    return user_access('interact with ' . $this->name, $account);
   }
 
   /**
@@ -256,6 +256,19 @@ interface WSClientEndpointInterface {
   public function load($type, $id);
 
   /**
+   * Connect to the remote web service and execute an operation.
+   *
+   * @param string $operation
+   *   The name of the operation.
+   * @param $arguments
+   *   The arguments needed for the operation.
+   *
+   * @return
+   *   The response of the web service call.
+   */
+  public function executeOperation($operation, $arguments);
+
+  /**
    * An array of definitions for the provided events.
    */
   public function events();
@@ -301,7 +314,7 @@ interface WSClientEndpointInterface {
 }
 
 /**
- * A controller for loading remote data.
+ * A controller for loading web service descriptions.
  */
 class WSClientServiceEntityController extends DrupalDefaultEntityController {
 
@@ -309,7 +322,7 @@ class WSClientServiceEntityController extends DrupalDefaultEntityController {
 
   function __construct($entityType) {
     parent::__construct($entityType);
-    $this->remote = wsclient_service_load($this->entityInfo['wsclient']['remote']);
+    $this->service = wsclient_service_load($this->entityInfo['wsclient']['remote']);
   }
 
 
@@ -339,7 +352,7 @@ class WSClientServiceEntityController extends DrupalDefaultEntityController {
     // Load any remaining entities from the web service.
     if ($ids === FALSE || $ids) {
       foreach ($ids as $id) {
-        $queried_entities[$id] = $this->remote->load($this->entityInfo['wsclient']['type'], $id);
+        $queried_entities[$id] = $this->service->load($this->entityInfo['wsclient']['type'], $id);
       }
     }
 

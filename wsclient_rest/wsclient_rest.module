@@ -56,6 +56,20 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
     return $this->client;
   }
 
+  public function __call($operation, $arguments) {
+    $this->executeOperation($operation, reset($arguments));
+  }
+
+  public function executeOperation($operation, $arguments) {
+    $client = $this->client();
+    try {
+      return $client->get($this->service->url . $operation, $arguments);
+    }
+    catch (RestClientException $e) {
+      throw new WSClientException('Error invoking the REST service %name: %error', array('%name' => $service->label, '%error' => $e->getMessage()));
+    }
+  }
+
   // This endpoint type doesn't provide events.
   public function events() {}
   public function subscribe($event) {}

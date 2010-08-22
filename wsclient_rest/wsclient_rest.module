@@ -2,89 +2,55 @@
 // $Id$
 
 /**
- * @file Rules Web Endpoint for invoking a RESTful service.
+ * @file
+ * Web service client endpoint for invoking a RESTful service.
  */
 
 /**
- * Implements hook_default_rules_web_remote().
+ * Implements hook_wsclient_endpoint_types().
  */
-function rules_rest_default_rules_web_remote() {
-  $remote = new RulesWebRemote();
-  $remote->name = 'google';
-  $remote->label = 'Google Ajax APIs';
-  $remote->url = 'http://ajax.googleapis.com/ajax/services/';
-  $remote->type = 'REST';
-
-  // Add info about the REST service, which the user has to provide via the UI.
-  $operation['label'] = 'Translate text';
-  $operation['url'] = 'language/translate';
-  $operation['parameter']['q'] = array('type' => 'text', 'label' => 'Text');
-  $operation['parameter']['langpair'] = array(
-    'type' => 'text',
-    'label' => 'Language pair',
-    'description' => 'The language pair used for translating, such as de|en.',
-  );
-  // We have to specify the version 1.0
-  $operation['parameter']['v'] = array('type' => 'hidden', 'default value' => '1.0');
-
-  $operation['provides']['responseData'] = array(
-    'type' => 'struct',
-    'label' => 'Translation result',
-    'property info' => array(
-      'translatedText' => array(
-        'type' => 'text',
-        'label' => 'Translated text',
-      ),
-    ),
-  );
-  $remote->settings['operations']['translate'] = $operation;
-  $remotes[$remote->name] = $remote;
-  return $remotes;
-}
-
-/**
- * Implements hook_rules_endpoint_types().
- */
-function rules_rest_rules_endpoint_types() {
+function wsclient_rest_wsclient_endpoint_types() {
   return array(
     'REST' => array(
       'label' => t('REST'),
-      'class' => 'RulesRESTEndpoint',
+      'class' => 'WSClientRESTEndpoint',
     ),
   );
 }
 
 /**
- * A remote endpoint types for invoking REST services.
+ * A remote endpoint type for invoking REST services.
  */
-class RulesRESTEndpoint implements RulesWebRemoteEndpointInterface {
+class WSClientRESTEndpoint implements WSClientEndpointInterface {
 
   /**
-   * @var RulesWebRemote
+   * @var WSClientServiceDescription
    */
-  protected $remote, $url;
+  protected $service;
+
+  protected $url;
 
   /**
    * @var RestClient
    */
-  protected  $client;
+  protected $client;
 
-  public function __construct(RulesWebRemote $remote) {
-    $this->remote = $remote;
-    $this->url = $remote->url;
+  public function __construct(WSClientServiceDescription $service) {
+    $this->service = $service;
+    $this->url = $service->url;
   }
 
   public function client() {
     if (!isset($this->client)) {
-      if (!empty($this->remote->settings['formatter'])) {
-        $this->client = new RestClient(NULL, $this->remote->settings['formatter']);
+      if (!empty($this->service->settings['formatter'])) {
+        $this->client = new RestClient(NULL, $this->service->settings['formatter']);
       }
       else {
         $this->client = new RestClient(NULL, new RestClientBaseFormatter(RestClientBaseFormatter::FORMAT_JSON));
       }
       // Pass through additional curl options.
-      if (!empty($this->remote->settings['curl options'])) {
-        $this->client->curlOpts = $this->remote->settings['curl options'];
+      if (!empty($this->service->settings['curl options'])) {
+        $this->client->curlOpts = $this->service->settings['curl options'];
       }
     }
     return $this->client;
@@ -100,22 +66,22 @@ class RulesRESTEndpoint implements RulesWebRemoteEndpointInterface {
 
 
   public function entities() {
-    if (!empty($this->remote->settings['resources'])) {
-      return $this->remote->settings['resources'];
+    if (!empty($this->service->settings['resources'])) {
+      return $this->service->settings['resources'];
     }
   }
 
   public function dataTypes() {
-    if (!empty($this->remote->settings['data types'])) {
-      return $this->remote->settings['data types'];
+    if (!empty($this->service->settings['data types'])) {
+      return $this->service->settings['data types'];
     }
   }
 
   public function actions() {
     $actions = array();
-    foreach ($this->remote->settings['operations'] as $name => $operation) {
+    foreach ($this->service->settings['operations'] as $name => $operation) {
       $actions[$name] = $operation += array(
-        'base' => 'rules_rest_call',
+        'base' => 'wsclient_rest_call',
         'named parameter' => TRUE,
       );
       $actions[$name]['parameter'] = array();
@@ -125,7 +91,7 @@ class RulesRESTEndpoint implements RulesWebRemoteEndpointInterface {
       }
       $actions[$name]['parameter']['remote'] = array(
         'type' => 'hidden',
-        'default value' => $this->remote->name,
+        'default value' => $this->service->name,
       );
       $actions[$name]['parameter']['url'] = array(
         'type' => 'hidden',
@@ -151,9 +117,9 @@ class RulesRESTEndpoint implements RulesWebRemoteEndpointInterface {
 /**
  * Action callback: Invoke a REST service.
  */
-function rules_rest_call($arguments, RulesPlugin $element) {
-  if ($remote = rules_web_remote_load($arguments['remote'])) {
-    $client = $remote->endpoint()->client();
+function wsclient_rest_call($arguments, RulesPlugin $element) {
+  if ($service = wsclient_service_load($arguments['remote'])) {
+    $client = $service->endpoint()->client();
     try {
       $rest_args = array();
       foreach ($arguments as $name => $data) {
@@ -162,7 +128,7 @@ function rules_rest_call($arguments, RulesPlugin $element) {
           $rest_args[substr($name, 6)] = $data;
         }
       }
-      $return = $client->get($remote->url . $arguments['url'], $rest_args);
+      $return = $client->get($service->url . $arguments['url'], $rest_args);
       if (!empty($return) && is_array($return)) {
         $vars = $element->providesVariables();
         // Only pass through returned data matching the described variables.
@@ -176,10 +142,10 @@ function rules_rest_call($arguments, RulesPlugin $element) {
       }
     }
     catch (RestClientException $e) {
-      throw new RulesException('Error invoking the REST service of the remote %name: %error', array('%name' => $remote->label, '%error' => $e->getMessage()), $element, RulesLog::ERROR);
+      throw new WSClientException('Error invoking the REST service %name: %error', array('%name' => $service->label, '%error' => $e->getMessage()));
     }
   }
   else {
-    throw new RulesException('The remote site %name cannot be found.', array('%name' => $arguments['remote']), $element, RulesLog::ERROR);
+    throw new WSClientException('The web service %name cannot be found.', array('%name' => $arguments['remote']));
   }
 }

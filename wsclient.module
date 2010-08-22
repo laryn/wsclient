@@ -149,10 +149,10 @@ function wsclient_get_types() {
 }
 
 /**
- * Load a single rules web remote.
+ * Load a single web service description.
  *
- * @return RulesWebRemote
- *   The rules web remote site definition or FALSE.
+ * @return WSClientServiceDescription
+ *   The web service description or FALSE.
  */
 function wsclient_service_load($name) {
   $return = entity_load('wsclient_service', array($name));

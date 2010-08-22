@@ -6,10 +6,12 @@
  * This file contains no working PHP code; it exists to provide additional
  * documentation for doxygen as well as to document remotes in the standard
  * Drupal manner.
+ *
+ * TODO: revisit this file later and check all names that might have changed.
  */
 
 /**
- * @addtogroup rules_hooks
+ * @addtogroup wsclient_hooks
  * @{
  */
 
@@ -17,23 +19,23 @@
  * Define a remote endpoint type.
  *
  * This hook may be used to define a remote endpoint type, which users may
- * use for configuring remote sites.
+ * use for configuring web services.
  *
  * @return
  *   An array of endpoint type definitions with the endpoint type names as keys.
  *   Each definition is represented by another array with the following keys:
  *   - label: The label of the endpoint type. Start capitalized. Required.
  *   - class: The actual implementation class for the endpoint type. This class
- *     has to implement the RulesWebRemoteEndpointInterface. Required.
+ *     has to implement the WSClientEndpointInterface. Required.
  *
  * @see hook_rules_endpoint_types_alter()
- * @see RulesWebRemoteEndpointInterface
+ * @see WSClientEndpointInterface
  */
 function hook_rules_endpoint_types() {
   return array(
     'rules_web_hook' => array(
       'label' => t('Rules Web Hooks'),
-      'class' => 'RulesWebRemoteEndpointWebHooks',
+      'class' => 'WSClientServiceDescriptionEndpointWebHooks',
     ),
   );
 }
@@ -52,112 +54,112 @@ function hook_rules_endpoint_types_alter(&$types) {
 }
 
 /**
- * Act on rules web remote sites being loaded from the database.
+ * Act on web service descriptions being loaded from the database.
  *
- * This hook is invoked during rules web remotes loading, which is handled by
- * entity_load(), via the EntityCRUDController.
+ * This hook is invoked during web service description loading, which is
+ * handled by entity_load(), via the EntityCRUDController.
  *
- * @param $remotes
- *   An array of rules web remote sites being loaded, keyed by id.
+ * @param $services
+ *   An array of web service descriptions being loaded, keyed by id.
  */
-function hook_rules_web_remote_load($remotes) {
-  $result = db_query('SELECT id, foo FROM {mytable} WHERE id IN(:ids)', array(':ids' => array_keys($remotes)));
+function hook_wsclient_service_load($services) {
+  $result = db_query('SELECT id, foo FROM {mytable} WHERE id IN(:ids)', array(':ids' => array_keys($services)));
   foreach ($result as $record) {
-    $remotes[$record->id]->foo = $record->foo;
+    $services[$record->id]->foo = $record->foo;
   }
 }
 
 /**
- * Respond to creation of a new rules web remote site.
+ * Respond to creation of a new web service description.
  *
- * This hook is invoked after the rules web remote is inserted into the
- * database.
+ * This hook is invoked after the description is inserted into the database.
  *
- * @param RulesWebRemote $remote
- *   The rules web remote site that is being created.
+ * @param  $service
+ *   The web service description that is being created.
  */
-function hook_rules_web_remote_insert($remote) {
+function hook_wsclient_service_insert($service) {
   db_insert('mytable')
     ->fields(array(
-      'id' => $remote->id,
-      'my_field' => $remote->myField,
+      'id' => $service->id,
+      'my_field' => $service->myField,
     ))
     ->execute();
 }
 
 /**
- * Act on a rules web remotes being inserted or updated.
+ * Act on a web service description being inserted or updated.
  *
- * This hook is invoked before the rules web remote site is saved to the
+ * This hook is invoked before the web service description is saved to the
  * database.
  *
- * @param RulesWebRemote $remote
- *   The rules web remote site that is being inserted or updated.
+ * @param WSClientServiceDescription $service
+ *   The web service description that is being inserted or updated.
  */
-function hook_rules_web_remote_presave($remote) {
-  $remote->myField = 'foo';
+function hook_wsclient_service_presave($service) {
+  $service->myField = 'foo';
 }
 
 /**
- * Respond to updates to a rules web remote.
+ * Respond to updates to a web service description.
  *
- * This hook is invoked after the remote site has been updated in the database.
+ * This hook is invoked after the web service description has been updated in
+ * the database.
  *
- * @param RulesWebRemote $remote
- *   The rules web remote site that is being updated.
+ * @param WSClientServiceDescription $service
+ *   The web service description that is being updated.
  */
-function hook_rules_web_remote_update($remote) {
+function hook_wsclient_service_update($service) {
   db_update('mytable')
-    ->fields(array('my_field' => $remote->myField))
-    ->condition('id', $remote->id)
+    ->fields(array('my_field' => $service->myField))
+    ->condition('id', $service->id)
     ->execute();
 }
 
 /**
- * Respond to a remote site deletion.
+ * Respond to a web service description deletion.
  *
- * This hook is invoked after the remote site has been removed from the
- * database.
+ * This hook is invoked after the web service description has been removed from
+ * the database.
  *
- * @param RulesWebRemote $remote
- *   The rules web remote site that is being deleted.
+ * @param WSClientServiceDescription $service
+ *   The web service description that is being deleted.
  */
-function hook_rules_web_remote_delete($remote) {
+function hook_wsclient_service_delete($service) {
   db_delete('mytable')
-    ->condition('id', $remote->id)
+    ->condition('id', $service->id)
     ->execute();
 }
 
 /**
- * Define default rules web remote sites.
+ * Define default web service descriptions.
  *
- * This hook is invoked when remote sites are loaded.
+ * This hook is invoked when web service descriptions are loaded.
  *
  * @return
- *   An array of rules web remote sites with the remote site names as keys.
+ *   An array of web service descriptions with the web service names as keys.
  *
- * @see hook_default_rules_web_remote_alter()
+ * @see hook_default_wsclient_service_alter()
  */
-function hook_default_rules_web_remote() {
-  $remote = new RulesWebRemote();
-  $remote->name = 'master';
-  $remote->label = 'The master site.';
-  $remote->url = 'http://master.example.com';
-  $remote->type = 'rules_web_hook';
-  $remotes[$remote->name] = $remote;
-  return $remotes;
+function hook_default_wsclient_service() {
+  $service = new WSClientServiceDescription();
+  $service->name = 'master';
+  $service->label = 'The master site.';
+  $service->url = 'http://master.example.com';
+  $service->type = 'REST';
+  $services[$service->name] = $service;
+  return $services;
 }
 
 /**
- * Alter default remote sites.
+ * Alter default web service descriptions.
  *
- * @param $remotes
- *   The default remote sites of all modules as returned from
- *   hook_default_rules_web_remote().
+ * @param $services
+ *   The default web service descriptions of all modules as returned from
+ *   hook_default_wsclient_service().
  *
- * @see hook_default_rules_web_remote()
+ * @see hook_default_wsclient_service()
  */
-function hook_default_rules_web_remote_alter(&$remotes) {
+function hook_default_wsclient_service_alter(&$services) {
 
 }
 

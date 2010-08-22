@@ -2,7 +2,6 @@
 name = Web service client REST
 description = Implements a REST endpoint to connect to REST services.
 package = Services
-version = VERSION
 core = 7.x
 files[] = wsclient_rest.module
 files[] = tests/wsclient_rest.test

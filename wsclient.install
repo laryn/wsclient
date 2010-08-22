@@ -14,10 +14,10 @@ function wsclient_enable() {
 
 
 /**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function wsclient_schema() {
-  $schema['wsclient'] = array(
+  $schema['wsclient_service'] = array(
     'fields' => array(
       'id' => array(
         'type' => 'serial',
@@ -90,7 +90,7 @@ function wsclient_schema() {
     ),
     'primary key' => array('name'),
     'foreign keys' => array(
-      'name' => array('wsclient' => 'name'),
+      'name' => array('wsclient_service' => 'name'),
     ),
   );
   $schema['wsclient_subscriptions'] = array(
@@ -105,12 +105,12 @@ function wsclient_schema() {
         'type' => 'varchar',
         'length' => '255',
         'not null' => TRUE,
-        'description' => 'An event of the remote site we are subscribed to.',
+        'description' => 'An event of the web service we are subscribed to.',
       ),
     ),
     'primary key' => array('name', 'event'),
     'foreign keys' => array(
-      'name' => array('wsclient' => 'name'),
+      'name' => array('wsclient_service' => 'name'),
     ),
   );
   return $schema;

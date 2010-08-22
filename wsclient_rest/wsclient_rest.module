@@ -66,22 +66,6 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
    */
   public function call($operation, $arguments) {
     $operation_url = $this->service->settings['operations'][$operation]['url'];
-    $named_arguments = array();
-    $remaining_params = $this->service->settings['operations'][$operation]['parameter'];
-    foreach ($this->service->settings['operations'][$operation]['parameter'] as $param => $info) {
-      if (isset($arguments[$param])) {
-        $named_arguments[$param] = $arguments[$param];
-        unset($arguments[$param]);
-        unset($remaining_params[$param]);
-      }
-      elseif ($info['type'] == 'hidden') {
-        $named_arguments[$param] = $info['default value'];
-        unset($remaining_params[$param]);
-      }
-    }
-    foreach ($remaining_params as $param => $info) {
-      $named_arguments[$param] = array_shift($arguments);
-    }
     $client = $this->client();
     try {
       $response = $client->get($this->service->url . $operation_url, $named_arguments);

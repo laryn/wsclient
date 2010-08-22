@@ -9,11 +9,11 @@
 /**
  * Implements hook_wsclient_endpoint_types().
  */
-function wsclient_soap_endpoint_types() {
+function wsclient_soap_wsclient_endpoint_types() {
   return array(
     'soap' => array(
       'label' => t('SOAP'),
-      'class' => 'RulesSOAPEndpoint',
+      'class' => 'WSClientSOAPEndpoint',
     ),
   );
 }

@@ -2,74 +2,14 @@
 // $Id$
 
 /**
- * @file Rules Remote Sites - Include file.
+ * @file
+ * Web service client - include file.
  */
 
 /**
- * Menu callback for notifying us of a remote event.
+ * Class representing web service descriptions.
  */
-function rules_web_remote_notify($remote) {
-  if (($json = file_get_contents('php://input')) && $data = @drupal_json_decode($json)) {
-    // Check message token.
-    if (!rules_web_remote_valid_message($remote, $data)) {
-      drupal_add_http_header('Status', '403 Forbidden');
-      return;
-    }
-    $events = $remote->events();
-    if (!empty($data['event_name']) && !empty($data['event_data']) && isset($events[$data['event_name']])) {
-      $name = 'rules_web_' . $remote->name . '_' . $data['event_name'];
-      if ($event_set = rules_get_cache('event_' . $name)) {
-        // Make sure passed arguments are complete and invoke event.
-        $event_args = $event_set->argumentInfo();
-        if (($args = array_intersect_key((array)$data['event_data'], $event_args)) && count($args) == count($event_args)) {
-          // Make sure data passed for entities is an object.
-          $info = entity_get_info();
-          foreach ($args as $name => $value) {
-            if (isset($info[$event_args[$name]['type']]) && is_array($value)) {
-              $args[$name] = (object)$value;
-            }
-          }
-          $event_set->execute($args);
-          $t_args = array('%event' => $data['event_name'], '%name' => $remote->label, '!log' => RulesLog::logger()->render());
-          watchdog('rules web remote', 'Event %event of remote %name triggered rule evaluation: !log', $t_args, WATCHDOG_NOTICE);
-        }
-      }
-      else {
-        // We don't have any configured rules, so unsubscribe.
-        $remote->unsubscribe($data['event_name']);
-      }
-    }
-    elseif (isset($data['handshake'])) {
-      // Accept handshakes to verify that this is a valid callback.
-      return TRUE;
-    }
-    else {
-      drupal_add_http_header('Status', '404 Not Found');
-    }
-  }
-  else {
-    drupal_add_http_header('Status', '415 Unsupported Media Type');
-  }
-}
-
-/**
- * Checks whether the provided message is a valid event notification by checking
- * the token.
- */
-function rules_web_remote_valid_message($remote, $data) {
-  if (isset($data['time']) && isset($data['token'])) {
-    // We don't accept too old messages.
-    if (($time = (int)$data['time']) + 3600 > time()) {
-      return $data['token'] === md5($time . md5($remote->token));
-    }
-  }
-  return FALSE;
-}
-
-/**
- * Class representing remote sites.
- */
-class RulesWebRemote extends EntityDBExtendable {
+class WSClientServiceDescription extends EntityDBExtendable {
 
   public $settings = array();
   public $name;
@@ -81,7 +21,7 @@ class RulesWebRemote extends EntityDBExtendable {
   protected $info = array();
   protected $subscriptions = array();
 
-  function __construct($values = array(), $entity_type = 'rules_web_remote') {
+  function __construct($values = array(), $entity_type = 'wsclient_service') {
     parent::__construct($values, $entity_type);
     // Make sure there is a token for communicating with the remote.
     if (!isset($this->token)) {
@@ -90,7 +30,7 @@ class RulesWebRemote extends EntityDBExtendable {
   }
 
   /**
-   * Determines access to the remote.
+   * Determines access to the web service.
    */
   public function access($account = NULL) {
     if (method_exists($this->endpoint(), 'access')) {
@@ -100,13 +40,13 @@ class RulesWebRemote extends EntityDBExtendable {
   }
 
   /**
-   * Returns the associated remote endpoint object.
+   * Returns the associated web service endpoint object.
    *
-   * @return RulesWebRemoteEndpointInterface
+   * @return WSClientEndpointInterface
    */
   public function endpoint() {
     if (!isset($this->endpoint)) {
-      $types = rules_web_remote_get_types();
+      $types = wsclient_get_types();
       $this->endpoint = new $types[$this->type]['class']($this);
     }
     return $this->endpoint;
@@ -122,12 +62,12 @@ class RulesWebRemote extends EntityDBExtendable {
     }
     catch (Exception $e) {
       $args = array('%name' => $this->name, '%message' => $e->getMessage(), '%type' => $type, '%id' => print_r($id,1));
-      throw new RulesException('Unable to load %id of type %type from the remote site %name. Error message: %message', $args, NULL, RulesLog::WARN);
+      throw new WSClientException('Unable to load %id of type %type from the web service description %name. Error message: %message', $args);
     }
   }
 
   /**
-   * Returns info about events of the remote site.
+   * Returns info about events of the web service.
    */
   public function events() {
     if (empty($this->info)) {
@@ -137,7 +77,7 @@ class RulesWebRemote extends EntityDBExtendable {
   }
 
   /**
-   * Returns info about the entities of the remote site.
+   * Returns info about the entities of the web service.
    */
   public function entities() {
     if (empty($this->info)) {
@@ -147,7 +87,7 @@ class RulesWebRemote extends EntityDBExtendable {
   }
 
   /**
-   * Returns info about the data types of the remote site, thus types being not
+   * Returns info about the data types of the web service, thus types being not
    * entities.
    */
   public function dataTypes() {
@@ -158,7 +98,7 @@ class RulesWebRemote extends EntityDBExtendable {
   }
 
   /**
-   * Returns info about the actions of the remote site.
+   * Returns info about the actions of the web service.
    */
   public function actions() {
     if (empty($this->info)) {
@@ -168,7 +108,7 @@ class RulesWebRemote extends EntityDBExtendable {
   }
 
   /**
-   * Returns info about the conditions of the remote site.
+   * Returns info about the conditions of the web service.
    */
   public function conditions() {
     if (empty($this->info)) {
@@ -188,7 +128,7 @@ class RulesWebRemote extends EntityDBExtendable {
     }
     catch (Exception $e) {
       $args = array('%name' => $this->name, '%message' => $e->getMessage());
-      watchdog('rules remote', 'Error getting definitions from the remote site %name. Error message: %message.', $args, WATCHDOG_ALERT);
+      watchdog('wsclient', 'Error getting definitions from the web service %name. Error message: %message.', $args, WATCHDOG_ALERT);
     }
   }
 
@@ -211,7 +151,7 @@ class RulesWebRemote extends EntityDBExtendable {
       try {
         $this->endpoint()->subscribe($event);
         $this->subscriptions[$event] = TRUE;
-        db_merge('rules_web_remote_subscriptions')
+        db_merge('wsclient_subscriptions')
           ->key(array(
             'name' => $this->name,
             'event' => $event,
@@ -220,7 +160,7 @@ class RulesWebRemote extends EntityDBExtendable {
       }
       catch (Exception $e) {
         $args = array('%event' => $event, '%name' => $this->name, '%message' => $e->getMessage());
-        watchdog('rules remote', 'Error subscribing to event %event of remote site %name. Error message: %message.', $args, WATCHDOG_ERROR);
+        watchdog('wsclient', 'Error subscribing to event %event of web service %name. Error message: %message.', $args, WATCHDOG_ERROR);
       }
     }
   }
@@ -232,24 +172,24 @@ class RulesWebRemote extends EntityDBExtendable {
     try {
       $this->endpoint()->unsubscribe($event);
       unset($this->subscriptions[$event]);
-      db_delete('rules_web_remote_subscriptions')
+      db_delete('wsclient_subscriptions')
         ->condition('name', $this->name)
         ->condition('event', $event)
         ->execute();
     }
     catch (Exception $e) {
       $args = array('%event' => $event, '%name' => $this->name, '%message' => $e->getMessage());
-      watchdog('rules remote', 'Error unsubscribing from event %event of remote site %name. Error message: %message.', $args, WATCHDOG_ERROR);
+      watchdog('wsclient', 'Error unsubscribing from event %event of web service %name. Error message: %message.', $args, WATCHDOG_ERROR);
     }
   }
 
   /**
-   * Stores the token and remote metadata independent from the remote site
-   * object itself, so a remote site may live in code via the default hook but
+   * Stores the token and remote metadata independent from the web service
+   * object itself, so a web service may live in code via the default hook but
    * still store this information.
    */
   protected function storeInfo() {
-    db_merge('rules_web_remote_info')
+    db_merge('wsclient_info')
       ->key(array('name' => $this->name))
       ->fields(array(
         'info' => serialize($this->info),
@@ -258,60 +198,57 @@ class RulesWebRemote extends EntityDBExtendable {
       ->execute();
   }
 
-
-
-
   public function save() {
     parent::save();
     $this->storeInfo();
   }
 
   /**
-   * Loads the stored info for the given remote site objects.
+   * Loads the stored info for the given web service objects.
    */
-  public static function attachLoad($remotes) {
-    $result = db_select('rules_web_remote_info', 'r')
+  public static function attachLoad($services) {
+    $result = db_select('wsclient_info', 'r')
     ->fields('r')
-    ->condition('name', array(array_keys($remotes)))
+    ->condition('name', array(array_keys($services)))
     ->execute();
 
     foreach ($result as $record) {
-      $remotes[$record->name]->info = unserialize($record->info);
-      $remotes[$record->name]->token = $record->token;
+      $services[$record->name]->info = unserialize($record->info);
+      $services[$record->name]->token = $record->token;
     }
 
     // Load subscribed events.
-    $result = db_select('rules_web_remote_subscriptions', 'r')
+    $result = db_select('wsclient_subscriptions', 'r')
     ->fields('r')
-    ->condition('name', array(array_keys($remotes)))
+    ->condition('name', array(array_keys($services)))
     ->execute();
     foreach ($result as $record) {
-      $remotes[$record->name]->subscriptions[$record->event] = TRUE;
+      $services[$record->name]->subscriptions[$record->event] = TRUE;
     }
   }
 }
 
 /**
- * Implements hook_rules_web_remote_load().
+ * Implements hook_wsclient_service_load().
  */
-function rules_web_remote_rules_web_remote_load($remotes) {
-  RulesWebRemote::attachLoad($remotes);
+function wsclient_wsclient_service_load($services) {
+  WSClientServiceDescription::attachLoad($services);
 }
 
 /**
- * Implements hook_default_rules_web_remote_alter().
+ * Implements hook_default_wsclient_service_alter().
  */
-function rules_web_remote_default_rules_web_remote_alter($remotes) {
-  RulesWebRemote::attachLoad($remotes);
+function wsclient_default_wsclient_service_alter($services) {
+  WSClientServiceDescription::attachLoad($services);
 }
 
 /**
  * Interface for remote endpoints. In case of any errors the implementing
  * classes should throw exceptions.
  */
-interface RulesWebRemoteEndpointInterface {
+interface WSClientEndpointInterface {
 
-  public function __construct(RulesWebRemote $remote);
+  public function __construct(WSClientServiceDescription $service);
 
   /**
    * Load remote data.
@@ -356,7 +293,7 @@ interface RulesWebRemoteEndpointInterface {
   public function conditions();
 
   /**
-   * Allows altering the configuration form of remote site definitions, such
+   * Allows altering the configuration form of web service definitions, such
    * that the form can include endpoint type specific configuration settings.
    */
   public function formAlter(&$form, &$form_state);
@@ -364,91 +301,20 @@ interface RulesWebRemoteEndpointInterface {
 }
 
 /**
- * A remote endpoint types for rules web hooks.
- */
-class RulesWebRemoteEndpointWebHooks implements RulesWebRemoteEndpointInterface {
-
-  /**
-   * @var RulesWebRemote
-   */
-  protected $remote, $url;
-
-  /**
-   * @var RestClient
-   */
-  protected  $client;
-
-  public function __construct(RulesWebRemote $remote, $base_path = 'rules_web') {
-    $this->remote = $remote;
-    $this->url = $remote->url . '/' . $base_path . '/';
-  }
-
-  public function client() {
-    if (!isset($this->client)) {
-      $this->client = new RestClient(NULL, new RestClientBaseFormatter(RestClientBaseFormatter::FORMAT_JSON));
-      // Pass through additional curl options.
-      if (!empty($this->remote->settings['curl options'])) {
-        $this->client->curlOpts = $this->remote->settings['curl options'];
-      }
-      $this->client->curlOpts += variable_get('rules_web_custom_curl_options', array());
-    }
-    return $this->client;
-  }
-
-  public function load($type, $id) {
-    if (valid_url($url = $this->url . "$type/$id.json", TRUE)) {
-      return (object)$this->client()->get($url);
-    }
-  }
-
-  public function events() {
-    return $this->client()->get($this->url . "rules_web_hook.json");
-  }
-
-  public function subscribe($event) {
-    if (valid_url($url = $this->url . "rules_web_hook/$event/subscribe.json", TRUE)) {
-      $this->client()->post($url, array(
-         'url' => url('rules_web/rules_web_remote/' . $this->remote->name . '/notify', array('absolute' => TRUE)),
-         'http_auth' => rules_web_remote_get_http_auth(),
-         'token' => $this->remote->token,
-      ));
-    }
-  }
-
-  public function unsubscribe($event) {
-    if (valid_url($url = $this->url . "rules_web_hook/$event/unsubscribe.json", TRUE)) {
-      $this->client()->post($url, array(
-         'url' => url('rules_web/rules_web_remote/' . $this->remote->name . '/notify', array('absolute' => TRUE)),
-         'token' => $this->remote->token,
-      ));
-    }
-  }
-
-  public function entities() {
-    return $this->client()->get($this->url . 'entity_metadata.json');
-  }
-
-  public function actions() { }
-  public function conditions() { }
-  public function dataTypes() { }
-  public function formAlter(&$form, &$form_state) { }
-}
-
-/**
  * A controller for loading remote data.
  */
-class RulesWebRemoteEntityController extends DrupalDefaultEntityController {
+class WSClientServiceEntityController extends DrupalDefaultEntityController {
 
-  protected $remote;
+  protected $service;
 
   function __construct($entityType) {
     parent::__construct($entityType);
-    $this->remote = rules_web_remote_load($this->entityInfo['rules web remote']['remote']);
+    $this->remote = wsclient_service_load($this->entityInfo['wsclient']['remote']);
   }
 
 
   /**
-   * Override load to fetch the data from the remote site. For now we don't
+   * Override load to fetch the data from the web service. For now we don't
    * support using $conditions or revisions.
    */
   public function load($ids = array(), $conditions = array()) {
@@ -470,10 +336,10 @@ class RulesWebRemoteEntityController extends DrupalDefaultEntityController {
       }
     }
 
-    // Load any remaining entities from the remote site.
+    // Load any remaining entities from the web service.
     if ($ids === FALSE || $ids) {
       foreach ($ids as $id) {
-        $queried_entities[$id] = $this->remote->load($this->entityInfo['rules web remote']['type'], $id);
+        $queried_entities[$id] = $this->remote->load($this->entityInfo['wsclient']['type'], $id);
       }
     }
 
@@ -504,3 +370,37 @@ class RulesWebRemoteEntityController extends DrupalDefaultEntityController {
   }
 }
 
+/**
+ * Custom exception class to enhance default PHP exceptions.
+ */
+class WSClientException extends Exception {
+
+  public $msg, $args;
+
+  /**
+   * @param $msg
+   *   The exception message containing placeholder as t().
+   * @param $args
+   *   Replacement arguments such as for t().
+   */
+  function __construct($msg, $args = array()) {
+    $this->msg = $msg;
+    $this->args = $args;
+    unset($this->message);
+  }
+
+  /**
+   * The getMessage() method cannot be overriden, so this is the only
+   * possibility to override its output.
+   */
+  public function __get($name) {
+    if ($name == 'message') {
+      return $this->__toString();
+    }
+    return parent::$name;
+  }
+
+  public function __toString() {
+    return t($this->msg, $this->args);
+  }
+}

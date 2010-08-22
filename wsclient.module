@@ -6,20 +6,6 @@
  * Web service client - module file.
  */
 
-/**
- * Implements of hook_menu().
- */
-function wsclient_menu() {
-  $items['wsclient/%wsclient/notify'] = array(
-    'page callback' => 'wsclient_notify',
-    'page arguments' => array(2),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-    'file' => 'wsclient.inc',
-  );
-  return $items;
-}
-
 function wsclient_access($service) {
   return $service->access();
 }

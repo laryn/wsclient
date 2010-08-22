@@ -131,7 +131,18 @@ function wsclient_permission() {
  * Gets all defined remote endpoint types.
  */
 function wsclient_get_types() {
-  return rules_fetch_data('endpoint_types');
+  $data = array();
+  foreach (module_implements('wsclient_endpoint_types') as $module) {
+    $result = call_user_func($module . '_wsclient_endpoint_types');
+    if (isset($result) && is_array($result)) {
+      foreach ($result as $name => $item) {
+        $item += array('module' => $module);
+        $data[$name] = $item;
+      }
+    }
+  }
+  drupal_alter('wsclient_endpoint_types' . $hook, $data);
+  return $data;
 }
 
 /**

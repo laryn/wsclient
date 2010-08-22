@@ -56,18 +56,39 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
     return $this->client;
   }
 
-  public function __call($operation, $arguments) {
-    $this->executeOperation($operation, reset($arguments));
-  }
-
-  public function executeOperation($operation, $arguments) {
+  /**
+   * Calls the REST service.
+   *
+   * @param string $operation
+   *   The name of the operation to execute.
+   * @param array $arguments
+   *   Arguments to pass to the service with this operation.
+   */
+  public function call($operation, $arguments) {
     $operation_url = $this->service->settings['operations'][$operation]['url'];
+    $named_arguments = array();
+    $remaining_params = $this->service->settings['operations'][$operation]['parameter'];
+    foreach ($this->service->settings['operations'][$operation]['parameter'] as $param => $info) {
+      if (isset($arguments[$param])) {
+        $named_arguments[$param] = $arguments[$param];
+        unset($arguments[$param]);
+        unset($remaining_params[$param]);
+      }
+      elseif ($info['type'] == 'hidden') {
+        $named_arguments[$param] = $info['default value'];
+        unset($remaining_params[$param]);
+      }
+    }
+    foreach ($remaining_params as $param => $info) {
+      $named_arguments[$param] = array_shift($arguments);
+    }
     $client = $this->client();
     try {
-      return $client->get($this->service->url . $operation_url, $arguments);
+      $response = $client->get($this->service->url . $operation_url, $named_arguments);
+      return $response['responseData'];
     }
     catch (RestClientException $e) {
-      throw new WSClientException('Error invoking the REST service %name: operation %operation: %error', array('%name' => $service->label, '%operation' => $operation, '%error' => $e->getMessage()));
+      throw new WSClientException('Error invoking the REST service %name, operation %operation: %error', array('%name' => $service->label, '%operation' => $operation, '%error' => $e->getMessage()));
     }
   }
 

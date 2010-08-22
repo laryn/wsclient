@@ -141,7 +141,7 @@ function wsclient_get_types() {
       }
     }
   }
-  drupal_alter('wsclient_endpoint_types' . $hook, $data);
+  drupal_alter('wsclient_endpoint_types', $data);
   return $data;
 }
 

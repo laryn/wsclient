@@ -9,7 +9,7 @@
 /**
  * Class representing web service descriptions.
  */
-class WSClientServiceDescription extends EntityDBExtendable {
+class WSClientServiceDescription extends EntityDB {
 
   public $settings = array();
   public $name;
@@ -27,6 +27,42 @@ class WSClientServiceDescription extends EntityDBExtendable {
     if (!isset($this->token)) {
       $this->token = drupal_get_token(time());
     }
+  }
+
+  public function __call($operation, $arguments) {
+    return $this->invoke($operation, $arguments);
+  }
+
+  /**
+   * Invoke a service via its endpoint.
+   *
+   * @param string $operation
+   *   The name of the operation to execute.
+   * @param array $arguments
+   *   Arguments to pass to the service with this operation. If the array keys
+   *   do not match the parameter information, the array values are assigned in
+   *   sequential order according to the order of parameters.
+   */
+  public function invoke($operation, $arguments) {
+    $named_arguments = array();
+    $remaining_params = $this->settings['operations'][$operation]['parameter'];
+    // Assign named arguments and hidden parameters.
+    foreach ($this->settings['operations'][$operation]['parameter'] as $param => $info) {
+      if (isset($arguments[$param])) {
+        $named_arguments[$param] = $arguments[$param];
+        unset($arguments[$param]);
+        unset($remaining_params[$param]);
+      }
+      elseif ($info['type'] == 'hidden') {
+        $named_arguments[$param] = $info['default value'];
+        unset($remaining_params[$param]);
+      }
+    }
+    // Assign the rest in sequential order.
+    foreach ($remaining_params as $param => $info) {
+      $named_arguments[$param] = array_shift($arguments);
+    }
+    return $this->endpoint()->call($operation, $named_arguments);
   }
 
   /**
@@ -207,6 +243,9 @@ class WSClientServiceDescription extends EntityDBExtendable {
    * Loads the stored info for the given web service objects.
    */
   public static function attachLoad($services) {
+    if (empty($services)) {
+      return;
+    }
     $result = db_select('wsclient_info', 'r')
     ->fields('r')
     ->condition('name', array(array_keys($services)))
@@ -256,7 +295,7 @@ interface WSClientEndpointInterface {
   public function load($type, $id);
 
   /**
-   * Connect to the remote web service and execute an operation.
+   * Connect to the remote web service and call an operation.
    *
    * @param string $operation
    *   The name of the operation.
@@ -266,7 +305,7 @@ interface WSClientEndpointInterface {
    * @return
    *   The response of the web service call.
    */
-  public function executeOperation($operation, $arguments);
+  public function call($operation, $arguments);
 
   /**
    * An array of definitions for the provided events.

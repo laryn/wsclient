@@ -59,9 +59,9 @@ function wsclient_entity_info_alter(&$info) {
   foreach ($services as $name => $service) {
     foreach ($service->entities() as $type => $type_info) {
       // Don't add in entity types, that stem from another site.
-      if (strpos($type, 'wsclient_service_') !== 0) {
+      if (strpos($type, 'wsclient_') !== 0) {
         $type_info += array('entity keys' => array(), 'label' => $type);
-        $info['wsclient_service_' . $name . '_' . $type] = array(
+        $info['wsclient_' . $name . '_' . $type] = array(
           'label' => t('Web service %name %type', array('%name' => $service->label, '%type' => $type_info['label'])),
           'entity keys' => $type_info['entity keys'],
           'controller class' => 'WSClientServiceEntityController',
@@ -73,12 +73,12 @@ function wsclient_entity_info_alter(&$info) {
           'revision table' => FALSE,
         );
         foreach ($type_info['bundles'] as $bundle => $bundle_info) {
-          $info['wsclient_service_' . $name . '_' . $type]['bundles'][$bundle] = array_intersect_key($bundle_info, array_flip(array('label')));
+          $info['wsclient_' . $name . '_' . $type]['bundles'][$bundle] = array_intersect_key($bundle_info, array_flip(array('label')));
         }
         // Apply defaults as entity_get_info().
-        $info['wsclient_service_' . $name . '_' . $type] += array(
+        $info['wsclient_' . $name . '_' . $type] += array(
           'static cache' => TRUE,
-          'load hook' => 'wsclient_service_' . $name . '_' . $type . '_load',
+          'load hook' => 'wsclient_' . $name . '_' . $type . '_load',
           'view modes' => array(),
           'cacheable' => TRUE,
           'translation' => array(),
@@ -96,10 +96,10 @@ function wsclient_entity_property_info() {
   foreach (entity_load('wsclient_service', FALSE) as $name => $service) {
     foreach ($service->entities() as $type => $type_info) {
       // Don't add in entity types, that stem from another site.
-      if (strpos($type, 'wsclient_service_') !== 0) {
-        $info['wsclient_service_' . $name . '_' . $type] = _wsclient_get_property_info($type_info);
+      if (strpos($type, 'wsclient_') !== 0) {
+        $info['wsclient_' . $name . '_' . $type] = _wsclient_get_property_info($type_info);
         foreach ($type_info['bundles'] as $bundle => $bundle_info) {
-          $info['wsclient_service_' . $name . '_' . $type]['bundles'][$bundle] = _wsclient_get_property_info($bundle_info);
+          $info['wsclient_' . $name . '_' . $type]['bundles'][$bundle] = _wsclient_get_property_info($bundle_info);
         }
       }
     }

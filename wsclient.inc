@@ -410,6 +410,67 @@ class WSClientServiceEntityController extends DrupalDefaultEntityController {
 }
 
 /**
+ * Menu callback for notifying us of a remote event.
+ */
+function wsclient_notify($service) {
+  if (($json = file_get_contents('php://input')) && $data = @drupal_json_decode($json)) {
+    // Check message token.
+    if (!wsclient_valid_message($service, $data)) {
+      drupal_add_http_header('Status', '403 Forbidden');
+      return;
+    }
+    $events = $service->events();
+    if (!empty($data['event_name']) && !empty($data['event_data']) && isset($events[$data['event_name']])) {
+      $name = 'wsclient_' . $service->name . '_' . $data['event_name'];
+      if ($event_set = rules_get_cache('event_' . $name)) {
+        // Make sure passed arguments are complete and invoke event.
+        $event_args = $event_set->parameterInfo();
+        if (($args = array_intersect_key((array)$data['event_data'], $event_args)) && count($args) == count($event_args)) {
+          // Make sure data passed for entities is an object.
+          $info = entity_get_info();
+          foreach ($args as $name => $value) {
+            if (isset($info[$event_args[$name]['type']]) && is_array($value)) {
+              $args[$name] = (object)$value;
+            }
+          }
+          $event_set->execute($args);
+          $t_args = array('%event' => $data['event_name'], '%name' => $service->label, '!log' => RulesLog::logger()->render());
+          watchdog('wsclient', 'Event %event of web service %name triggered rule evaluation: !log', $t_args, WATCHDOG_NOTICE);
+        }
+      }
+      else {
+        // We don't have any configured rules, so unsubscribe.
+        $service->unsubscribe($data['event_name']);
+      }
+    }
+    elseif (isset($data['handshake'])) {
+      // Accept handshakes to verify that this is a valid callback.
+      return TRUE;
+    }
+    else {
+      drupal_add_http_header('Status', '404 Not Found');
+    }
+  }
+  else {
+    drupal_add_http_header('Status', '415 Unsupported Media Type');
+  }
+}
+
+/**
+ * Checks whether the provided message is a valid event notification by checking
+ * the token.
+ */
+function wsclient_valid_message($service, $data) {
+  if (isset($data['time']) && isset($data['token'])) {
+    // We don't accept too old messages.
+    if (($time = (int)$data['time']) + 3600 > time()) {
+      return $data['token'] === md5($time . md5($service->token));
+    }
+  }
+  return FALSE;
+}
+
+/**
  * Custom exception class to enhance default PHP exceptions.
  */
 class WSClientException extends Exception {

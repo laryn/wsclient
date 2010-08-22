@@ -141,19 +141,11 @@ class WSClientServiceDescription extends EntityDB {
     return $this->cache('actions');
   }
 
-  /**
-   * Returns info about the conditions of the web service.
-   */
-  public function conditions() {
-    return $this->cache('conditions');
-  }
-
   protected function refreshInfo() {
     try {
       $this->cache['entities'] = $this->endpoint()->entities();
       $this->cache['dataTypes'] = $this->endpoint()->dataTypes();
       $this->cache['actions'] = $this->endpoint()->actions();
-      $this->cache['conditions'] = $this->endpoint()->conditions();
       $this->cache['events'] = $this->endpoint()->events();
       $this->storeInfo();
     }
@@ -318,14 +310,13 @@ interface WSClientEndpointInterface {
   public function unsubscribe($event);
 
   /**
-   * An array of info about entity types used by the provided
-   * events/conditions/actions.
+   * An array of info about entity types used by the provided events/actions.
    */
   public function entities();
 
   /**
-   * An array of info about data types used by the provided events/conditions/
-   * actions being not entities.
+   * An array of info about data types used by the provided events/actions
+   * being not entities.
    */
   public function dataTypes();
 
@@ -333,11 +324,6 @@ interface WSClientEndpointInterface {
    * An array of definitions for the provided actions.
    */
   public function actions();
-
-  /**
-   * An array of definitions for the provided conditions.
-   */
-  public function conditions();
 
   /**
    * Allows altering the configuration form of web service definitions, such

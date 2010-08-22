@@ -113,7 +113,6 @@ class WSClientSOAPEndpoint implements WSClientEndpointInterface {
     return $actions;
   }
 
-  public function conditions() {}
   public function formAlter(&$form, &$form_state) { }
 }
 

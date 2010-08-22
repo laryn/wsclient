@@ -86,25 +86,6 @@ function wsclient_rules_action_info() {
 }
 
 /**
- * Implements hook_rules_condition_info().
- */
-function wsclient_rules_condition_info() {
-  $return = array();
-  foreach (entity_load('wsclient_service', FALSE) as $name => $service) {
-    $service_types = $service->entities() + $service->dataTypes();
-    foreach ($service->conditions() as $item_name => $info) {
-      $info += array('parameter' => array());
-      // Map the types.
-      foreach ($info['parameter'] as $param => &$param_info) {
-        $param_info['type'] = _wsclient_map_type($name, $service_types, $param_info['type']);
-      }
-      $return['wsclient_' . $name . '_' . $item_name] = $info;
-    }
-  }
-  return $return;
-}
-
-/**
  * Maps the type name from the name used by the remote info to the rules name.
  */
 function _wsclient_map_type($name, $service_types, $type) {

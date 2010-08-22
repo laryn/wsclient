@@ -2,7 +2,8 @@
 // $Id$
 
 /**
- * @file Rules SOAP Tests.
+ * @file
+ * Web service client SOAP Tests.
  */
 
 class WSClientSOAPTestCase extends DrupalWebTestCase {
@@ -25,8 +26,7 @@ class WSClientSOAPTestCase extends DrupalWebTestCase {
   function testServiceInvocation() {
     $service = wsclient_service_load('geocoder');
     $result = $service->geocode_address('1600 Pennsylvania Av, Washington, DC');
-    dpm($result);
-    //$this->assertEqual(drupal_strtolower($result['translatedText']), 'hello world', 'SOAP service invocation was successful.');
+    $this->assertEqual($result[0]->zip, '20502', 'SOAP service invocation was successful.');
   }
 
   /**

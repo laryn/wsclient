@@ -58,7 +58,6 @@ class WSClientSOAPEndpoint implements WSClientEndpointInterface {
    *   Arguments to pass to the service with this operation.
    */
   public function call($operation, $arguments) {
-    $operation_url = $this->service->settings['operations'][$operation]['url'];
     $client = $this->client();
     try {
       $response = $client->__soapCall($operation, $arguments);

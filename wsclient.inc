@@ -18,7 +18,7 @@ class WSClientServiceDescription extends EntityDB {
   public $token;
 
   protected $endpoint = NULL;
-  protected $info = array();
+  protected $cache = array();
   protected $subscriptions = array();
 
   function __construct($values = array(), $entity_type = 'wsclient_service') {
@@ -29,6 +29,9 @@ class WSClientServiceDescription extends EntityDB {
     }
   }
 
+  /**
+   * Magic method to catch service invocations.
+   */
   public function __call($operation, $arguments) {
     return $this->invoke($operation, $arguments);
   }
@@ -102,24 +105,25 @@ class WSClientServiceDescription extends EntityDB {
     }
   }
 
+  protected function cache($part) {
+    if (empty($this->cache)) {
+      $this->refreshInfo();
+    }
+    return !empty($this->cache[$part]) ? $this->cache[$part] : array();
+  }
+
   /**
    * Returns info about events of the web service.
    */
   public function events() {
-    if (empty($this->info)) {
-      $this->refreshInfo();
-    }
-    return !empty($this->info['events']) ? $this->info['events'] : array();
+    return $this->cache('events');
   }
 
   /**
    * Returns info about the entities of the web service.
    */
   public function entities() {
-    if (empty($this->info)) {
-      $this->refreshInfo();
-    }
-    return !empty($this->info['entities']) ? $this->info['entities'] : array();
+    return $this->cache('entities');
   }
 
   /**
@@ -127,39 +131,30 @@ class WSClientServiceDescription extends EntityDB {
    * entities.
    */
   public function dataTypes() {
-    if (empty($this->info)) {
-      $this->refreshInfo();
-    }
-    return !empty($this->info['dataTypes']) ? $this->info['dataTypes'] : array();
+    return $this->cache('dataTypes');
   }
 
   /**
    * Returns info about the actions of the web service.
    */
   public function actions() {
-    if (empty($this->info)) {
-      $this->refreshInfo();
-    }
-    return !empty($this->info['actions']) ? $this->info['actions'] : array();
+    return $this->cache('actions');
   }
 
   /**
    * Returns info about the conditions of the web service.
    */
   public function conditions() {
-    if (empty($this->info)) {
-      $this->refreshInfo();
-    }
-    return !empty($this->info['conditions']) ? $this->info['conditions'] : array();
+    return $this->cache('conditions');
   }
 
   protected function refreshInfo() {
     try {
-      $this->info['entities'] = $this->endpoint()->entities();
-      $this->info['dataTypes'] = $this->endpoint()->dataTypes();
-      $this->info['actions'] = $this->endpoint()->actions();
-      $this->info['conditions'] = $this->endpoint()->conditions();
-      $this->info['events'] = $this->endpoint()->events();
+      $this->cache['entities'] = $this->endpoint()->entities();
+      $this->cache['dataTypes'] = $this->endpoint()->dataTypes();
+      $this->cache['actions'] = $this->endpoint()->actions();
+      $this->cache['conditions'] = $this->endpoint()->conditions();
+      $this->cache['events'] = $this->endpoint()->events();
       $this->storeInfo();
     }
     catch (Exception $e) {
@@ -228,7 +223,7 @@ class WSClientServiceDescription extends EntityDB {
     db_merge('wsclient_info')
       ->key(array('name' => $this->name))
       ->fields(array(
-        'info' => serialize($this->info),
+        'info' => serialize($this->cache),
         'token' => $this->token,
       ))
       ->execute();
@@ -252,7 +247,7 @@ class WSClientServiceDescription extends EntityDB {
     ->execute();
 
     foreach ($result as $record) {
-      $services[$record->name]->info = unserialize($record->info);
+      $services[$record->name]->cache = unserialize($record->info);
       $services[$record->name]->token = $record->token;
     }
 

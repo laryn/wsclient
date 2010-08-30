@@ -16,6 +16,7 @@ class WSClientServiceDescription extends EntityDB {
   public $name;
   public $label;
   public $url;
+  public $type;
   public $token;
 
   protected $endpoint = NULL;

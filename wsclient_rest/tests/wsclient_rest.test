@@ -26,7 +26,7 @@ class WSClientRESTTestCase extends DrupalWebTestCase {
   function testServiceInvocation() {
     $service = wsclient_service_load('google');
     $result = $service->translate('Hallo Welt', 'de|en');
-    $this->assertEqual(drupal_strtolower($result['translatedText']), 'hello world', 'REST service invocation was successful.');
+    $this->assertEqual(drupal_strtolower($result['responseData']['translatedText']), 'hello world', 'REST service invocation was successful.');
   }
 }
 

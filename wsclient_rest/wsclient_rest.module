@@ -113,6 +113,10 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
         'type' => 'hidden',
         'default value' => $this->service->name,
       );
+      $actions[$name]['parameter']['operation'] = array(
+        'type' => 'hidden',
+        'default value' => $name,
+      );
       $actions[$name]['parameter']['url'] = array(
         'type' => 'hidden',
         'default value' => $operation['url'],
@@ -138,7 +142,6 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
  */
 function wsclient_rest_call($arguments, RulesPlugin $element) {
   if ($service = wsclient_service_load($arguments['remote'])) {
-    $client = $service->endpoint()->client();
     try {
       $rest_args = array();
       foreach ($arguments as $name => $data) {
@@ -147,7 +150,7 @@ function wsclient_rest_call($arguments, RulesPlugin $element) {
           $rest_args[substr($name, 6)] = $data;
         }
       }
-      $return = $client->get($service->url . $arguments['url'], $rest_args);
+      $return = $service->invoke($arguments['operation'], $rest_args);
       if (!empty($return) && is_array($return)) {
         $vars = $element->providesVariables();
         // Only pass through returned data matching the described variables.

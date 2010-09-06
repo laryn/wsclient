@@ -100,7 +100,7 @@ class WSClientServiceDescription extends EntityDB {
 
   /**
    * Loads the entity of the given type and id. In case of errors a
-   * RulesException is thrown.
+   * WSClientException is thrown.
    */
   public function load($type, $id) {
     try {

@@ -2,8 +2,8 @@ $Id$
 
 Web Service Client Module (wsclient)
 ------------------------------------
-by Klaus Purer, klaus.purer@epiqo.com
-and Wolfgang Ziegler, nuppla@zites.net
+by Klaus Purer (klausi), klaus.purer@epiqo.com
+and Wolfgang Ziegler (fago), wolfgang.ziegler@epiqo.com
 
 WSClient provides an interface to consume external web services. It focuses on
 integrating web service operations as Rules actions, but can also be used as data

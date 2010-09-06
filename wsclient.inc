@@ -25,7 +25,7 @@ class WSClientServiceDescription extends EntityDB {
 
   function __construct($values = array(), $entity_type = 'wsclient_service') {
     parent::__construct($values, $entity_type);
-    // Make sure there is a token for communicating with the remote.
+    // Make sure there is a token for communicating with the remote service.
     if (!isset($this->token)) {
       $this->token = drupal_get_token(time());
     }
@@ -183,7 +183,6 @@ class WSClientServiceDescription extends EntityDB {
   protected function refreshInfo() {
     try {
       $this->cache['entities'] = $this->endpoint()->entities();
-      $this->cache['actions'] = $this->endpoint()->actions();
       $this->cache['events'] = $this->endpoint()->events();
       $this->storeInfo();
     }

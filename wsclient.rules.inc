@@ -100,3 +100,23 @@ function _wsclient_map_type($name, $service_types, $type) {
   return $type;
 }
 
+/**
+ * Action callback: invoke a web service.
+ */
+function wsclient_service_action($arguments, RulesPlugin $element) {
+  if ($service = wsclient_service_load($arguments['service'])) {
+    $args = array();
+    foreach ($arguments as $name => $data) {
+      if (strpos($name, 'param_') === 0) {
+        // Remove the parameter name prefix 'param_'.
+        $args[substr($name, 6)] = $data;
+      }
+    }
+    $return = $service->invoke($arguments['operation'], $args);
+    return array('result' => $return);
+  }
+  else {
+    throw new WSClientException('The web service %name cannot be found.', array('%name' => $arguments['service']));
+  }
+}
+

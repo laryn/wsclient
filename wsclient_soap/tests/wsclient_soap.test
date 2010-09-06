@@ -54,7 +54,7 @@ class WSClientSOAPRulesTestCase extends DrupalWebTestCase {
 
     $rule = rule(array('address' => array('type' => 'text')));
     $rule->action('wsclient_geocoder_geocode_address', array('param_address:select' => 'address'))
-         ->action('drupal_message', array('message:select' => 'var:0:zip'))
+         ->action('drupal_message', array('message:select' => 'result:0:zip'))
          ->execute('1600 Pennsylvania Av, Washington, DC');
 
     RulesLog::logger()->checkLog();

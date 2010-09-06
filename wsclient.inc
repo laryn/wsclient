@@ -148,7 +148,36 @@ class WSClientServiceDescription extends EntityDB {
    * Returns info about the actions of the web service.
    */
   public function actions() {
-    return $this->cache('actions');
+    $actions = array();
+    foreach ($this->operations as $name => $operation) {
+      $actions[$name] = $operation += array(
+        'base' => 'wsclient_service_action',
+        'named parameter' => TRUE,
+      );
+      $actions[$name]['parameter'] = array();
+      // Prefix operation parameter names to avoid name clashes.
+      foreach ((array) $operation['parameter'] as $param => $info) {
+        $actions[$name]['parameter']['param_' . $param] = $info;
+      }
+      $actions[$name]['parameter']['service'] = array(
+        'type' => 'hidden',
+        'default value' => $this->name,
+      );
+      $actions[$name]['parameter']['operation'] = array(
+        'type' => 'hidden',
+        'default value' => $name,
+      );
+      // Pass through provided variables as they are described, but ensure
+      // valid variable names.
+      // TODO: Use regex to enforce valid PHP variable name and/or map names?
+      if (!empty($actions[$name]['provides'])) {
+        foreach ($actions[$name]['provides'] as $var => $info) {
+          unset($actions[$name]['provides'][$var]);
+          $actions[$name]['provides'][strtolower($var)] = $info;
+        }
+      }
+    }
+    return $actions;
   }
 
   protected function refreshInfo() {
@@ -322,11 +351,6 @@ interface WSClientEndpointInterface {
    * An array of info about entity types used by the provided events/actions.
    */
   public function entities();
-
-  /**
-   * An array of definitions for the provided actions.
-   */
-  public function actions();
 
   /**
    * Allows altering the configuration form of web service definitions, such

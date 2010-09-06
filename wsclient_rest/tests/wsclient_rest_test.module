@@ -28,13 +28,19 @@ function wsclient_rest_test_default_wsclient_service() {
   // We have to specify the version 1.0
   $operation['parameter']['v'] = array('type' => 'hidden', 'default value' => '1.0');
 
-  $operation['provides']['responseData'] = array(
+  $operation['provides']['result'] = array(
     'type' => 'struct',
     'label' => 'Translation result',
     'property info' => array(
-      'translatedText' => array(
-        'type' => 'text',
-        'label' => 'Translated text',
+      'responseData' => array(
+        'type' => 'struct',
+        'label' => 'Response data',
+        'property info' => array(
+          'translatedText' => array(
+            'type' => 'text',
+            'label' => 'Translated text',
+          ),
+        ),
       ),
     ),
   );

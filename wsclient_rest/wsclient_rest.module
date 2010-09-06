@@ -91,5 +91,11 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
     }
   }
 
+  public function dataTypes() {
+    if (!empty($this->service->settings['data types'])) {
+      return $this->service->settings['data types'];
+    }
+  }
+
   public function formAlter(&$form, &$form_state) { }
 }

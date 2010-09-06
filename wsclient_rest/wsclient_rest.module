@@ -138,32 +138,27 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
  */
 function wsclient_rest_call($arguments, RulesPlugin $element) {
   if ($service = wsclient_service_load($arguments['service'])) {
-    try {
-      $rest_args = array();
-      foreach ($arguments as $name => $data) {
-        if (strpos($name, 'param_') === 0) {
-          // Remove the parameter name prefix 'param_'.
-          $rest_args[substr($name, 6)] = $data;
-        }
-      }
-      $return = $service->invoke($arguments['operation'], $rest_args);
-      if (!empty($return) && is_array($return)) {
-        $vars = $element->providesVariables();
-        // Only pass through returned data matching the described variables.
-        foreach ($return as $name => $data) {
-          unset($return[$name]);
-          if (isset($vars[strtolower($name)])) {
-            $return[strtolower($name)] = $data;
-          }
-        }
-        return $return;
+    $rest_args = array();
+    foreach ($arguments as $name => $data) {
+      if (strpos($name, 'param_') === 0) {
+        // Remove the parameter name prefix 'param_'.
+        $rest_args[substr($name, 6)] = $data;
       }
     }
-    catch (RestClientException $e) {
-      throw new WSClientException('Error invoking the REST service %name: %error', array('%name' => $service->label, '%error' => $e->getMessage()));
+    $return = $service->invoke($arguments['operation'], $rest_args);
+    if (!empty($return) && is_array($return)) {
+      $vars = $element->providesVariables();
+      // Only pass through returned data matching the described variables.
+      foreach ($return as $name => $data) {
+        unset($return[$name]);
+        if (isset($vars[strtolower($name)])) {
+          $return[strtolower($name)] = $data;
+        }
+      }
+      return $return;
     }
   }
   else {
-    throw new WSClientException('The web service %name cannot be found.', array('%name' => $arguments['remote']));
+    throw new WSClientException('The web service %name cannot be found.', array('%name' => $arguments['service']));
   }
 }

@@ -138,7 +138,10 @@ class WSClientServiceDescription extends EntityDB {
    * entities.
    */
   public function dataTypes() {
-    return $this->cache('dataTypes');
+    if (!empty($this->settings['data types'])) {
+      return $this->settings['data types'];
+    }
+    return array();
   }
 
   /**
@@ -151,7 +154,6 @@ class WSClientServiceDescription extends EntityDB {
   protected function refreshInfo() {
     try {
       $this->cache['entities'] = $this->endpoint()->entities();
-      $this->cache['dataTypes'] = $this->endpoint()->dataTypes();
       $this->cache['actions'] = $this->endpoint()->actions();
       $this->cache['events'] = $this->endpoint()->events();
       $this->storeInfo();
@@ -320,12 +322,6 @@ interface WSClientEndpointInterface {
    * An array of info about entity types used by the provided events/actions.
    */
   public function entities();
-
-  /**
-   * An array of info about data types used by the provided events/actions
-   * being not entities.
-   */
-  public function dataTypes();
 
   /**
    * An array of definitions for the provided actions.

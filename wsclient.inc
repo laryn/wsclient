@@ -448,7 +448,7 @@ function wsclient_notify($service) {
       $name = 'wsclient_' . $service->name . '_' . $data['event_name'];
       if ($event_set = rules_get_cache('event_' . $name)) {
         // Make sure passed arguments are complete and invoke event.
-        $event_args = $event_set->parameterInfo();
+        $event_args = $event_set->pluginParameterInfo();
         if (($args = array_intersect_key((array)$data['event_data'], $event_args)) && count($args) == count($event_args)) {
           // Make sure data passed for entities is an object.
           $info = entity_get_info();

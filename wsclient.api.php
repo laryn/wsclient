@@ -4,10 +4,8 @@
 /**
  * @file
  * This file contains no working PHP code; it exists to provide additional
- * documentation for doxygen as well as to document remotes in the standard
- * Drupal manner.
- *
- * TODO: revisit this file later and check all names that might have changed.
+ * documentation for doxygen as well as to document web service descriptions
+ * in the standard Drupal manner.
  */
 
 /**
@@ -50,7 +48,7 @@ function hook_wsclient_endpoint_types() {
  * @see hook_wsclient_endpoint_types()
  */
 function hook_wsclient_endpoint_types_alter(&$types) {
-
+  $types['rules_web_hook']['label'] = t('New fancy Rules Web Hooks');
 }
 
 /**
@@ -160,7 +158,7 @@ function hook_default_wsclient_service() {
  * @see hook_default_wsclient_service()
  */
 function hook_default_wsclient_service_alter(&$services) {
-
+  $services['master']->label = 'New fancy mster site.';
 }
 
 /**

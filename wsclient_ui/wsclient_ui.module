@@ -5,3 +5,22 @@
  * @file
  * Web service client UI - module file.
  */
+
+define('WSCLIENT_UI_PATH', 'admin/config/services/wsclient');
+
+/**
+ * Implementation of hook_menu()
+ */
+function wsclient_ui_menu() {
+  $items = array();
+  $items[WSCLIENT_UI_PATH] = array(
+    'title' => 'Web service client',
+    'position' => 'right',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wsclient_ui_overview'),
+    'description' => 'Manage web service descriptions.',
+    'access arguments' => array('administer web services'),
+    'file' => 'wsclient_ui.inc',
+  );
+  return $items;
+}

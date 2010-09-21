@@ -40,6 +40,10 @@ function wsclient_entity_info() {
         'name' => 'name',
       ),
       'exportable' => TRUE,
+      'admin ui' => array(
+        'path' => 'admin/config/services/wsclient',
+      ),
+      'access callback' => 'wsclient_entity_access',
     ),
   );
 }
@@ -197,4 +201,13 @@ function wsclient_rules_event_set_alter($event_name, RulesEventSet $event_set) {
       }
     }
   }
+}
+
+/**
+ * Access callback for operations on wsclient entities.
+ *
+ * @see entity_access()
+ */
+function wsclient_entity_access($op, $entity, $account, $entity_type) {
+  return user_access('administer web services', $account);
 }

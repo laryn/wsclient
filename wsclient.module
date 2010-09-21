@@ -38,6 +38,7 @@ function wsclient_entity_info() {
       'entity keys' => array(
         'id' => 'id',
         'name' => 'name',
+        'label' => 'label',
       ),
       'exportable' => TRUE,
       'admin ui' => array(

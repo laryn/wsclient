@@ -7,9 +7,4 @@
  * screens.
  */
 
-/**
- * WSClient service description overview.
- */
-function wsclient_ui_overview($form, &$form_state) {
 
-}

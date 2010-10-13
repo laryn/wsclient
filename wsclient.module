@@ -41,9 +41,6 @@ function wsclient_entity_info() {
         'label' => 'label',
       ),
       'exportable' => TRUE,
-      'admin ui' => array(
-        'path' => 'admin/config/services/wsclient',
-      ),
       'access callback' => 'wsclient_entity_access',
     ),
   );

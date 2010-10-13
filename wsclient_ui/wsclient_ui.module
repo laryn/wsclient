@@ -6,21 +6,66 @@
  * Web service client UI - module file.
  */
 
-define('WSCLIENT_UI_PATH', 'admin/config/services/wsclient');
+/**
+ * Implements hook_enttity_info_alter().
+ */
+function wsclient_ui_entity_info_alter(&$entity_info) {
+  $entity_info['wsclient_service']['admin ui'] = array(
+    'path' => 'admin/config/services/wsclient',
+  );
+}
+
+function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
+  dpm($service);
+  dpm($op);
+  if ($op == 'clone') {
+    $service = clone $service;
+    $service->id = FALSE;
+    $service->label .= ' (cloned)';
+    $service->name .= '_clone';
+  }
+  $form['label'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Label',
+    '#default_value' => $service->label,
+    '#required' => TRUE,
+    '#weight' => -5,
+    '#description' => t('The human-readable name.'),
+  );
+  $form['name'] = array(
+    '#title' => t('Machine name'),
+    '#type' => 'textfield',
+    '#default_value' => $service->name,
+    '#maxlength' => 32,
+    '#required' => TRUE,
+    '#description' => t('The machine-readable name of this service is used internally to identify the service. This name must contain only lowercase letters, numbers, and underscores and must be unique.'),
+    '#element_validate' => array('wsclient_ui_machine_name_validate'),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#weight' => 10,
+  );
+  $form_state += array(
+    'entity' => $service,
+    'op' => $op
+  );
+  return $form;
+}
+
+/*function wsclient_service_entity_form_validate($form, &$form_state) {
+
+}*/
+
+function wsclient_service_form_submit($form, &$form_state) {
+  dpm('test');
+}
 
 /**
- * Implementation of hook_menu()
+ * FAPI callback to validate a machine readable name.
  */
-function wsclient_ui_menu() {
-  $items = array();
-  $items[WSCLIENT_UI_PATH] = array(
-    'title' => 'Web service client',
-    'position' => 'right',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('wsclient_ui_overview'),
-    'description' => 'Manage web service descriptions.',
-    'access arguments' => array('administer web services'),
-    'file' => 'wsclient_ui.inc',
-  );
-  return $items;
+function wsclient_ui_machine_name_validate($element, &$form_state) {
+  if ($element['#value'] && !preg_match('!^[a-z0-9_]+$!', $element['#value'])) {
+    form_error($element, t('Machine-readable names must contain only lowercase letters, numbers, and underscores.'));
+  }
 }

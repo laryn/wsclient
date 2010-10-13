@@ -15,21 +15,36 @@ function wsclient_ui_entity_info_alter(&$entity_info) {
   );
 }
 
+/**
+ * Provides a form to add, edit and clone web service descriptions.
+ */
 function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
-  dpm($service);
-  dpm($op);
+  // Include form helper functions from Rules.
+  module_load_include('inc', 'rules', 'ui/ui.forms');
+  $form_state['build_info']['files'][] = array('module' => 'rules', 'name' => 'ui/ui.forms.inc');
   if ($op == 'clone') {
     $service = clone $service;
     $service->id = FALSE;
     $service->label .= ' (cloned)';
     $service->name .= '_clone';
   }
+  if ($op == 'add') {
+    $service = new WSClientServiceDescription();
+  }
+  $type_info = wsclient_get_types();
+  if (empty($type_info)) {
+    drupal_set_message(t('No service types were found, please enable a module that provides a service type.'), 'warning');
+  }
+  $types = array();
+  foreach ($type_info as $type => $info) {
+    $types[$type] = $info['label'];
+  }
+
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => 'Label',
     '#default_value' => $service->label,
     '#required' => TRUE,
-    '#weight' => -5,
     '#description' => t('The human-readable name.'),
   );
   $form['name'] = array(
@@ -39,12 +54,27 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     '#maxlength' => 32,
     '#required' => TRUE,
     '#description' => t('The machine-readable name of this service is used internally to identify the service. This name must contain only lowercase letters, numbers, and underscores and must be unique.'),
-    '#element_validate' => array('wsclient_ui_machine_name_validate'),
+    '#element_validate' => array('rules_ui_element_machine_name_validate'),
+  );
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => 'URL',
+    '#default_value' => $service->url,
+    '#required' => TRUE,
+    '#description' => t('The URL of the web service.'),
+    '#element_validate' => array('wsclient_ui_element_url_validate'),
+  );
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => 'Type',
+    '#default_value' => $service->type,
+    '#options' => $types,
+    '#required' => TRUE,
+    '#description' => t('The type of the web service.'),
   );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
-    '#weight' => 10,
   );
   $form_state += array(
     'entity' => $service,
@@ -53,19 +83,21 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
   return $form;
 }
 
-/*function wsclient_service_entity_form_validate($form, &$form_state) {
-
-}*/
-
+/**
+ * Submit callback of web service description form.
+ */
 function wsclient_service_form_submit($form, &$form_state) {
-  dpm('test');
+  $service = $form_state['entity'];
+  entity_form_submit_build_entity('wsclient_service', $service, $form, $form_state);
+  // @todo validate machine name for uniqueness
+  $service->save();
 }
 
 /**
- * FAPI callback to validate a machine readable name.
+ * FAPI callback to validate a URL.
  */
-function wsclient_ui_machine_name_validate($element, &$form_state) {
-  if ($element['#value'] && !preg_match('!^[a-z0-9_]+$!', $element['#value'])) {
-    form_error($element, t('Machine-readable names must contain only lowercase letters, numbers, and underscores.'));
+function wsclient_ui_element_url_validate($element, &$form_state) {
+  if (!valid_url($element['#value'], TRUE)) {
+    form_error($element, t('Please enter a valid URL.'));
   }
 }

@@ -152,9 +152,11 @@ class WSClientServiceDescription extends EntityDB {
         'named parameter' => TRUE,
       );
       $actions[$name]['parameter'] = array();
-      // Prefix operation parameter names to avoid name clashes.
-      foreach ((array) $operation['parameter'] as $param => $info) {
-        $actions[$name]['parameter']['param_' . $param] = $info;
+      if (isset($operation['parameter'])) {
+        // Prefix operation parameter names to avoid name clashes.
+        foreach ((array) $operation['parameter'] as $param => $info) {
+          $actions[$name]['parameter']['param_' . $param] = $info;
+        }
       }
       $actions[$name]['parameter']['service'] = array(
         'type' => 'hidden',

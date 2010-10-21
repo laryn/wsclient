@@ -4,6 +4,8 @@
 /**
  * @file
  * Web service client UI - module file.
+ *
+ * @todo: move form into include.
  */
 
 /**
@@ -20,16 +22,16 @@ function wsclient_ui_entity_info_alter(&$entity_info) {
  */
 function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
   // Include form helper functions from Rules.
+  // @todo: fix via form include or change it.
   module_load_include('inc', 'rules', 'ui/ui.forms');
   $form_state['build_info']['files'][] = array('module' => 'rules', 'name' => 'ui/ui.forms.inc');
   if ($op == 'clone') {
-    $service = clone $service;
-    $service->id = FALSE;
     $service->label .= ' (cloned)';
     $service->name .= '_clone';
   }
   if ($op == 'add') {
     $service = new WSClientServiceDescription();
+    $form_state['wsclient_service'] = $service;
   }
   $type_info = wsclient_get_types();
   if (empty($type_info)) {
@@ -76,10 +78,6 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     '#type' => 'submit',
     '#value' => t('Save'),
   );
-  $form_state += array(
-    'entity' => $service,
-    'op' => $op
-  );
   return $form;
 }
 
@@ -87,10 +85,10 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
  * Submit callback of web service description form.
  */
 function wsclient_service_form_submit($form, &$form_state) {
-  $service = $form_state['entity'];
-  entity_form_submit_build_entity('wsclient_service', $service, $form, $form_state);
-  // @todo validate machine name for uniqueness
+  $service = entity_ui_form_submit_build_entity($form, $form_state);
+  // @todo validate machine name for uniqueness with the machine name element.
   $service->save();
+  $form_state['redirect'] = 'admin/config/services/wsclient';
 }
 
 /**

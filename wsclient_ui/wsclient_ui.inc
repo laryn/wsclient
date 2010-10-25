@@ -83,3 +83,7 @@ function wsclient_ui_element_url_validate($element, &$form_state) {
     form_error($element, t('Please enter a valid URL.'));
   }
 }
+
+function wsclient_ui_add_operation($service) {
+
+}

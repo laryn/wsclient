@@ -6,14 +6,30 @@
  * Web service client UI - module file.
  */
 
+define('WSCLIENT_UI_PATH', 'admin/config/services/wsclient');
+
 /**
  * Implements hook_entity_info_alter().
  */
 function wsclient_ui_entity_info_alter(&$entity_info) {
   // Enable the entity API UI controller. See EntityDefaultUIController.
   $entity_info['wsclient_service']['admin ui'] = array(
-    'path' => 'admin/config/services/wsclient',
+    'path' => WSCLIENT_UI_PATH,
     'file' => 'wsclient_ui.inc',
     'file path' => drupal_get_path('module', 'wsclient_ui'),
   );
+}
+
+function wsclient_ui_menu() {
+  $items = array();
+  $id_count = count(explode('/', WSCLIENT_UI_PATH)) + 1;
+  $items[WSCLIENT_UI_PATH . '/manage/%wsclient_service/add/operation'] = array(
+    'title' => 'Add operation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wsclient_ui_add_operation', $id_count),
+    'access arguments' => array('administer web services'),
+    'type' => MENU_CALLBACK,
+    'file' => 'wsclient_ui.inc',
+  );
+  return $items;
 }

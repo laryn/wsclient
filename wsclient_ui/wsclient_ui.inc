@@ -11,10 +11,6 @@
  * Provides a form to add, edit and clone web service descriptions.
  */
 function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
-  // Include form helper functions from Rules.
-  // @todo: fix via form include or change it.
-  module_load_include('inc', 'rules', 'ui/ui.forms');
-  $form_state['build_info']['files'][] = array('module' => 'rules', 'name' => 'ui/ui.forms.inc');
   if ($op == 'clone') {
     $service->label .= ' (cloned)';
     $service->name .= '_clone';
@@ -36,13 +32,16 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     '#description' => t('The human-readable name.'),
   );
   $form['name'] = array(
-    '#title' => t('Machine name'),
-    '#type' => 'textfield',
-    '#default_value' => $service->name,
+    '#type' => 'machine_name',
+    '#default_value' => isset($service->name) ? $service->name : '',
     '#maxlength' => 32,
+    '#machine_name' => array(
+      'exists' => 'wsclient_service_load',
+      'source' => array('label'),
+    ),
     '#required' => TRUE,
     '#description' => t('The machine-readable name of this service is used internally to identify the service. This name must contain only lowercase letters, numbers, and underscores and must be unique.'),
-    '#element_validate' => array('rules_ui_element_machine_name_validate'),
+    '#element_validate' => array('form_validate_machine_name', 'entity_ui_validate_machine_name'),
   );
   $form['url'] = array(
     '#type' => 'textfield',
@@ -72,7 +71,6 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
  */
 function wsclient_service_form_submit($form, &$form_state) {
   $service = entity_ui_form_submit_build_entity($form, $form_state);
-  // @todo validate machine name for uniqueness with the machine name element.
   $service->save();
   $form_state['redirect'] = 'admin/config/services/wsclient';
 }

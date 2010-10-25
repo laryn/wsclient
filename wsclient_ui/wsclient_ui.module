@@ -29,10 +29,6 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     $service->label .= ' (cloned)';
     $service->name .= '_clone';
   }
-  if ($op == 'add') {
-    $service = new WSClientServiceDescription();
-    $form_state['wsclient_service'] = $service;
-  }
   $type_info = wsclient_get_types();
   if (empty($type_info)) {
     drupal_set_message(t('No service types were found, please enable a module that provides a service type.'), 'warning');

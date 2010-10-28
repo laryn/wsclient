@@ -64,7 +64,7 @@ class WSClientSOAPEndpoint implements WSClientEndpointInterface {
       return $response;
     }
     catch (SoapFault $e) {
-      throw new WSClientException('Error invoking the SOAP service %name, operation %operation: %error', array('%name' => $service->label, '%operation' => $operation, '%error' => $e->getMessage()));
+      throw new WSClientException('Error invoking the SOAP service %name, operation %operation: %error', array('%name' => $this->service->label, '%operation' => $operation, '%error' => $e->getMessage()));
     }
   }
 

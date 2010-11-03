@@ -59,6 +59,34 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     '#required' => TRUE,
     '#description' => t('The type of the web service.'),
   );
+  $rows = array();
+  foreach ($service->operations as $name => $operation) {
+    $row = array();
+    $row[] = l($operation['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/edit/' . $name);
+    $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/edit/' . $name);
+    $row[] = l(t('Clone'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/clone/' . $name);
+    $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/delete/' . $name);
+    $rows[] = $row;
+  }
+  $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
+  $form['operations'] = array(
+    '#access' => TRUE,
+    '#tree' => TRUE,
+    '#theme' => 'table',
+    '#empty' => t('None'),
+    '#caption' => t('Operations'),
+    '#rows' => $rows,
+    '#header' => $header,
+  );
+  $form['add_operaton'] = array(
+    '#theme' => 'links__wsclient',
+    '#links' => array(
+      'add_op' => array(
+        'title' => t('Add operation'),
+        'href' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/add/operation',
+      ),
+    ),
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -72,7 +100,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
 function wsclient_service_form_submit($form, &$form_state) {
   $service = entity_ui_form_submit_build_entity($form, $form_state);
   $service->save();
-  $form_state['redirect'] = 'admin/config/services/wsclient';
+  $form_state['redirect'] = WSCLIENT_UI_PATH;
 }
 
 /**
@@ -84,6 +112,18 @@ function wsclient_ui_element_url_validate($element, &$form_state) {
   }
 }
 
-function wsclient_ui_add_operation($service) {
-
+/**
+ * Form to add operations.
+ */
+function wsclient_ui_add_operation($form, &$form_state, $service) {
+  dpm($service);
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => 'Type',
+    '#default_value' => 1,
+    '#options' => array(1, 2, 3),
+    '#required' => TRUE,
+    '#description' => t('The type of the web service.'),
+  );
+  return $form;
 }

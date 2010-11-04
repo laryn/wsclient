@@ -115,16 +115,55 @@ function wsclient_ui_element_url_validate($element, &$form_state) {
 /**
  * Operation form.
  */
-function wsclient_ui_operation($form, &$form_state, $service, $operation) {
-  dpm($service);
+function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 'edit') {
+  if ($op == 'add') {
+    $operation = array('name' => '');
+  }
   dpm($operation);
-  $form['type'] = array(
-    '#type' => 'select',
-    '#title' => 'Type',
-    '#default_value' => 1,
-    '#options' => array(1, 2, 3),
+  $form['label'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Label',
+    '#default_value' => isset($operation['label']) ? $operation['label'] : '',
     '#required' => TRUE,
-    '#description' => t('The type of the web service.'),
+    '#description' => t('The human-readable name of the operation.'),
   );
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Name',
+    '#default_value' => isset($operation['name']) ? $operation['name'] : '',
+    '#required' => TRUE,
+    '#description' => t('The machine-readable name of this operation is used internally to identify the operation.'),
+    '#element_validate' => array('wsclient_ui_operation_name_validate'),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+  $form_state['service'] = $service;
+  $form_state['operation'] = $operation;
   return $form;
+}
+
+/**
+ * Submit callback of operaton form.
+ */
+function wsclient_ui_operation_submit($form, $form_state) {
+  $service = $form_state['service'];
+  $service->operations[$form_state['values']['name']] = array(
+    'label' => $form_state['values']['label'],
+  );
+  $service->save();
+  $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
+}
+
+/**
+ * Validation callback for operation names.
+ */
+function wsclient_ui_operation_name_validate($element, &$form_state) {
+  if ($element['#value'] && !preg_match('!^[A-Za-z0-9_]+$!', $element['#value'])) {
+    form_error($element, t('Operation names must contain only letters, numbers, and underscores.'));
+  }
+  if ($element['#value'] != $form_state['operation']['name'] && isset($form_state['service']->operations) && in_array($element['#value'], array_keys($form_state['service']->operations))) {
+    form_error($element, t('An operation with that name already exists'));
+  }
 }

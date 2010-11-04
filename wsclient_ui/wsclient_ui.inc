@@ -117,9 +117,11 @@ function wsclient_ui_element_url_validate($element, &$form_state) {
  */
 function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 'edit') {
   if ($op == 'add') {
-    $operation = array('name' => '');
+    $operation = array(
+      'name' => '',
+      'parameter' => array(),
+    );
   }
-  dpm($operation);
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => 'Label',
@@ -135,6 +137,26 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     '#description' => t('The machine-readable name of this operation is used internally to identify the operation.'),
     '#element_validate' => array('wsclient_ui_operation_name_validate'),
   );
+  $form['parameters'] = array(
+    '#tree' => TRUE,
+    '#element_validate' => array('wsclient_ui_validate_parameters'),
+    //'#theme' => 'rules_ui_variable_form',
+    '#title' => t('Parameters'),
+    '#description' => t('Specify the parameters for the operation. For each parameter you have to specify a certain data type and a unique name containing only alphanumeric characters and underscores.'),
+  );
+  foreach ($operation['parameter'] as $name => $info) {
+    $form['parameters']['items'][$name] = wsclient_ui_parameter_row($service, $name, $info);
+  }
+  // Always add three empty forms.
+  for ($i = 0; $i < 3; $i++) {
+    $form['parameters']['items'][$i] = wsclient_ui_parameter_row($service);
+  }
+  $form['parameters']['more'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add more'),
+    '#limit_validation_errors' => array('parameters'),
+    '#submit' => array('wsclient_ui_form_submit_rebuild'),
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -144,10 +166,32 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
   return $form;
 }
 
+function wsclient_ui_parameter_row($service, $name = '', $info = array()) {
+  $parameter['type'] = array(
+    '#type' => 'select',
+    '#options' => array(0 => '--') + $service->dataTypes(),
+    '#default_value' => isset($info['type']) ? $info['type'] : 0,
+  );
+  $parameter['name'] = array(
+    '#type' => 'textfield',
+    '#size' => 40,
+    '#default_value' => $name,
+    '#element_validate' => array('wsclient_ui_operation_name_validate'),
+  );
+  return $parameter;
+}
+
 /**
- * Submit callback of operaton form.
+ * General form submit handler, that rebuilds the form
  */
-function wsclient_ui_operation_submit($form, $form_state) {
+function wsclient_ui_form_submit_rebuild($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Submit callback of operation form.
+ */
+function wsclient_ui_operation_submit($form, &$form_state) {
   $service = $form_state['service'];
   $service->operations[$form_state['values']['name']] = array(
     'label' => $form_state['values']['label'],

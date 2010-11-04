@@ -62,10 +62,10 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
   $rows = array();
   foreach ($service->operations as $name => $operation) {
     $row = array();
-    $row[] = l($operation['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/edit/' . $name);
-    $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/edit/' . $name);
-    $row[] = l(t('Clone'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/clone/' . $name);
-    $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/delete/' . $name);
+    $row[] = l($operation['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
+    $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
+    $row[] = l(t('Clone'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name . '/clone');
+    $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name . '/delete');
     $rows[] = $row;
   }
   $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
@@ -113,10 +113,11 @@ function wsclient_ui_element_url_validate($element, &$form_state) {
 }
 
 /**
- * Form to add operations.
+ * Operation form.
  */
-function wsclient_ui_add_operation($form, &$form_state, $service) {
+function wsclient_ui_operation($form, &$form_state, $service, $operation) {
   dpm($service);
+  dpm($operation);
   $form['type'] = array(
     '#type' => 'select',
     '#title' => 'Type',

@@ -124,14 +124,14 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
   }
   $form['label'] = array(
     '#type' => 'textfield',
-    '#title' => 'Label',
+    '#title' => t('Label'),
     '#default_value' => isset($operation['label']) ? $operation['label'] : '',
     '#required' => TRUE,
     '#description' => t('The human-readable name of the operation.'),
   );
   $form['name'] = array(
     '#type' => 'textfield',
-    '#title' => 'Name',
+    '#title' => t('Name'),
     '#default_value' => isset($operation['name']) ? $operation['name'] : '',
     '#required' => TRUE,
     '#description' => t('The machine-readable name of this operation is used internally to identify the operation.'),
@@ -146,7 +146,6 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
   );
   $weight = 0;
   $types = wsclient_ui_types();
-  dpm($types);
   if (isset($operation['parameter'])) {
     foreach ($operation['parameter'] as $name => $info) {
       $form['parameters']['items'][$name] = wsclient_ui_parameter_row($service, $types, $name, $info);
@@ -161,8 +160,15 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
   $form['parameters']['more'] = array(
     '#type' => 'submit',
     '#value' => t('Add more'),
-    '#limit_validation_errors' => array('parameters'),
+    '#limit_validation_errors' => array(array('parameters')),
     '#submit' => array('wsclient_ui_form_submit_rebuild'),
+  );
+  $form['result'] = array(
+    '#type' => 'select',
+    '#title' => t('Result'),
+    '#options' => array(0 => '--') + $types,
+    '#default_value' => isset($operation['provides']['result']['type']) ? $operation['provides']['result']['type'] : 0,
+    '#description' => t('The result data type returned by the service'),
   );
   $form['submit'] = array(
     '#type' => 'submit',
@@ -177,7 +183,6 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
  * Generates a row in the parameter table.
  */
 function wsclient_ui_parameter_row($service, $types, $name = '', $info = array()) {
-  dpm($info);
   if (isset($info['type'])) {
     if (isset($types[$info['type']])) {
       $default_value = $info['type'];
@@ -303,4 +308,25 @@ function wsclient_ui_types() {
   }
   natcasesort($options);
   return $options;
+}
+
+/**
+ * FAPI callback to validate the form for editing parameter info.
+ */
+function wsclient_ui_validate_parameters($elements, &$form_state) {
+  $names = array();
+  foreach (element_children($elements['items']) as $item_key) {
+    $element = &$elements['items'][$item_key];
+    if ($element['name']['#value'] || $element['type']['#value']) {
+      foreach (array('name' => t('Name'), 'type' => t('Data type')) as $key => $title) {
+        if (!$element[$key]['#value']) {
+          form_error($element[$key], t('!name field is required.', array('!name' => $title)));
+        }
+      }
+      if (isset($names[$element['name']['#value']])) {
+        form_error($element['name'], t('The name %name is already taken.', array('%name' => $element['name']['#value'])));
+      }
+      $names[$element['name']['#value']] = TRUE;
+    }
+  }
 }

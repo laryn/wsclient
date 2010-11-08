@@ -5,3 +5,4 @@ package = Services
 core = 7.x
 files[] = wsclient_ui.module
 dependencies[] = wsclient
+dependencies[] = rules

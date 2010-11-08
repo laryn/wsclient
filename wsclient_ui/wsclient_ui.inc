@@ -140,16 +140,23 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
   $form['parameters'] = array(
     '#tree' => TRUE,
     '#element_validate' => array('wsclient_ui_validate_parameters'),
-    //'#theme' => 'rules_ui_variable_form',
+    '#theme' => 'wsclient_ui_variable_form',
     '#title' => t('Parameters'),
     '#description' => t('Specify the parameters for the operation. For each parameter you have to specify a certain data type and a unique name containing only alphanumeric characters and underscores.'),
   );
-  foreach ($operation['parameter'] as $name => $info) {
-    $form['parameters']['items'][$name] = wsclient_ui_parameter_row($service, $name, $info);
+  $weight = 0;
+  $types = wsclient_ui_types();
+  dpm($types);
+  if (isset($operation['parameter'])) {
+    foreach ($operation['parameter'] as $name => $info) {
+      $form['parameters']['items'][$name] = wsclient_ui_parameter_row($service, $types, $name, $info);
+      $form['parameters']['items'][$name]['weight']['#default_value'] = $weight++;
+    }
   }
   // Always add three empty forms.
   for ($i = 0; $i < 3; $i++) {
-    $form['parameters']['items'][$i] = wsclient_ui_parameter_row($service);
+    $form['parameters']['items'][$i] = wsclient_ui_parameter_row($service, $types);
+    $form['parameters']['items'][$i]['weight']['#default_value'] = $weight++;
   }
   $form['parameters']['more'] = array(
     '#type' => 'submit',
@@ -166,17 +173,36 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
   return $form;
 }
 
-function wsclient_ui_parameter_row($service, $name = '', $info = array()) {
+/**
+ * Generates a row in the parameter table.
+ */
+function wsclient_ui_parameter_row($service, $types, $name = '', $info = array()) {
+  dpm($info);
+  if (isset($info['type'])) {
+    if (isset($types[$info['type']])) {
+      $default_value = $info['type'];
+    }
+    else {
+      // Map the internal type name to the global one.
+      $default_value = 'wsclient_' . $service->name . '_' . $info['type'];
+    }
+  }
+  else {
+    $default_value = 0;
+  }
   $parameter['type'] = array(
     '#type' => 'select',
-    '#options' => array(0 => '--') + $service->dataTypes(),
-    '#default_value' => isset($info['type']) ? $info['type'] : 0,
+    '#options' => array(0 => '--') + $types,
+    '#default_value' => $default_value,
   );
   $parameter['name'] = array(
     '#type' => 'textfield',
     '#size' => 40,
     '#default_value' => $name,
     '#element_validate' => array('wsclient_ui_operation_name_validate'),
+  );
+  $parameter['weight'] = array(
+    '#type' => 'weight',
   );
   return $parameter;
 }
@@ -210,4 +236,71 @@ function wsclient_ui_operation_name_validate($element, &$form_state) {
   if ($element['#value'] != $form_state['operation']['name'] && isset($form_state['service']->operations) && in_array($element['#value'], array_keys($form_state['service']->operations))) {
     form_error($element, t('An operation with that name already exists'));
   }
+}
+
+/**
+ * Themes the operation form for editing the used parameters.
+ *
+ * @ingroup themeable
+ */
+function theme_wsclient_ui_variable_form($variables) {
+  $elements = $variables['element'];
+
+  $table['#theme'] = 'table';
+  $table['#header'] = array(t('Data type'), t('Name'), array('data' => t('Weight'), 'class' => array('tabledrag-hide')));
+  $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
+
+  foreach (element_children($elements['items']) as $key) {
+    $element = &$elements['items'][$key];
+    // Add special classes to be used for tabledrag.js.
+    $element['weight']['#attributes']['class'] = array('rules-element-weight');
+
+    $row = array();
+    $row[] = array('data' => $element['type']);
+    $row[] = array('data' => $element['name']);
+    $row[] = array('data' => $element['weight']);
+    $row = array('data' => $row) + $element['#attributes'];
+    $row['class'][] = 'draggable';
+    $table['#rows'][] = $row;
+  }
+  $elements['items']['#printed'] = TRUE;
+  if (!empty($table['#rows'])) {
+    drupal_add_tabledrag($table['#attributes']['id'], 'order', 'sibling', 'rules-element-weight');
+  }
+
+  // Theme it like a form item, but with the description above the content.
+  $attributes['class'][] = 'form-item';
+  $attributes['class'][] = 'rules-variables-form';
+
+  $output = '<div' . drupal_attributes($attributes) . '>' . "\n";
+  $output .= theme('form_element_label', $variables);
+  if (!empty($elements['#description'])) {
+    $output .= ' <div class="description">' . $elements['#description'] . "</div>\n";
+  }
+  $output .= ' ' . drupal_render($table) . "\n";
+  // Add in any further children elements.
+  foreach (element_children($elements, TRUE) as $key) {
+    $output .= drupal_render($elements[$key]);
+  }
+  $output .= "</div>\n";
+  return $output;
+}
+
+/**
+ * Returns a list of available data types for service parameters and return
+ * values. Entities are excluded.
+ */
+function wsclient_ui_types() {
+  $cache = rules_get_cache();
+  $data_info = $cache['data_info'];
+  $entity_info = entity_get_info();
+  // Remove entities.
+  $data_info = array_diff_key($data_info, $entity_info);
+  unset($data_info['entity']);
+  $options = array();
+  foreach ($data_info as $type => $properties) {
+    $options[$type] = $properties['label'];
+  }
+  natcasesort($options);
+  return $options;
 }

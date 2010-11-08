@@ -83,3 +83,15 @@ function wsclient_ui_operation_load($operation_name, $service_name) {
 function wsclient_ui_uri($service) {
   return array('path' => WSCLIENT_UI_PATH . '/manage/' . $service->name);
 }
+
+/**
+ * Implements hook_theme().
+ */
+function wsclient_ui_theme() {
+  return array(
+    'wsclient_ui_variable_form' => array(
+      'render element' => 'element',
+      'file' => 'wsclient_ui.inc',
+    ),
+  );
+}

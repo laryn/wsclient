@@ -166,14 +166,10 @@ class WSClientServiceDescription extends EntityDB {
         'type' => 'hidden',
         'default value' => $name,
       );
-      // Pass through provided variables as they are described, but ensure
-      // valid variable names.
-      // TODO: Use regex to enforce valid PHP variable name and/or map names?
-      if (!empty($actions[$name]['provides'])) {
-        foreach ($actions[$name]['provides'] as $var => $info) {
-          unset($actions[$name]['provides'][$var]);
-          $actions[$name]['provides'][strtolower($var)] = $info;
-        }
+      // Pass through the service result as provided variable.
+      if (!empty($actions[$name]['result'])) {
+        $actions[$name]['provides']['result'] = $actions[$name]['result'];
+        unset($actions[$name]['result']);
       }
     }
     return $actions;

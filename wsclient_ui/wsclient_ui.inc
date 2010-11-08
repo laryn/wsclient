@@ -167,7 +167,7 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     '#type' => 'select',
     '#title' => t('Result'),
     '#options' => array(0 => '--') + $types,
-    '#default_value' => isset($operation['provides']['result']['type']) ? $operation['provides']['result']['type'] : 0,
+    '#default_value' => isset($operation['result']['type']) ? $operation['result']['type'] : 0,
     '#description' => t('The result data type returned by the service'),
   );
   $form['submit'] = array(

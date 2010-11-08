@@ -19,7 +19,7 @@ function wsclient_soap_test_default_wsclient_service() {
   // Add info about the SOAP service, which the user has to provide via the UI.
   $operation['label'] = 'Geocode an address';
   $operation['parameter']['address'] = array('type' => 'text');
-  $operation['provides']['result'] = array(
+  $operation['result'] = array(
     'type' => 'list<struct>',
     'label' => 'Address results',
     'property info' => array(

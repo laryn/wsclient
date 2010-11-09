@@ -148,13 +148,13 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
   $types = wsclient_ui_types();
   if (isset($operation['parameter'])) {
     foreach ($operation['parameter'] as $name => $info) {
-      $form['parameters']['items'][$name] = wsclient_ui_parameter_row($service, $types, $name, $info);
+      $form['parameters']['items'][$name] = _wsclient_ui_parameter_row($service, $types, $name, $info);
       $form['parameters']['items'][$name]['weight']['#default_value'] = $weight++;
     }
   }
   // Always add three empty forms.
   for ($i = 0; $i < 3; $i++) {
-    $form['parameters']['items'][$i] = wsclient_ui_parameter_row($service, $types);
+    $form['parameters']['items'][$i] = _wsclient_ui_parameter_row($service, $types);
     $form['parameters']['items'][$i]['weight']['#default_value'] = $weight++;
   }
   $form['parameters']['more'] = array(
@@ -167,7 +167,7 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     '#type' => 'select',
     '#title' => t('Result'),
     '#options' => array(0 => '--') + $types,
-    '#default_value' => isset($operation['result']['type']) ? $operation['result']['type'] : 0,
+    '#default_value' => isset($operation['result']) ? _wsclient_ui_type_default($types, $service, $operation['result']) : 0,
     '#description' => t('The result data type returned by the service'),
   );
   $form['submit'] = array(
@@ -182,19 +182,8 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
 /**
  * Generates a row in the parameter table.
  */
-function wsclient_ui_parameter_row($service, $types, $name = '', $info = array()) {
-  if (isset($info['type'])) {
-    if (isset($types[$info['type']])) {
-      $default_value = $info['type'];
-    }
-    else {
-      // Map the internal type name to the global one.
-      $default_value = 'wsclient_' . $service->name . '_' . $info['type'];
-    }
-  }
-  else {
-    $default_value = 0;
-  }
+function _wsclient_ui_parameter_row($service, $types, $name = '', $info = array()) {
+  $default_value = _wsclient_ui_type_default($types, $service, $info);
   $parameter['type'] = array(
     '#type' => 'select',
     '#options' => array(0 => '--') + $types,
@@ -329,4 +318,20 @@ function wsclient_ui_validate_parameters($elements, &$form_state) {
       $names[$element['name']['#value']] = TRUE;
     }
   }
+}
+
+/**
+ * Determines and returns a data type from the given service and data info.
+ */
+function _wsclient_ui_type_default($types, $service, $data_info) {
+  if (isset($data_info['type'])) {
+    if (isset($types[$data_info['type']])) {
+      return $data_info['type'];
+    }
+    else {
+      // Map the internal type name to the global one.
+      return 'wsclient_' . $service->name . '_' . $data_info['type'];
+    }
+  }
+  return 0;
 }

@@ -153,7 +153,8 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     }
   }
   // Always add three empty forms.
-  for ($i = 0; $i < 3; $i++) {
+  $form_state['more'] = isset($form_state['more']) ? $form_state['more'] : 3;
+  for ($i = 0; $i < $form_state['more']; $i++) {
     $form['parameters']['items'][$i] = _wsclient_ui_parameter_row($service, $types);
     $form['parameters']['items'][$i]['weight']['#default_value'] = $weight++;
   }
@@ -161,7 +162,7 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     '#type' => 'submit',
     '#value' => t('Add more'),
     '#limit_validation_errors' => array(array('parameters')),
-    '#submit' => array('wsclient_ui_form_submit_rebuild'),
+    '#submit' => array('wsclient_ui_more_parameter_submit'),
   );
   $form['result'] = array(
     '#type' => 'select',
@@ -202,9 +203,10 @@ function _wsclient_ui_parameter_row($service, $types, $name = '', $info = array(
 }
 
 /**
- * General form submit handler, that rebuilds the form
+ * Submit callback for adding more parameter rows.
  */
-function wsclient_ui_form_submit_rebuild($form, &$form_state) {
+function wsclient_ui_more_parameter_submit($form, &$form_state) {
+  $form_state['more']++;
   $form_state['rebuild'] = TRUE;
 }
 

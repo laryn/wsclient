@@ -353,3 +353,25 @@ function _wsclient_ui_type_default($types, $service, $data_info) {
   }
   return 0;
 }
+
+/**
+ * Operation delete confirmation form.
+ */
+function wsclient_ui_operation_delete($form, &$form_state, $service, $operation) {
+  $confirm_question = t('Are you sure you want to delete the operation %operation?', array('%operation' => $operation['label']));
+  $form_state['service'] = $service;
+  $form_state['operation'] = $operation;
+  return confirm_form($form, $confirm_question, WSCLIENT_UI_PATH . '/manage/' . $service->name);
+}
+
+/**
+ * Submit callback of operation delete form.
+ */
+function wsclient_ui_operation_delete_submit($form, &$form_state) {
+  $service = $form_state['service'];
+  $operation = $form_state['operation'];
+  unset($service->operations[$operation['name']]);
+  $service->save();
+  drupal_set_message(t('Deleted operation %operation.', array('%operation' => $operation['label'])));
+  $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
+}

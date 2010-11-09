@@ -72,9 +72,12 @@ function wsclient_ui_menu() {
  */
 function wsclient_ui_operation_load($operation_name, $service_name) {
   $service = reset(entity_load('wsclient_service', array($service_name)));
-  $operation = $service->operations[$operation_name];
-  $operation['name'] = $operation_name;
-  return $operation;
+  if ($service && isset($service->operations[$operation_name])) {
+    $operation = $service->operations[$operation_name];
+    $operation['name'] = $operation_name;
+    return $operation;
+  }
+  return FALSE;
 }
 
 /**

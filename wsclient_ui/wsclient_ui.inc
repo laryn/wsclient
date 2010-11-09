@@ -152,7 +152,7 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
       $form['parameters']['items'][$name]['weight']['#default_value'] = $weight++;
     }
   }
-  // Always add three empty forms.
+  // Always add three empty lines.
   $form_state['more'] = isset($form_state['more']) ? $form_state['more'] : 3;
   for ($i = 0; $i < $form_state['more']; $i++) {
     $form['parameters']['items'][$i] = _wsclient_ui_parameter_row($service, $types);
@@ -164,12 +164,18 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     '#limit_validation_errors' => array(array('parameters')),
     '#submit' => array('wsclient_ui_more_parameter_submit'),
   );
-  $form['result'] = array(
+  $form['result_type'] = array(
     '#type' => 'select',
-    '#title' => t('Result'),
+    '#title' => t('Result type'),
     '#options' => array(0 => '--') + $types,
-    '#default_value' => isset($operation['result']) ? _wsclient_ui_type_default($types, $service, $operation['result']) : 0,
+    '#default_value' => isset($operation['result']['type']) ? _wsclient_ui_type_default($types, $service, $operation['result']) : 0,
     '#description' => t('The result data type returned by the service'),
+  );
+  $form['result_label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Result label'),
+    '#default_value' => isset($operation['result']['label']) ? $operation['result']['label'] : '',
+    '#description' => t('The human-readable name of the result variable returned by the service.'),
   );
   $form['submit'] = array(
     '#type' => 'submit',
@@ -221,8 +227,11 @@ function wsclient_ui_operation_submit($form, &$form_state) {
       $operation['parameter'][$item['name']] = array('type' => $item['type']);
     }
   }
-  if (!empty($form_state['values']['result'])) {
-    $operation['result'] = array('type' => $form_state['values']['result']);
+  if (!empty($form_state['values']['result_type'])) {
+    $operation['result'] = array(
+      'type' => $form_state['values']['result_type'],
+      'label' => isset($form_state['values']['result_label']) ? $form_state['values']['result_label'] : 'result',
+    );
   }
   $service->operations[$form_state['values']['name']] = $operation;
   $service->save();

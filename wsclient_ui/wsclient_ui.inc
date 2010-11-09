@@ -64,7 +64,6 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     $row = array();
     $row[] = l($operation['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
     $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
-    $row[] = l(t('Clone'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name . '/clone');
     $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name . '/delete');
     $rows[] = $row;
   }

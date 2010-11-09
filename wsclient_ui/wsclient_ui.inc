@@ -215,9 +215,16 @@ function wsclient_ui_more_parameter_submit($form, &$form_state) {
  */
 function wsclient_ui_operation_submit($form, &$form_state) {
   $service = $form_state['service'];
-  $service->operations[$form_state['values']['name']] = array(
-    'label' => $form_state['values']['label'],
-  );
+  $operation['label'] = $form_state['values']['label'];
+  foreach ($form_state['values']['parameters']['items'] as $key => $item) {
+    if (!empty($item['name'])) {
+      $operation['parameter'][$item['name']] = array('type' => $item['type']);
+    }
+  }
+  if (!empty($form_state['values']['result'])) {
+    $operation['result'] = array('type' => $form_state['values']['result']);
+  }
+  $service->operations[$form_state['values']['name']] = $operation;
   $service->save();
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
 }

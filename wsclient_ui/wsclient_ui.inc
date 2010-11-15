@@ -458,6 +458,18 @@ function wsclient_ui_type($form, &$form_state, $service, $type, $op = 'edit') {
 }
 
 /**
+ * Submit callback of data type form.
+ */
+function wsclient_ui_type_submit($form, &$form_state) {
+  $service = $form_state['service'];
+  $type['label'] = $form_state['values']['label'];
+  unset($service->datatypes[$form_state['type']['name']]);
+  $service->datatypes[$form_state['values']['name']] = $type;
+  $service->save();
+  $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
+}
+
+/**
  * Validation callback for data type names.
  */
 function wsclient_ui_type_name_validate($element, &$form_state) {

@@ -65,6 +65,15 @@ function wsclient_ui_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'wsclient_ui.inc',
   );
+  $items[WSCLIENT_UI_PATH . '/manage/%wsclient_service/type/%wsclient_ui_type'] = array(
+    'title' => 'Edit data type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wsclient_ui_type', $id_count, $op_count, 'edit'),
+    'load arguments' => array($id_count),
+    'access arguments' => array('administer web services'),
+    'type' => MENU_CALLBACK,
+    'file' => 'wsclient_ui.inc',
+  );
   return $items;
 }
 
@@ -77,6 +86,19 @@ function wsclient_ui_operation_load($operation_name, $service_name) {
     $operation = $service->operations[$operation_name];
     $operation['name'] = $operation_name;
     return $operation;
+  }
+  return FALSE;
+}
+
+/**
+ * Data type load callback.
+ */
+function wsclient_ui_type_load($type_name, $service_name) {
+  $service = reset(entity_load('wsclient_service', array($service_name)));
+  if ($service && isset($service->datatypes[$type_name])) {
+    $type = $service->datatypes[$type_name];
+    $type['name'] = $type_name;
+    return $type;
   }
   return FALSE;
 }

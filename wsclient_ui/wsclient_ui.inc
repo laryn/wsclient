@@ -153,12 +153,6 @@ function wsclient_ui_element_url_validate($element, &$form_state) {
  * Operation form.
  */
 function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 'edit') {
-  if ($op == 'add') {
-    $operation = array(
-      'name' => '',
-      'parameter' => array(),
-    );
-  }
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
@@ -427,12 +421,6 @@ function wsclient_ui_operation_delete_submit($form, &$form_state) {
  * Data type form.
  */
 function wsclient_ui_type($form, &$form_state, $service, $type, $op = 'edit') {
-  if ($op == 'add') {
-    $type = array(
-      'name' => '',
-      'parameter' => array(),
-    );
-  }
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),

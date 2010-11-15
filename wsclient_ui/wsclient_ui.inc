@@ -62,7 +62,8 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
   if ($op == 'edit') {
     // Operations of the web service in a table
     $rows = array();
-    foreach ($service->operations as $name => $operation) {
+    $operations = wsclient_ui_label_sort($service->operations);
+    foreach ($operations as $name => $operation) {
       $row = array();
       $row[] = l($operation['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
       $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
@@ -90,7 +91,8 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     );
     // Data types of the web service in a table
     $rows = array();
-    foreach ($service->datatypes as $name => $datatype) {
+    $datatypes = wsclient_ui_label_sort($service->datatypes);
+    foreach ($datatypes as $name => $datatype) {
       $row = array();
       $row[] = l($datatype['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
       $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
@@ -465,4 +467,20 @@ function wsclient_ui_type_name_validate($element, &$form_state) {
   if ($element['#value'] != $form_state['type']['name'] && isset($form_state['service']->datatypes) && in_array($element['#value'], array_keys($form_state['service']->datatypes))) {
     form_error($element, t('A data type with that name already exists'));
   }
+}
+
+/**
+ * Helper function to sort a nested data information array based on the label
+ * of the items.
+ */
+function wsclient_ui_label_sort($data_info, $label_key = 'label') {
+  $sort_info = array();
+  foreach ($data_info as $key => $info) {
+    $sort_info[$key] = $info[$label_key];
+  }
+  natcasesort($sort_info);
+  foreach ($sort_info as $key => $label) {
+    $sort_info[$key] = $data_info[$key];
+  }
+  return $sort_info;
 }

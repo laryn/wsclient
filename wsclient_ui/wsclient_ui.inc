@@ -59,62 +59,64 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     '#required' => TRUE,
     '#description' => t('The type of the web service.'),
   );
-  // Operations of the web service in a table
-  $rows = array();
-  foreach ($service->operations as $name => $operation) {
-    $row = array();
-    $row[] = l($operation['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
-    $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
-    $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name . '/delete');
-    $rows[] = $row;
-  }
-  $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
-  $form['operations'] = array(
-    '#access' => TRUE,
-    '#tree' => TRUE,
-    '#theme' => 'table',
-    '#empty' => t('None'),
-    '#caption' => t('Operations'),
-    '#rows' => $rows,
-    '#header' => $header,
-  );
-  $form['add_operaton'] = array(
-    '#theme' => 'links__wsclient',
-    '#links' => array(
-      'add_op' => array(
-        'title' => t('Add operation'),
-        'href' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/add/operation',
+  if ($op == 'edit') {
+    // Operations of the web service in a table
+    $rows = array();
+    foreach ($service->operations as $name => $operation) {
+      $row = array();
+      $row[] = l($operation['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
+      $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
+      $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name . '/delete');
+      $rows[] = $row;
+    }
+    $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
+    $form['operations'] = array(
+      '#access' => TRUE,
+      '#tree' => TRUE,
+      '#theme' => 'table',
+      '#empty' => t('None'),
+      '#caption' => t('Operations'),
+      '#rows' => $rows,
+      '#header' => $header,
+    );
+    $form['add_operaton'] = array(
+      '#theme' => 'links__wsclient',
+      '#links' => array(
+        'add_op' => array(
+          'title' => t('Add operation'),
+          'href' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/add/operation',
+        ),
       ),
-    ),
-  );
-  // Data types of the web service in a table
-  $rows = array();
-  foreach ($service->datatypes as $name => $datatype) {
-    $row = array();
-    $row[] = l($datatype['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
-    $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
-    $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name . '/delete');
-    $rows[] = $row;
-  }
-  $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
-  $form['datatypess'] = array(
-    '#access' => TRUE,
-    '#tree' => TRUE,
-    '#theme' => 'table',
-    '#empty' => t('None'),
-    '#caption' => t('Data types'),
-    '#rows' => $rows,
-    '#header' => $header,
-  );
-  $form['add_type'] = array(
-    '#theme' => 'links__wsclient',
-    '#links' => array(
-      'add_op' => array(
-        'title' => t('Add data type'),
-        'href' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/add/type',
+    );
+    // Data types of the web service in a table
+    $rows = array();
+    foreach ($service->datatypes as $name => $datatype) {
+      $row = array();
+      $row[] = l($datatype['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
+      $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
+      $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name . '/delete');
+      $rows[] = $row;
+    }
+    $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
+    $form['datatypess'] = array(
+      '#access' => TRUE,
+      '#tree' => TRUE,
+      '#theme' => 'table',
+      '#empty' => t('None'),
+      '#caption' => t('Data types'),
+      '#rows' => $rows,
+      '#header' => $header,
+    );
+    $form['add_type'] = array(
+      '#theme' => 'links__wsclient',
+      '#links' => array(
+        'add_op' => array(
+          'title' => t('Add data type'),
+          'href' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/add/type',
+        ),
       ),
-    ),
-  );
+    );
+  }
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -128,7 +130,12 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
 function wsclient_service_form_submit($form, &$form_state) {
   $service = entity_ui_form_submit_build_entity($form, $form_state);
   $service->save();
-  $form_state['redirect'] = WSCLIENT_UI_PATH;
+  if ($form_state['op'] == 'add') {
+    $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
+  }
+  else {
+    $form_state['redirect'] = WSCLIENT_UI_PATH;
+  }
 }
 
 /**
@@ -228,12 +235,21 @@ function _wsclient_ui_parameter_row($service, $types, $name = '', $info = array(
     '#type' => 'textfield',
     '#size' => 40,
     '#default_value' => $name,
-    '#element_validate' => array('wsclient_ui_operation_name_validate'),
+    '#element_validate' => array('wsclient_ui_parameter_name_validate'),
   );
   $parameter['weight'] = array(
     '#type' => 'weight',
   );
   return $parameter;
+}
+
+/**
+ * Validation callback for parameter names.
+ */
+function wsclient_ui_parameter_name_validate($element, &$form_state) {
+  if ($element['#value'] && !preg_match('!^[A-Za-z0-9_]+$!', $element['#value'])) {
+    form_error($element, t('Parameter names must contain only letters, numbers, and underscores.'));
+  }
 }
 
 /**
@@ -408,5 +424,44 @@ function wsclient_ui_operation_delete_submit($form, &$form_state) {
  * Data type form.
  */
 function wsclient_ui_type($form, &$form_state, $service, $type, $op = 'edit') {
+  if ($op == 'add') {
+    $type = array(
+      'name' => '',
+      'parameter' => array(),
+    );
+  }
+  $form['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#default_value' => isset($type['label']) ? $type['label'] : '',
+    '#required' => TRUE,
+    '#description' => t('The human-readable name of the data type.'),
+  );
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#default_value' => isset($type['name']) ? $type['name'] : '',
+    '#required' => TRUE,
+    '#description' => t('The machine-readable name of this data type is used internally to identify the data type.'),
+    '#element_validate' => array('wsclient_ui_type_name_validate'),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+  $form_state['service'] = $service;
+  $form_state['type'] = $type;
+  return $form;
+}
 
+/**
+ * Validation callback for data type names.
+ */
+function wsclient_ui_type_name_validate($element, &$form_state) {
+  if ($element['#value'] && !preg_match('!^[A-Za-z0-9_]+$!', $element['#value'])) {
+    form_error($element, t('Data type names must contain only letters, numbers, and underscores.'));
+  }
+  if ($element['#value'] != $form_state['type']['name'] && isset($form_state['service']->datatypes) && in_array($element['#value'], array_keys($form_state['service']->datatypes))) {
+    form_error($element, t('A data type with that name already exists'));
+  }
 }

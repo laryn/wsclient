@@ -48,6 +48,12 @@ function wsclient_schema() {
         'serialize' => TRUE,
         'description' => 'The operations this web service offers.',
       ),
+      'datatypes' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'serialize' => TRUE,
+        'description' => 'The complex data types used in the operations.',
+      ),
       'type' => array(
         'type' => 'varchar',
         'length' => '255',

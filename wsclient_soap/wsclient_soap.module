@@ -78,8 +78,8 @@ class WSClientSOAPEndpoint implements WSClientEndpointInterface {
   public function entities() {}
 
   public function dataTypes() {
-    if (!empty($this->service->settings['data types'])) {
-      return $this->service->settings['data types'];
+    if (!empty($this->service->datatypes)) {
+      return $this->service->datatypes;
     }
   }
 

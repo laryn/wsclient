@@ -13,6 +13,7 @@ class WSClientServiceDescription extends EntityDB {
 
   public $settings = array();
   public $operations = array();
+  public $datatypes = array();
   public $name;
   public $label;
   public $url;

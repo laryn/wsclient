@@ -17,21 +17,26 @@ function wsclient_soap_test_default_wsclient_service() {
   $service->type = 'soap';
 
   // Add info about the SOAP service, which the user has to provide via the UI.
-  $service->settings['data types'] = array(
+  $service->datatypes = array(
     'geocoder_result' => array(
-      'type' => 'list<struct>',
       'label' => 'Address results',
       'property info' => array(
-        'number' => array('type' => 'integer'),
-        'zip' => array('type' => 'integer'),
-        'suffix' => array('type' => 'text'),
-        'prefix' => array('type' => 'text'),
-        'type' => array('type' => 'text'),
-        'street' => array('type' => 'text'),
-        'state' => array('type' => 'text'),
-        'city' => array('type' => 'text'),
-        'lat' => array('type' => 'decimal'),
-        'long' => array('type' => 'decimal'),
+        'result_list' => array(
+          'label' => 'Result list',
+          'type' => 'list<struct>',
+          'property info' => array(
+            'number' => array('type' => 'integer'),
+            'zip' => array('type' => 'integer'),
+            'suffix' => array('type' => 'text'),
+            'prefix' => array('type' => 'text'),
+            'type' => array('type' => 'text'),
+            'street' => array('type' => 'text'),
+            'state' => array('type' => 'text'),
+            'city' => array('type' => 'text'),
+            'lat' => array('type' => 'decimal'),
+            'long' => array('type' => 'decimal'),
+          ),
+        ),
       ),
     ),
   );

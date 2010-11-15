@@ -17,18 +17,23 @@ function wsclient_rest_test_default_wsclient_service() {
   $service->type = 'rest';
 
   // Add info about the REST service, which the user has to provide via the UI.
-  $service->settings['data types'] = array(
+  $service->datatypes = array(
     'translation_result' => array(
-      'type' => 'struct',
       'label' => 'Translation result',
       'property info' => array(
-        'responseData' => array(
+        'data' => array(
           'type' => 'struct',
-          'label' => 'Response data',
+          'label' => 'Translation data',
           'property info' => array(
-            'translatedText' => array(
-              'type' => 'text',
-              'label' => 'Translated text',
+            'responseData' => array(
+              'type' => 'struct',
+              'label' => 'Response data',
+              'property info' => array(
+                'translatedText' => array(
+                  'type' => 'text',
+                  'label' => 'Translated text',
+                ),
+              ),
             ),
           ),
         ),

@@ -277,6 +277,7 @@ function wsclient_ui_operation_submit($form, &$form_state) {
       'label' => isset($form_state['values']['result_label']) ? $form_state['values']['result_label'] : 'result',
     );
   }
+  unset($service->operations[$form_state['operation']['name']]);
   $service->operations[$form_state['values']['name']] = $operation;
   $service->save();
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
@@ -289,7 +290,7 @@ function wsclient_ui_operation_name_validate($element, &$form_state) {
   if ($element['#value'] && !preg_match('!^[A-Za-z0-9_]+$!', $element['#value'])) {
     form_error($element, t('Operation names must contain only letters, numbers, and underscores.'));
   }
-  if ($element['#value'] != $form_state['operation']['name'] && isset($form_state['service']->operations) && in_array($element['#value'], array_keys($form_state['service']->operations))) {
+  if ($element['#value'] != $form_state['operation']['name'] && isset($form_state['service']->operations[$element['#value']])) {
     form_error($element, t('An operation with that name already exists'));
   }
 }

@@ -51,7 +51,7 @@ class WSClientRESTRulesTestCase extends DrupalWebTestCase {
     list($result) = rules_action('wsclient_google_translate', array(
            'param_langpair' => 'de|en',
          ))->execute('Hallo Welt');
-    $this->assertEqual(drupal_strtolower($result['data']['responseData']['translatedText']), 'hello world', 'REST service invoked via the action.');
+    $this->assertEqual(drupal_strtolower($result['responseData']['translatedText']), 'hello world', 'REST service invoked via the action.');
 
     // Test making use of the provided variable.
     $rule = rule(array('text' => array('type' => 'text')));
@@ -59,7 +59,7 @@ class WSClientRESTRulesTestCase extends DrupalWebTestCase {
            'param_q:select' => 'text',
            'param_langpair' => 'de|en',
          ))
-         ->action('drupal_message', array('message:select' => 'result:data:responseData:translatedText'))
+         ->action('drupal_message', array('message:select' => 'result:responseData:translatedText'))
          ->execute('Hallo Welt');
     RulesLog::logger()->checkLog();
     $msg = drupal_get_messages();

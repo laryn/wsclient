@@ -50,11 +50,11 @@ class WSClientSOAPRulesTestCase extends DrupalWebTestCase {
   function testRulesIntegration() {
     list($result) = rules_action('wsclient_geocoder_geocode_address', array())
          ->execute('1600 Pennsylvania Av, Washington, DC');
-    $this->assertEqual($result['result_list'][0]->zip, '20502', 'SOAP service invoked via the action.');
+    $this->assertEqual($result[0]->zip, '20502', 'SOAP service invoked via the action.');
 
     $rule = rule(array('address' => array('type' => 'text')));
     $rule->action('wsclient_geocoder_geocode_address', array('param_address:select' => 'address'))
-         ->action('drupal_message', array('message:select' => 'result:result_list:0:zip'))
+         ->action('drupal_message', array('message:select' => 'result:0:zip'))
          ->execute('1600 Pennsylvania Av, Washington, DC');
 
     RulesLog::logger()->checkLog();

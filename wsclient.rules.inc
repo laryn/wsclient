@@ -113,10 +113,7 @@ function wsclient_service_action($arguments, RulesPlugin $element) {
       }
     }
     $return = $service->invoke($arguments['operation'], $args);
-    $operation = $service->operations[$arguments['operation']];
-    $result_type = $operation['result']['type'];
-    $property_name = key($service->datatypes[$result_type]['property info']);
-    return array('result' => array($property_name => $return));
+    return array('result' => $return);
   }
   else {
     throw new WSClientException('The web service %name cannot be found.', array('%name' => $arguments['service']));

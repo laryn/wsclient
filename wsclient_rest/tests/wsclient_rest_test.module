@@ -21,19 +21,13 @@ function wsclient_rest_test_default_wsclient_service() {
     'translation_result' => array(
       'label' => 'Translation result',
       'property info' => array(
-        'data' => array(
+        'responseData' => array(
           'type' => 'struct',
-          'label' => 'Translation data',
+          'label' => 'Response data',
           'property info' => array(
-            'responseData' => array(
-              'type' => 'struct',
-              'label' => 'Response data',
-              'property info' => array(
-                'translatedText' => array(
-                  'type' => 'text',
-                  'label' => 'Translated text',
-                ),
-              ),
+            'translatedText' => array(
+              'type' => 'text',
+              'label' => 'Translated text',
             ),
           ),
         ),
@@ -50,7 +44,7 @@ function wsclient_rest_test_default_wsclient_service() {
   );
   // We have to specify the version 1.0
   $operation['parameter']['v'] = array('type' => 'hidden', 'default value' => '1.0');
-  $operation['result'] = array('type' => 'translation_result', 'label' => 'Translation result');
+  $operation['result'] = array('type' => 'wsclient_google_translation_result', 'label' => 'Translation result');
   $service->operations['translate'] = $operation;
   $services[$service->name] = $service;
   return $services;

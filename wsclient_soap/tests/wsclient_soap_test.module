@@ -21,28 +21,22 @@ function wsclient_soap_test_default_wsclient_service() {
     'geocoder_result' => array(
       'label' => 'Address results',
       'property info' => array(
-        'result_list' => array(
-          'label' => 'Result list',
-          'type' => 'list<struct>',
-          'property info' => array(
-            'number' => array('type' => 'integer'),
-            'zip' => array('type' => 'integer'),
-            'suffix' => array('type' => 'text'),
-            'prefix' => array('type' => 'text'),
-            'type' => array('type' => 'text'),
-            'street' => array('type' => 'text'),
-            'state' => array('type' => 'text'),
-            'city' => array('type' => 'text'),
-            'lat' => array('type' => 'decimal'),
-            'long' => array('type' => 'decimal'),
-          ),
-        ),
+        'number' => array('type' => 'integer'),
+        'zip' => array('type' => 'integer'),
+        'suffix' => array('type' => 'text'),
+        'prefix' => array('type' => 'text'),
+        'type' => array('type' => 'text'),
+        'street' => array('type' => 'text'),
+        'state' => array('type' => 'text'),
+        'city' => array('type' => 'text'),
+        'lat' => array('type' => 'decimal'),
+        'long' => array('type' => 'decimal'),
       ),
     ),
   );
   $operation['label'] = 'Geocode an address';
   $operation['parameter']['address'] = array('type' => 'text');
-  $operation['result'] = array('type' => 'geocoder_result', 'label' => 'Geocoder result');
+  $operation['result'] = array('type' => 'list<wsclient_geocoder_geocoder_result>', 'label' => 'Geocoder result');
 
   $service->operations['geocode_address'] = $operation;
   $services[$service->name] = $service;

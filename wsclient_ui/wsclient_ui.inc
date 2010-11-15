@@ -59,6 +59,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     '#required' => TRUE,
     '#description' => t('The type of the web service.'),
   );
+  // Operations of the web service in a table
   $rows = array();
   foreach ($service->operations as $name => $operation) {
     $row = array();
@@ -83,6 +84,34 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       'add_op' => array(
         'title' => t('Add operation'),
         'href' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/add/operation',
+      ),
+    ),
+  );
+  // Data types of the web service in a table
+  $rows = array();
+  foreach ($service->datatypes as $name => $datatype) {
+    $row = array();
+    $row[] = l($datatype['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
+    $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
+    $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name . '/delete');
+    $rows[] = $row;
+  }
+  $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
+  $form['datatypess'] = array(
+    '#access' => TRUE,
+    '#tree' => TRUE,
+    '#theme' => 'table',
+    '#empty' => t('None'),
+    '#caption' => t('Data types'),
+    '#rows' => $rows,
+    '#header' => $header,
+  );
+  $form['add_type'] = array(
+    '#theme' => 'links__wsclient',
+    '#links' => array(
+      'add_op' => array(
+        'title' => t('Add data type'),
+        'href' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/add/type',
       ),
     ),
   );
@@ -373,4 +402,11 @@ function wsclient_ui_operation_delete_submit($form, &$form_state) {
   $service->save();
   drupal_set_message(t('Deleted operation %operation.', array('%operation' => $operation['label'])));
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
+}
+
+/**
+ * Data type form.
+ */
+function wsclient_ui_type($form, &$form_state, $service, $type, $op = 'edit') {
+
 }

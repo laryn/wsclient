@@ -27,6 +27,7 @@ function wsclient_ui_entity_info_alter(&$entity_info) {
  */
 function wsclient_ui_menu() {
   $items = array();
+  // Menu items to manage web service operations
   $id_count = count(explode('/', WSCLIENT_UI_PATH)) + 1;
   $items[WSCLIENT_UI_PATH . '/manage/%wsclient_service/add/operation'] = array(
     'title' => 'Add operation',
@@ -51,6 +52,15 @@ function wsclient_ui_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wsclient_ui_operation_delete', $id_count, $op_count),
     'load arguments' => array($id_count),
+    'access arguments' => array('administer web services'),
+    'type' => MENU_CALLBACK,
+    'file' => 'wsclient_ui.inc',
+  );
+  // Menu items to manage data types.
+  $items[WSCLIENT_UI_PATH . '/manage/%wsclient_service/add/type'] = array(
+    'title' => 'Add data type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wsclient_ui_type', $id_count, NULL, 'add'),
     'access arguments' => array('administer web services'),
     'type' => MENU_CALLBACK,
     'file' => 'wsclient_ui.inc',

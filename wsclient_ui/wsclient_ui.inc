@@ -65,8 +65,15 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     $operations = wsclient_ui_label_sort($service->operations);
     foreach ($operations as $name => $operation) {
       $row = array();
-      // @todo add machine name
-      $row[] = l($operation['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
+      $row[] = array('data' => array(
+        '#theme' => 'entity_ui_overview_item',
+        '#label' => $operation['label'],
+        '#name' => $name,
+        '#url' => array(
+          'path' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name,
+          'options' => array(),
+        ),
+      ));
       $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
       $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name . '/delete');
       $rows[] = $row;
@@ -98,8 +105,15 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     $datatypes = wsclient_ui_label_sort($service->datatypes);
     foreach ($datatypes as $name => $datatype) {
       $row = array();
-      // @todo add machine name
-      $row[] = l($datatype['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
+      $row[] = array('data' => array(
+        '#theme' => 'entity_ui_overview_item',
+        '#label' => $datatype['label'],
+        '#name' => $name,
+        '#url' => array(
+          'path' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name,
+          'options' => array(),
+        ),
+      ));
       $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
       $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name . '/delete');
       $rows[] = $row;

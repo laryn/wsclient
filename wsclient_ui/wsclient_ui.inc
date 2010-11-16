@@ -197,7 +197,7 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     '#type' => 'submit',
     '#value' => t('Add more'),
     '#limit_validation_errors' => array(array('parameters')),
-    '#submit' => array('wsclient_ui_more_parameter_submit'),
+    '#submit' => array('wsclient_ui_more_submit'),
   );
   $form['result_type'] = array(
     '#type' => 'select',
@@ -235,7 +235,7 @@ function _wsclient_ui_parameter_row($service, $types, $name = '', $info = array(
     '#type' => 'textfield',
     '#size' => 40,
     '#default_value' => $name,
-    '#element_validate' => array('wsclient_ui_parameter_name_validate'),
+    '#element_validate' => array('wsclient_ui_name_validate'),
   );
   $parameter['weight'] = array(
     '#type' => 'weight',
@@ -244,18 +244,18 @@ function _wsclient_ui_parameter_row($service, $types, $name = '', $info = array(
 }
 
 /**
- * Validation callback for parameter names.
+ * Validation callback for machine names of parameters or properties.
  */
-function wsclient_ui_parameter_name_validate($element, &$form_state) {
+function wsclient_ui_name_validate($element, &$form_state) {
   if ($element['#value'] && !preg_match('!^[A-Za-z0-9_]+$!', $element['#value'])) {
-    form_error($element, t('Parameter names must contain only letters, numbers, and underscores.'));
+    form_error($element, t('Machine names must contain only letters, numbers, and underscores.'));
   }
 }
 
 /**
  * Submit callback for adding more parameter rows.
  */
-function wsclient_ui_more_parameter_submit($form, &$form_state) {
+function wsclient_ui_more_submit($form, &$form_state) {
   $form_state['more']++;
   $form_state['rebuild'] = TRUE;
 }
@@ -440,6 +440,30 @@ function wsclient_ui_type($form, &$form_state, $service, $type, $op = 'edit') {
     '#description' => t('The machine-readable name of this data type is used internally to identify the data type.'),
     '#element_validate' => array('wsclient_ui_type_name_validate'),
   );
+  $form['properties'] = array(
+    '#tree' => TRUE,
+    '#element_validate' => array('wsclient_ui_validate_parameters'),
+    '#theme' => 'wsclient_ui_property_form',
+    '#title' => t('Properties'),
+    '#description' => t('Specify the properties for the data type. For each property you have to specify a certain data type and a unique name containing only alphanumeric characters and underscores.'),
+  );
+  $types = wsclient_ui_types();
+  if (isset($type['property info'])) {
+    foreach ($type['property info'] as $name => $info) {
+      $form['properties']['items'][$name] = _wsclient_ui_property_row($service, $types, $name, $info);
+    }
+  }
+  // Always add three empty lines.
+  $form_state['more'] = isset($form_state['more']) ? $form_state['more'] : 3;
+  for ($i = 0; $i < $form_state['more']; $i++) {
+    $form['properties']['items'][$i] = _wsclient_ui_property_row($service, $types);
+  }
+  $form['properties']['more'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add more'),
+    '#limit_validation_errors' => array(array('properties')),
+    '#submit' => array('wsclient_ui_more_submit'),
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -455,6 +479,14 @@ function wsclient_ui_type($form, &$form_state, $service, $type, $op = 'edit') {
 function wsclient_ui_type_submit($form, &$form_state) {
   $service = $form_state['service'];
   $type['label'] = $form_state['values']['label'];
+  foreach ($form_state['values']['properties']['items'] as $key => $item) {
+    if (!empty($item['name'])) {
+      $type['property info'][$item['name']] = array(
+        'type' => $item['type'],
+        'label' => $item['label'],
+      );
+    }
+  }
   unset($service->datatypes[$form_state['type']['name']]);
   $service->datatypes[$form_state['values']['name']] = $type;
   $service->save();
@@ -509,4 +541,69 @@ function wsclient_ui_type_delete_submit($form, &$form_state) {
   $service->save();
   drupal_set_message(t('Deleted data type %type.', array('%type' => $type['label'])));
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
+}
+
+/**
+ * Generates a row in the properties table.
+ */
+function _wsclient_ui_property_row($service, $types, $name = '', $info = array()) {
+  $default_value = _wsclient_ui_type_default($types, $service, $info);
+  $property['type'] = array(
+    '#type' => 'select',
+    '#options' => array(0 => '--') + $types,
+    '#default_value' => $default_value,
+  );
+  $property['name'] = array(
+    '#type' => 'textfield',
+    '#size' => 40,
+    '#default_value' => $name,
+    '#element_validate' => array('wsclient_ui_name_validate'),
+  );
+  $property['label'] = array(
+    '#type' => 'textfield',
+    '#default_value' => isset($info['label']) ? $info['label'] : '',
+  );
+  return $property;
+}
+
+/**
+ * Themes the data type form for editing the properties.
+ *
+ * @ingroup themeable
+ */
+function theme_wsclient_ui_property_form($variables) {
+  $elements = $variables['element'];
+
+  $table['#theme'] = 'table';
+  $table['#header'] = array(t('Data type'), t('Name'), t('Label'));
+  $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
+
+  foreach (element_children($elements['items']) as $key) {
+    $element = &$elements['items'][$key];
+
+    $row = array();
+    $row[] = array('data' => $element['type']);
+    $row[] = array('data' => $element['name']);
+    $row[] = array('data' => $element['label']);
+    $row = array('data' => $row) + $element['#attributes'];
+    $table['#rows'][] = $row;
+  }
+  $elements['items']['#printed'] = TRUE;
+
+  // Theme it like a form item, but with the description above the content.
+  $attributes['class'][] = 'form-item';
+  $attributes['class'][] = 'rules-variables-form';
+
+  $output = '<div' . drupal_attributes($attributes) . '>' . "\n";
+  $output .= theme('form_element_label', $variables);
+  if (!empty($elements['#description'])) {
+    $output .= ' <div class="description">' . $elements['#description'] . "</div>\n";
+  }
+  $output .= ' ' . drupal_render($table) . "\n";
+  // Add in any further children elements.
+  foreach (element_children($elements, TRUE) as $key) {
+    $output .= drupal_render($elements[$key]);
+  }
+  $output .= "</div>\n";
+  return $output;
 }

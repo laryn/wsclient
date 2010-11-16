@@ -154,6 +154,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
 function wsclient_service_form_submit($form, &$form_state) {
   $service = entity_ui_form_submit_build_entity($form, $form_state);
   $service->save();
+  drupal_set_message(t('Web service description %service has been saved.', array('%service' => $service->label)));
   if ($form_state['op'] == 'add') {
     $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
   }
@@ -307,6 +308,7 @@ function wsclient_ui_operation_submit($form, &$form_state) {
   unset($service->operations[$form_state['operation']['name']]);
   $service->operations[$form_state['values']['name']] = $operation;
   $service->save();
+  drupal_set_message(t('Operation %operation has been saved.', array('%operation' => $operation['label'])));
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
 }
 
@@ -532,6 +534,7 @@ function wsclient_ui_type_submit($form, &$form_state) {
   unset($service->datatypes[$form_state['type']['name']]);
   $service->datatypes[$form_state['values']['name']] = $type;
   $service->save();
+  drupal_set_message(t('Data type %type has been saved.', array('%type' => $type['label'])));
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
 }
 

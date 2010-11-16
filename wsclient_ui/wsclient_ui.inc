@@ -61,10 +61,12 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
   );
   if ($op == 'edit') {
     // Operations of the web service in a table
+    // @todo improve table caption/heading
     $rows = array();
     $operations = wsclient_ui_label_sort($service->operations);
     foreach ($operations as $name => $operation) {
       $row = array();
+      // @todo add machine name
       $row[] = l($operation['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
       $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
       $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name . '/delete');
@@ -90,10 +92,12 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       ),
     );
     // Data types of the web service in a table
+    // @todo improve table caption/heading
     $rows = array();
     $datatypes = wsclient_ui_label_sort($service->datatypes);
     foreach ($datatypes as $name => $datatype) {
       $row = array();
+      // @todo add machine name
       $row[] = l($datatype['label'], WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
       $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
       $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name . '/delete');
@@ -483,4 +487,26 @@ function wsclient_ui_label_sort($data_info, $label_key = 'label') {
     $sort_info[$key] = $data_info[$key];
   }
   return $sort_info;
+}
+
+/**
+ * Data type delete confirmation form.
+ */
+function wsclient_ui_type_delete($form, &$form_state, $service, $type) {
+  $confirm_question = t('Are you sure you want to delete the data type %type?', array('%type' => $type['label']));
+  $form_state['service'] = $service;
+  $form_state['type'] = $type;
+  return confirm_form($form, $confirm_question, WSCLIENT_UI_PATH . '/manage/' . $service->name);
+}
+
+/**
+ * Submit callback of data type delete form.
+ */
+function wsclient_ui_type_delete_submit($form, &$form_state) {
+  $service = $form_state['service'];
+  $type = $form_state['type'];
+  unset($service->datatypes[$type['name']]);
+  $service->save();
+  drupal_set_message(t('Deleted data type %type.', array('%type' => $type['label'])));
+  $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
 }

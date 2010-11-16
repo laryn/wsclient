@@ -74,6 +74,15 @@ function wsclient_ui_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'wsclient_ui.inc',
   );
+  $items[WSCLIENT_UI_PATH . '/manage/%wsclient_service/type/%wsclient_ui_type/delete'] = array(
+    'title' => 'Delete data type',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wsclient_ui_type_delete', $id_count, $op_count),
+    'load arguments' => array($id_count),
+    'access arguments' => array('administer web services'),
+    'type' => MENU_CALLBACK,
+    'file' => 'wsclient_ui.inc',
+  );
   return $items;
 }
 

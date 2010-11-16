@@ -61,7 +61,6 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
   );
   if ($op == 'edit') {
     // Operations of the web service in a table
-    // @todo improve table caption/heading
     $rows = array();
     $operations = wsclient_ui_label_sort($service->operations);
     foreach ($operations as $name => $operation) {
@@ -82,6 +81,9 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       '#rows' => $rows,
       '#header' => $header,
     );
+    // Add some table styling from Rules.
+    $form['operations']['#attributes']['class'][] = 'rules-overview-table';
+    $form['operations']['#attached']['css'][] = drupal_get_path('module', 'rules') . '/ui/rules.ui.css';
     $form['add_operaton'] = array(
       '#theme' => 'links__wsclient',
       '#links' => array(
@@ -92,7 +94,6 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       ),
     );
     // Data types of the web service in a table
-    // @todo improve table caption/heading
     $rows = array();
     $datatypes = wsclient_ui_label_sort($service->datatypes);
     foreach ($datatypes as $name => $datatype) {
@@ -104,7 +105,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       $rows[] = $row;
     }
     $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
-    $form['datatypess'] = array(
+    $form['datatypes'] = array(
       '#access' => TRUE,
       '#tree' => TRUE,
       '#theme' => 'table',
@@ -113,6 +114,9 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       '#rows' => $rows,
       '#header' => $header,
     );
+    // Add some table styling from Rules.
+    $form['datatypes']['#attributes']['class'][] = 'rules-overview-table';
+    $form['datatypes']['#attached']['css'][] = drupal_get_path('module', 'rules') . '/ui/rules.ui.css';
     $form['add_type'] = array(
       '#theme' => 'links__wsclient',
       '#links' => array(

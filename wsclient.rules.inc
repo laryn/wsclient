@@ -57,6 +57,8 @@ function wsclient_rules_data_info() {
         'label' => t('Web service %label %type', array('%label' => $service->label, '%type' => $type)),
         'creation callback' => 'rules_action_data_create_array',
       );
+      // Prefix the label with the service label.
+      $type_info['label'] = $service->label . ': ' . $type_info['label'];
       $types['wsclient_' . $name . '_' . $type] = $type_info;
     }
   }

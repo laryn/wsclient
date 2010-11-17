@@ -59,10 +59,27 @@ function wsclient_rules_data_info() {
       );
       // Prefix the label with the service label.
       $type_info['label'] = $service->label . ': ' . $type_info['label'];
+      // Populate labels for properties.
+      wsclient_type_info_add_label($type_info);
       $types['wsclient_' . $name . '_' . $type] = $type_info;
     }
   }
   return $types;
+}
+
+/**
+ * Helper function to recursively populate label information by defaulting to
+ * the machine name.
+ */
+function wsclient_type_info_add_label(array &$type_info) {
+  if (isset($type_info['property info'])) {
+    foreach ($type_info['property info'] as $name => &$info) {
+      if (!isset($info['label'])) {
+        $info['label'] = $name;
+      }
+      wsclient_type_info_add_label($info);
+    }
+  }
 }
 
 /**

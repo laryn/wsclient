@@ -79,6 +79,8 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       $rows[] = $row;
     }
     $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
+    // @todo description help text for operations, data types
+    // @todo required property for parameters
     $form['operations'] = array(
       '#access' => TRUE,
       '#tree' => TRUE,
@@ -91,6 +93,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     // Add some table styling from Rules.
     $form['operations']['#attributes']['class'][] = 'rules-overview-table';
     $form['operations']['#attached']['css'][] = drupal_get_path('module', 'rules') . '/ui/rules.ui.css';
+    // @todo add operation link should be part of the table as in Rules
     $form['add_operaton'] = array(
       '#theme' => 'links__wsclient',
       '#links' => array(

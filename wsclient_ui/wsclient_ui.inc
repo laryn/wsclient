@@ -80,7 +80,6 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     }
     $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
     // @todo description help text for operations, data types
-    // @todo required property for parameters
     $form['operations'] = array(
       '#access' => TRUE,
       '#tree' => TRUE,
@@ -199,7 +198,7 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     '#element_validate' => array('wsclient_ui_validate_parameters'),
     '#theme' => 'wsclient_ui_variable_form',
     '#title' => t('Parameters'),
-    '#description' => t('Specify the parameters for the operation. For each parameter you have to specify a certain data type and a unique name containing only alphanumeric characters and underscores. You can also specify a fixed value for the parameter, if its type is hidden.'),
+    '#description' => t('Specify the parameters for the operation. For each parameter you have to specify a certain data type and a unique name containing only alphanumeric characters and underscores. You can also specify a default value for the parameter and if it is required.'),
   );
   $weight = 0;
   $types = wsclient_ui_types(TRUE);
@@ -261,9 +260,14 @@ function _wsclient_ui_parameter_row($service, $types, $name = '', $info = array(
     '#default_value' => $name,
     '#element_validate' => array('wsclient_ui_name_validate'),
   );
-  $parameter['fixed_value'] = array(
+  $parameter['default_value'] = array(
     '#type' => 'textfield',
+    '#size' => 40,
     '#default_value' => isset($info['default value']) ? $info['default value'] : '',
+  );
+  $parameter['required'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => isset($info['optional']) ? !$info['optional'] : TRUE,
   );
   $parameter['weight'] = array(
     '#type' => 'weight',
@@ -297,8 +301,11 @@ function wsclient_ui_operation_submit($form, &$form_state) {
   foreach ($form_state['values']['parameters']['items'] as $key => $item) {
     if (!empty($item['name'])) {
       $operation['parameter'][$item['name']] = array('type' => $item['type']);
-      if ($item['type'] == 'hidden') {
-        $operation['parameter'][$item['name']]['default value'] = $item['fixed_value'];
+      if ($item['default_value'] !== '') {
+        $operation['parameter'][$item['name']]['default value'] = $item['default_value'];
+      }
+      if (!$item['required']) {
+        $operation['parameter'][$item['name']]['optional'] = TRUE;
       }
     }
   }
@@ -337,7 +344,7 @@ function theme_wsclient_ui_variable_form($variables) {
   $elements = $variables['element'];
 
   $table['#theme'] = 'table';
-  $table['#header'] = array(t('Data type'), t('Name'), t('Fixed value'), array('data' => t('Weight'), 'class' => array('tabledrag-hide')));
+  $table['#header'] = array(t('Data type'), t('Name'), t('Default value'), t('Required'), array('data' => t('Weight'), 'class' => array('tabledrag-hide')));
   $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
 
   foreach (element_children($elements['items']) as $key) {
@@ -348,7 +355,8 @@ function theme_wsclient_ui_variable_form($variables) {
     $row = array();
     $row[] = array('data' => $element['type']);
     $row[] = array('data' => $element['name']);
-    $row[] = array('data' => $element['fixed_value']);
+    $row[] = array('data' => $element['default_value']);
+    $row[] = array('data' => $element['required']);
     $row[] = array('data' => $element['weight']);
     $row = array('data' => $row) + $element['#attributes'];
     $row['class'][] = 'draggable';
@@ -422,11 +430,8 @@ function wsclient_ui_validate_parameters($elements, &$form_state) {
       }
       $names[$element['name']['#value']] = TRUE;
     }
-    if (isset($element['fixed_value']['#value']) && $element['fixed_value']['#value'] !== '' && $element['type']['#value'] != 'hidden') {
-      form_error($element['type'], t('A fixed value is only possible for the "hidden" data type.'));
-    }
-    if ($element['type']['#value'] == 'hidden' && $element['fixed_value']['#value'] === '') {
-      form_error($element['fixed_value'], t('The "hidden" data type requires a fixed value.'));
+    if ($element['type']['#value'] == 'hidden' && $element['default_value']['#value'] === '') {
+      form_error($element['default_value'], t('The "hidden" data type requires a default value.'));
     }
   }
 }
@@ -611,6 +616,7 @@ function _wsclient_ui_property_row($service, $types, $name = '', $info = array()
   );
   $property['label'] = array(
     '#type' => 'textfield',
+    '#size' => 40,
     '#default_value' => isset($info['label']) ? $info['label'] : '',
   );
   return $property;

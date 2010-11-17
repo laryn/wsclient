@@ -79,6 +79,20 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       $rows[] = $row;
     }
     $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
+    $add_operation = array(
+      '#theme' => 'links__wsclient',
+      '#links' => array(
+        'add_op' => array(
+          'title' => t('Add operation'),
+          'href' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/add/operation',
+        ),
+      ),
+    );
+    $add_operation['#attributes']['class'][] = 'rules-operations-add';
+    $add_operation['#attributes']['class'][] = 'action-links';
+    $row = array();
+    $row[] = array('data' => $add_operation, 'colspan' => 3);
+    $rows[] = array('data' => $row, 'class' => array('rules-elements-add'));
     // @todo description help text for operations, data types
     $form['operations'] = array(
       '#access' => TRUE,
@@ -90,18 +104,9 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       '#header' => $header,
     );
     // Add some table styling from Rules.
-    $form['operations']['#attributes']['class'][] = 'rules-overview-table';
+    $form['operations']['#attributes']['class'][] = 'rules-elements-table';
     $form['operations']['#attached']['css'][] = drupal_get_path('module', 'rules') . '/ui/rules.ui.css';
-    // @todo add operation link should be part of the table as in Rules
-    $form['add_operaton'] = array(
-      '#theme' => 'links__wsclient',
-      '#links' => array(
-        'add_op' => array(
-          'title' => t('Add operation'),
-          'href' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/add/operation',
-        ),
-      ),
-    );
+
     // Data types of the web service in a table
     $rows = array();
     $datatypes = wsclient_ui_label_sort($service->datatypes);
@@ -121,6 +126,20 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       $rows[] = $row;
     }
     $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
+    $add_type = array(
+      '#theme' => 'links__wsclient',
+      '#links' => array(
+        'add_op' => array(
+          'title' => t('Add data type'),
+          'href' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/add/type',
+        ),
+      ),
+    );
+    $add_type['#attributes']['class'][] = 'rules-operations-add';
+    $add_type['#attributes']['class'][] = 'action-links';
+    $row = array();
+    $row[] = array('data' => $add_type, 'colspan' => 3);
+    $rows[] = array('data' => $row, 'class' => array('rules-elements-add'));
     $form['datatypes'] = array(
       '#access' => TRUE,
       '#tree' => TRUE,
@@ -131,17 +150,8 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       '#header' => $header,
     );
     // Add some table styling from Rules.
-    $form['datatypes']['#attributes']['class'][] = 'rules-overview-table';
+    $form['datatypes']['#attributes']['class'][] = 'rules-elements-table';
     $form['datatypes']['#attached']['css'][] = drupal_get_path('module', 'rules') . '/ui/rules.ui.css';
-    $form['add_type'] = array(
-      '#theme' => 'links__wsclient',
-      '#links' => array(
-        'add_op' => array(
-          'title' => t('Add data type'),
-          'href' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/add/type',
-        ),
-      ),
-    );
   }
   $form['submit'] = array(
     '#type' => 'submit',

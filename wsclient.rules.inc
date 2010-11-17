@@ -71,14 +71,24 @@ function wsclient_rules_action_info() {
   foreach (entity_load('wsclient_service', FALSE) as $name => $service) {
     $service_types = $service->entities() + $service->dataTypes();
     foreach ($service->actions() as $item_name => $info) {
-      $info += array('parameter' => array(), 'provides' => array());
+      $info += array(
+        'parameter' => array(),
+        'provides' => array(),
+        'group' => t('Web services'),
+      );
       // Map the types.
       foreach ($info['parameter'] as $param => &$param_info) {
         $param_info['type'] = _wsclient_map_type($name, $service_types, $param_info['type']);
+        if (!isset($param_info['label'])) {
+          // Create a label from parameter machine name, remove prefix 'param_'.
+          $param_info['label'] = substr($param, 6);
+        }
       }
       foreach ($info['provides'] as $var_name => &$var_info) {
         $var_info['type'] = _wsclient_map_type($name, $service_types, $var_info['type']);
       }
+      // Prefix the action label with the service label.
+      $info['label'] = $service->label . ': ' . $info['label'];
       $return['wsclient_' . $name . '_' . $item_name] = $info;
     }
   }

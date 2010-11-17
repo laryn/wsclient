@@ -310,6 +310,7 @@ function wsclient_ui_operation_submit($form, &$form_state) {
   $service->save();
   drupal_set_message(t('Operation %operation has been saved.', array('%operation' => $operation['label'])));
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
+  rules_clear_cache();
 }
 
 /**
@@ -536,6 +537,7 @@ function wsclient_ui_type_submit($form, &$form_state) {
   $service->save();
   drupal_set_message(t('Data type %type has been saved.', array('%type' => $type['label'])));
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
+  rules_clear_cache();
 }
 
 /**

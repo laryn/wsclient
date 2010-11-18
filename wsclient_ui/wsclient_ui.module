@@ -14,6 +14,7 @@ define('WSCLIENT_UI_PATH', 'admin/config/services/wsclient');
 function wsclient_ui_entity_info_alter(&$entity_info) {
   // Enable the entity API UI controller. See EntityDefaultUIController.
   $entity_info['wsclient_service']['admin ui'] = array(
+    'controller class' => 'WSClientUIController',
     'path' => WSCLIENT_UI_PATH,
     'file' => 'wsclient_ui.inc',
     'file path' => drupal_get_path('module', 'wsclient_ui'),
@@ -127,4 +128,20 @@ function wsclient_ui_theme() {
       'file' => 'wsclient_ui.inc',
     ),
   );
+}
+
+/**
+ * Controller class for customizing the default Entity UI.
+ */
+class WSClientUIController extends EntityDefaultUIController {
+
+  /**
+   * Overrides the default description of the top level menu item.
+   * @see EntityDefaultUIController::hook_menu()
+   */
+  function hook_menu() {
+    $items = parent::hook_menu();
+    $items[$this->path]['description'] = 'Manage Web Service Descriptions for Web service client.';
+    return $items;
+  }
 }

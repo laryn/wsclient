@@ -43,10 +43,10 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
   public function client() {
     if (!isset($this->client)) {
       if (!empty($this->service->settings['formatter'])) {
-        $this->client = new RestClient(NULL, $this->service->settings['formatter']);
+        $this->client = new HttpClient(NULL, $this->service->settings['formatter']);
       }
       else {
-        $this->client = new RestClient(NULL, new RestClientBaseFormatter(RestClientBaseFormatter::FORMAT_JSON));
+        $this->client = new HttpClient(NULL, new HttpClientBaseFormatter(HttpClientBaseFormatter::FORMAT_JSON));
       }
       // Pass through additional curl options.
       if (!empty($this->service->settings['curl options'])) {
@@ -71,7 +71,7 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
       $response = $client->get($this->service->url . $operation_url, $arguments);
       return $response;
     }
-    catch (RestClientException $e) {
+    catch (HttpClientException $e) {
       throw new WSClientException('Error invoking the REST service %name, operation %operation: %error', array('%name' => $this->service->label, '%operation' => $operation, '%error' => $e->getMessage()));
     }
   }

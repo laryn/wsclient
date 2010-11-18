@@ -6,4 +6,4 @@ core = 7.x
 files[] = wsclient_rest.module
 files[] = tests/wsclient_rest.test
 dependencies[] = wsclient
-dependencies[] = rest_client
+dependencies[] = http_client

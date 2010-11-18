@@ -118,7 +118,7 @@ function wsclient_ui_uri($service) {
  */
 function wsclient_ui_theme() {
   return array(
-    'wsclient_ui_variable_form' => array(
+    'wsclient_ui_parameter_form' => array(
       'render element' => 'element',
       'file' => 'wsclient_ui.inc',
     ),

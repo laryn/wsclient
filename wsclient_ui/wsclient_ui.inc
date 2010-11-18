@@ -206,7 +206,7 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
   $form['parameters'] = array(
     '#tree' => TRUE,
     '#element_validate' => array('wsclient_ui_validate_parameters'),
-    '#theme' => 'wsclient_ui_variable_form',
+    '#theme' => 'wsclient_ui_parameter_form',
     '#title' => t('Parameters'),
     '#description' => t('Specify the parameters for the operation. For each parameter you have to specify a certain data type and a unique name containing only alphanumeric characters and underscores. You can also specify a default value for the parameter and if it is required.'),
   );
@@ -350,7 +350,7 @@ function wsclient_ui_operation_name_validate($element, &$form_state) {
  *
  * @ingroup themeable
  */
-function theme_wsclient_ui_variable_form($variables) {
+function theme_wsclient_ui_parameter_form($variables) {
   $elements = $variables['element'];
 
   $table['#theme'] = 'table';

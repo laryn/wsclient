@@ -11,7 +11,6 @@
  * Provides a form to add, edit and clone web service descriptions.
  */
 function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
-  dpm($service);
   if ($op == 'clone') {
     $service->label .= ' (cloned)';
     $service->name .= '_clone';

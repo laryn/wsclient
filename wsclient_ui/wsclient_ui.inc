@@ -11,6 +11,7 @@
  * Provides a form to add, edit and clone web service descriptions.
  */
 function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
+  dpm($service);
   if ($op == 'clone') {
     $service->label .= ' (cloned)';
     $service->name .= '_clone';
@@ -555,7 +556,9 @@ function wsclient_ui_type_submit($form, &$form_state) {
   $service->save();
   drupal_set_message(t('Data type %type has been saved.', array('%type' => $type['label'])));
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
+  // Clear caches so that the new type is made available immediately.
   rules_clear_cache();
+  $service->clearCache();
 }
 
 /**

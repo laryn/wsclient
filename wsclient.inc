@@ -286,6 +286,30 @@ class WSClientServiceDescription extends EntityDB {
       $services[$record->name]->subscriptions[$record->event] = TRUE;
     }
   }
+
+  /**
+   * Overrides the default export() method to add in data types from other
+   * services.
+   * @see EntityDB::export()
+   */
+  /*public function export($prefix) {
+    $this_prefix = 'wsclient_' . $this->name;
+    foreach ($this->datatypes as $name => $type) {
+      // Copy data types of other services.
+      if (substr($name, 0, 9) == 'wsclient_' && substr($name, 0, strlen($this_prefix)) != $this_prefix) {
+        $service_and_type = substr($name, 9);
+        $parts = explode('_', $service_and_type);
+        $service_name = '';
+        foreach ($parts as $part) {
+          $service_name .= $part;
+          if ($service = wsclient_service_load($name)) {
+
+          }
+        }
+      }
+    }
+    parent::export($prefix);
+  }*/
 }
 
 /**

@@ -357,9 +357,50 @@ interface WSClientEndpointInterface {
   /**
    * Allows altering the configuration form of web service definitions, such
    * that the form can include endpoint type specific configuration settings.
+   * @todo call from wsclient_ui
    */
   public function formAlter(&$form, &$form_state);
 
+}
+
+/**
+ * Default parent class for service endpoints.
+ */
+abstract class WSClientEndpoint implements WSClientEndpointInterface {
+
+  /**
+   * @var WSClientServiceDescription
+   */
+  protected $service;
+
+  protected $url;
+
+  protected  $client;
+
+  public function __construct(WSClientServiceDescription $service) {
+    $this->service = $service;
+    $this->url = $service->url;
+  }
+
+  public function load($type, $id) {}
+
+  public function call($operation, $arguments) {}
+
+  public function events() {}
+
+  public function subscribe($event) {}
+
+  public function unsubscribe($event) {}
+
+  public function entities() {}
+
+  public function dataTypes() {
+    if (!empty($this->service->datatypes)) {
+      return $this->service->datatypes;
+    }
+  }
+
+  public function formAlter(&$form, &$form_state) {}
 }
 
 /**

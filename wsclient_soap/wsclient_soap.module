@@ -19,23 +19,9 @@ function wsclient_soap_wsclient_endpoint_types() {
 }
 
 /**
- * A remote endpoint types for invoking SOAP services.
+ * A remote endpoint type for invoking SOAP services.
  */
-class WSClientSOAPEndpoint implements WSClientEndpointInterface {
-
-  /**
-   * @var WSClientServiceDescription
-   */
-  protected $service;
-
-  protected $url;
-
-  protected  $client;
-
-  public function __construct(WSClientServiceDescription $service) {
-    $this->service = $service;
-    $this->url = $service->url;
-  }
+class WSClientSOAPEndpoint extends WSClientEndpoint {
 
   public function client() {
     if (!isset($this->client)) {
@@ -67,21 +53,4 @@ class WSClientSOAPEndpoint implements WSClientEndpointInterface {
       throw new WSClientException('Error invoking the SOAP service %name, operation %operation: %error', array('%name' => $this->service->label, '%operation' => $operation, '%error' => $e->getMessage()));
     }
   }
-
-  // This endpoint type doesn't provide events.
-  public function events() {}
-  public function subscribe($event) {}
-  public function unsubscribe($event) {}
-
-  // We don't provide any entites, just register rules data types.
-  public function load($type, $id) {}
-  public function entities() {}
-
-  public function dataTypes() {
-    if (!empty($this->service->datatypes)) {
-      return $this->service->datatypes;
-    }
-  }
-
-  public function formAlter(&$form, &$form_state) { }
 }

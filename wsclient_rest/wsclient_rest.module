@@ -21,14 +21,7 @@ function wsclient_rest_wsclient_endpoint_types() {
 /**
  * A remote endpoint type for invoking REST services.
  */
-class WSClientRESTEndpoint implements WSClientEndpointInterface {
-
-  /**
-   * @var WSClientServiceDescription
-   */
-  protected $service;
-
-  protected $url;
+class WSClientRESTEndpoint extends WSClientEndpoint {
 
   /**
    * @var RestClient
@@ -76,26 +69,9 @@ class WSClientRESTEndpoint implements WSClientEndpointInterface {
     }
   }
 
-  // This endpoint type doesn't provide events.
-  public function events() {}
-  public function subscribe($event) {}
-  public function unsubscribe($event) {}
-
-  // TODO: Add in order to support resources.
-  public function load($type, $id) {}
-
-
   public function entities() {
     if (!empty($this->service->settings['resources'])) {
       return $this->service->settings['resources'];
     }
   }
-
-  public function dataTypes() {
-    if (!empty($this->service->datatypes)) {
-      return $this->service->datatypes;
-    }
-  }
-
-  public function formAlter(&$form, &$form_state) { }
 }

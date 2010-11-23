@@ -34,6 +34,7 @@ function wsclient_entity_info() {
       'entity class' => 'WSClientServiceDescription',
       'controller class' => 'EntityAPIController',
       'base table' => 'wsclient_service',
+      'module' => 'wsclient',
       'fieldable' => TRUE,
       'entity keys' => array(
         'id' => 'id',

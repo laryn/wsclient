@@ -3,11 +3,12 @@
 
 /**
  * @file
- * Provides Features integration for web service descriptions
+ * Provides Features integration for web service descriptions.
  */
 
 /**
- * Custom Features controller to add data type dependencies to the export.
+ * Custom Features controller to add service data type dependencies and
+ * endpoint module dependencies to the export.
  */
 class WSClientFeaturesController extends EntityDefaultFeaturesController {
 
@@ -16,12 +17,18 @@ class WSClientFeaturesController extends EntityDefaultFeaturesController {
    */
   public function export($data, &$export, $module_name = '') {
     $pipe = parent::export($data, $export, $module_name);
-    // Add other services when data types stem from them.
     $wsclient_types = wsclient_data_type_info();
+    $endpoints = wsclient_get_types();
     // Keep track of services that are a dependency.
     $dependencies = array();
     foreach ($data as $identifier) {
       $service = wsclient_service_load($identifier);
+      // Add the module that provides the endpoint for the service as
+      // dependency.
+      $module = $endpoints[$service->type]['module'];
+      $export['dependencies'][$module] = $module;
+
+      // Add other services when data types stem from them.
       foreach ($service->dataTypes() as $type_name => $info) {
         if (isset($info['property info'])) {
           foreach ($info['property info'] as $property => $property_info) {

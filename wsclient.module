@@ -42,6 +42,7 @@ function wsclient_entity_info() {
       ),
       'exportable' => TRUE,
       'access callback' => 'wsclient_entity_access',
+      'features controller class' => 'WSClientFeaturesController',
     ),
   );
 }
@@ -208,4 +209,18 @@ function wsclient_rules_event_set_alter($event_name, RulesEventSet $event_set) {
  */
 function wsclient_entity_access($op, $entity, $account, $entity_type) {
   return user_access('administer web services', $account);
+}
+
+/**
+ * Returns all data types of all services indexed by their global name.
+ */
+function wsclient_data_type_info() {
+  $services = entity_load('wsclient_service');
+  $types = array();
+  foreach ($services as $name => $service) {
+    foreach ($service->dataTypes() as $type_name => $info) {
+      $types['wsclient_' . $name . '_' . $type_name] = $info;
+    }
+  }
+  return $types;
 }

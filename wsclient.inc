@@ -139,7 +139,12 @@ class WSClientServiceDescription extends EntityDB {
    * entities.
    */
   public function dataTypes() {
-    return $this->cache('dataTypes');
+    $cached = $this->cache('dataTypes');
+    foreach ($cached as $type => $info) {
+      // Add in the service name so that others know where this type comes from.
+      $cached[$type]['service'] = $this->name;
+    }
+    return $cached;
   }
 
   /**

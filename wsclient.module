@@ -225,3 +225,22 @@ function wsclient_data_type_info() {
   }
   return $types;
 }
+
+/**
+ * Maps the type name from the name used by the remote info to the rules name.
+ */
+function wsclient_map_type($name, $service_types, $type) {
+  if (is_array($type)) {
+    foreach ($type as $key => $entry) {
+      $type[$key] = wsclient_map_type($name, $service_types, $entry);
+    }
+    return $type;
+  }
+  if (isset($service_types[$type])) {
+    return 'wsclient_' . $name . '_' . $type;
+  }
+  if (strpos($type, 'list<') === 0 && isset($service_types[substr($type, 5, -1)])) {
+    return 'list<wsclient_' . $name . '_' . substr($type, 5, -1) . '>';
+  }
+  return $type;
+}

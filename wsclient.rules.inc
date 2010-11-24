@@ -26,7 +26,7 @@ function wsclient_rules_event_info() {
             continue 2;
           }
           // Map the type name of types defined by the remote.
-          $var_info['type'] = _wsclient_map_type($name, $service_types, $var_info['type']);
+          $var_info['type'] = wsclient_map_type($name, $service_types, $var_info['type']);
 
           if (!isset($valid_types[$var_info['type']])) {
             continue 2;
@@ -97,14 +97,14 @@ function wsclient_rules_action_info() {
       );
       // Map the types.
       foreach ($info['parameter'] as $param => &$param_info) {
-        $param_info['type'] = _wsclient_map_type($name, $service_types, $param_info['type']);
+        $param_info['type'] = wsclient_map_type($name, $service_types, $param_info['type']);
         if (!isset($param_info['label'])) {
           // Create a label from parameter machine name, remove prefix 'param_'.
           $param_info['label'] = substr($param, 6);
         }
       }
       foreach ($info['provides'] as $var_name => &$var_info) {
-        $var_info['type'] = _wsclient_map_type($name, $service_types, $var_info['type']);
+        $var_info['type'] = wsclient_map_type($name, $service_types, $var_info['type']);
       }
       // Prefix the action label with the service label.
       $info['label'] = $service->label . ': ' . $info['label'];
@@ -112,21 +112,6 @@ function wsclient_rules_action_info() {
     }
   }
   return $return;
-}
-
-/**
- * Maps the type name from the name used by the remote info to the rules name.
- */
-function _wsclient_map_type($name, $service_types, $type) {
-  if (is_array($type)) {
-    foreach ($type as $key => $entry) {
-      $type[$key] = _wsclient_map_type($name, $service_types, $entry);
-    }
-  }
-  elseif (isset($service_types[$type])) {
-    $type = 'wsclient_' . $name . '_' . $type;
-  }
-  return $type;
 }
 
 /**

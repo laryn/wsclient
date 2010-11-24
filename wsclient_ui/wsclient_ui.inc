@@ -452,9 +452,14 @@ function wsclient_ui_types($hidden = FALSE) {
   // Remove entities.
   $data_info = array_diff_key($data_info, $entity_info);
   unset($data_info['entity']);
+  // Remove the generic list type.
+  unset($data_info['list']);
   $options = array();
   foreach ($data_info as $type => $properties) {
-    $options[$type] = $properties['label'];
+    // Do not add lists as this handled by the "multiple" checkbox.
+    if (strpos($type, 'list<') !== 0) {
+      $options[$type] = $properties['label'];
+    }
   }
   if ($hidden) {
     // Add special 'hidden' data type
@@ -586,10 +591,14 @@ function wsclient_ui_type_submit($form, &$form_state) {
   $type['label'] = $form_state['values']['label'];
   foreach ($form_state['values']['properties']['items'] as $key => $item) {
     if (!empty($item['name'])) {
+      $unmapped_type = _wsclient_ui_unmap_type($item['type'], $service);
       $type['property info'][$item['name']] = array(
-        'type' => $item['type'],
+        'type' => $unmapped_type,
         'label' => $item['label'],
       );
+      if ($item['multiple']) {
+        $type['property info'][$item['name']] = array('type' => 'list<' . $unmapped_type . '>');
+      }
     }
   }
   unset($service->datatypes[$form_state['type']['name']]);
@@ -656,11 +665,24 @@ function wsclient_ui_type_delete_submit($form, &$form_state) {
  * Generates a row in the properties table.
  */
 function _wsclient_ui_property_row($service, $types, $name = '', $info = array()) {
-  $default_value = _wsclient_ui_type_default($types, $service, $info);
+  $property_type = 0;
+  $multiple = FALSE;
+  if (isset($info['type'])) {
+    $property_type = wsclient_map_type($service->name, $service->dataTypes(), $info['type']);
+    if (strpos($property_type, 'list<') === 0) {
+      $multiple = TRUE;
+      // Cut off the 'list<>' indicator.
+      $property_type = substr($property_type, 5, -1);
+    }
+  }
   $property['type'] = array(
     '#type' => 'select',
     '#options' => array(0 => '--') + $types,
-    '#default_value' => $default_value,
+    '#default_value' => $property_type,
+  );
+  $property['multiple'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => $multiple,
   );
   $property['name'] = array(
     '#type' => 'textfield',
@@ -685,7 +707,7 @@ function theme_wsclient_ui_property_form($variables) {
   $elements = $variables['element'];
 
   $table['#theme'] = 'table';
-  $table['#header'] = array(t('Data type'), t('Name'), t('Label'));
+  $table['#header'] = array(t('Data type'), t('Multiple'), t('Name'), t('Label'));
   $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
 
   foreach (element_children($elements['items']) as $key) {
@@ -693,6 +715,7 @@ function theme_wsclient_ui_property_form($variables) {
 
     $row = array();
     $row[] = array('data' => $element['type']);
+    $row[] = array('data' => $element['multiple']);
     $row[] = array('data' => $element['name']);
     $row[] = array('data' => $element['label']);
     $row = array('data' => $row) + $element['#attributes'];

@@ -232,12 +232,29 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
   );
   // Exclude the hidden data type for result types.
   unset($types['hidden']);
+
+  $result_type = 0;
+  $multiple = FALSE;
+  if (isset($operation['result']['type'])) {
+    $result_type = wsclient_map_type($service->name, $service->dataTypes(), $operation['result']['type']);
+    if (strpos($result_type, 'list<') === 0) {
+      $multiple = TRUE;
+      // Cut off the 'list<>' indicator.
+      $result_type = substr($result_type, 5, -1);
+    }
+  }
   $form['result_type'] = array(
     '#type' => 'select',
     '#title' => t('Result type'),
     '#options' => array(0 => '--') + $types,
-    '#default_value' => isset($operation['result']['type']) ? _wsclient_ui_type_default($types, $service, $operation['result']) : 0,
+    '#default_value' => $result_type,
     '#description' => t('The result data type returned by the service'),
+  );
+  $form['result_multiple'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Multiple result'),
+    '#default_value' => $multiple,
+    '#description' => t('If checked, the result variable is a list containing multiple elements of the result type.'),
   );
   $form['result_label'] = array(
     '#type' => 'textfield',

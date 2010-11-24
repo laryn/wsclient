@@ -36,7 +36,7 @@ function wsclient_soap_test_default_wsclient_service() {
   );
   $operation['label'] = 'Geocode an address';
   $operation['parameter']['address'] = array('type' => 'text');
-  $operation['result'] = array('type' => 'list<wsclient_geocoder_geocoder_result>', 'label' => 'Geocoder result');
+  $operation['result'] = array('type' => 'list<geocoder_result>', 'label' => 'Geocoder result');
 
   $service->operations['geocode_address'] = $operation;
   $services[$service->name] = $service;

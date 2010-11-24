@@ -275,11 +275,24 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
  * Generates a row in the parameter table.
  */
 function _wsclient_ui_parameter_row($service, $types, $name = '', $info = array()) {
-  $default_value = _wsclient_ui_type_default($types, $service, $info);
+  $param_type = 0;
+  $multiple = FALSE;
+  if (isset($info['type'])) {
+    $param_type = wsclient_map_type($service->name, $service->dataTypes(), $info['type']);
+    if (strpos($param_type, 'list<') === 0) {
+      $multiple = TRUE;
+      // Cut off the 'list<>' indicator.
+      $param_type = substr($param_type, 5, -1);
+    }
+  }
   $parameter['type'] = array(
     '#type' => 'select',
     '#options' => array(0 => '--') + $types,
-    '#default_value' => $default_value,
+    '#default_value' => $param_type,
+  );
+  $parameter['multiple'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => $multiple,
   );
   $parameter['name'] = array(
     '#type' => 'textfield',
@@ -289,7 +302,7 @@ function _wsclient_ui_parameter_row($service, $types, $name = '', $info = array(
   );
   $parameter['default_value'] = array(
     '#type' => 'textfield',
-    '#size' => 40,
+    '#size' => 30,
     '#default_value' => isset($info['default value']) ? $info['default value'] : '',
   );
   $parameter['required'] = array(
@@ -327,7 +340,14 @@ function wsclient_ui_operation_submit($form, &$form_state) {
   $operation['label'] = $form_state['values']['label'];
   foreach ($form_state['values']['parameters']['items'] as $key => $item) {
     if (!empty($item['name'])) {
-      $operation['parameter'][$item['name']] = array('type' => $item['type']);
+      // Unmap the data type if it is local to this service.
+      $unmapped_type = _wsclient_ui_unmap_type($item['type'], $service);
+      if ($item['multiple']) {
+        $operation['parameter'][$item['name']] = array('type' => 'list<' . $unmapped_type . '>');
+      }
+      else {
+        $operation['parameter'][$item['name']] = array('type' => $unmapped_type);
+      }
       if ($item['default_value'] !== '') {
         $operation['parameter'][$item['name']]['default value'] = $item['default_value'];
       }
@@ -337,10 +357,14 @@ function wsclient_ui_operation_submit($form, &$form_state) {
     }
   }
   if (!empty($form_state['values']['result_type'])) {
+    $unmapped_type = _wsclient_ui_unmap_type($form_state['values']['result_type'], $service);
     $operation['result'] = array(
-      'type' => $form_state['values']['result_type'],
+      'type' => $unmapped_type,
       'label' => isset($form_state['values']['result_label']) ? $form_state['values']['result_label'] : 'result',
     );
+    if ($form_state['values']['result_multiple']) {
+      $operation['result']['type'] = 'list<' . $unmapped_type . '>';
+    }
   }
   unset($service->operations[$form_state['operation']['name']]);
   $service->operations[$form_state['values']['name']] = $operation;
@@ -371,7 +395,7 @@ function theme_wsclient_ui_parameter_form($variables) {
   $elements = $variables['element'];
 
   $table['#theme'] = 'table';
-  $table['#header'] = array(t('Data type'), t('Name'), t('Default value'), t('Required'), array('data' => t('Weight'), 'class' => array('tabledrag-hide')));
+  $table['#header'] = array(t('Data type'), t('Multiple'), t('Name'), t('Default value'), t('Required'), array('data' => t('Weight'), 'class' => array('tabledrag-hide')));
   $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
 
   foreach (element_children($elements['items']) as $key) {
@@ -381,6 +405,7 @@ function theme_wsclient_ui_parameter_form($variables) {
 
     $row = array();
     $row[] = array('data' => $element['type']);
+    $row[] = array('data' => $element['multiple']);
     $row[] = array('data' => $element['name']);
     $row[] = array('data' => $element['default_value']);
     $row[] = array('data' => $element['required']);
@@ -691,4 +716,18 @@ function theme_wsclient_ui_property_form($variables) {
   }
   $output .= "</div>\n";
   return $output;
+}
+
+/**
+ * Maps the global name of a data type back to the local name in the service,
+ * if the type actually stems from the service.
+ */
+function _wsclient_ui_unmap_type($type, $service) {
+  if (strpos($type, 'wsclient_' . $service->name . '_') === 0) {
+    $unmaped_type = substr($type, strlen('wsclient_' . $service->name . '_'));
+    if (array_key_exists($unmaped_type, $service->dataTypes())) {
+      return $unmaped_type;
+    }
+  }
+  return $type;
 }

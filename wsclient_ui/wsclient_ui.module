@@ -98,7 +98,7 @@ function wsclient_ui_operation_load($operation_name, $service_name) {
  * Data type load callback.
  */
 function wsclient_ui_type_load($type_name, $service_name) {
-  $service = reset(entity_load('wsclient_service', array($service_name)));
+  $service = wsclient_service_load($service_name);
   if ($service && isset($service->datatypes[$type_name])) {
     $type = $service->datatypes[$type_name];
     $type['name'] = $type_name;

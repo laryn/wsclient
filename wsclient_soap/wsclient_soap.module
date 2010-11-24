@@ -106,7 +106,7 @@ function wsclient_soap_parse_operations(array $operations) {
   $wsclient_operations = array();
   foreach ($operations as $operation) {
     $parts = explode(' ', $operation);
-    $return_type = $parts[0];
+    $return_type = wsclient_soap_type_mapper($parts[0]);
     $name_parts = explode('(', $parts[1]);
     $op_name = $name_parts[0];
     $wsclient_operations[$op_name] = array(
@@ -139,6 +139,10 @@ function wsclient_soap_type_mapper($type) {
       return 'integer';
     case 'string':
       return 'text';
+  }
+  // Check for list types.
+  if (strpos($type, 'ArrayOf') === 0) {
+    return 'list<' . substr($type, 7) . '>';
   }
   return $type;
 }

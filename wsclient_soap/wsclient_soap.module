@@ -54,3 +54,55 @@ class WSClientSOAPEndpoint extends WSClientEndpoint {
     }
   }
 }
+
+/**
+ * Convert metadata about data types provided by a SOAPClient into a wsclient
+ * compatible data type array.
+ *
+ * @param array $types
+ *   The array containing the struct strings.
+ * @return
+ *   A data type array with property information.
+ */
+function wsclient_soap_parse_types(array $types) {
+  $wsclient_types = array();
+  foreach ($types as $type_string) {
+    if (strpos($type_string, 'struct') === 0) {
+      $parts = explode('{', $type_string);
+      // Cut off struct and whitespaces from type name.
+      $type_name = trim(substr($parts[0], 6));
+      $wsclient_types[$type_name] = array('label' => $type_name);
+      $property_string = $parts[1];
+      // Cut off trailing '}'
+      $property_string = substr($property_string, 0, -1);
+      $properties = explode(';', $property_string);
+      // Remove last empty element
+      array_pop($properties);
+      foreach ($properties as $property_string) {
+        // Cut off white spaces.
+        $property_string = trim($property_string);
+        $parts = explode(' ', $property_string);
+        $property_type = $parts[0];
+        $property_name = $parts[1];
+        $wsclient_types[$type_name]['property info'][$property_name] = array(
+          'type' => wsclient_soap_type_mapper($property_type),
+        );
+      }
+    }
+  }
+  return $wsclient_types;
+}
+
+/**
+ * Maps data type names from SOAPClient to wsclient/rules internals.
+ */
+function wsclient_soap_type_mapper($type) {
+  switch ($type) {
+    case 'int':
+      return 'integer';
+    case 'string':
+      return 'text';
+    default:
+      return $type;
+  }
+}

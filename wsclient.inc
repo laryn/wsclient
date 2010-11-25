@@ -9,7 +9,7 @@
 /**
  * Class representing web service descriptions.
  */
-class WSClientServiceDescription extends EntityDB {
+class WSClientServiceDescription extends Entity {
 
   public $settings = array();
   public $operations = array();

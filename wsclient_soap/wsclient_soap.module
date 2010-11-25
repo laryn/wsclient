@@ -123,6 +123,8 @@ function wsclient_soap_wsclient_service_form_submit($form, &$form_state) {
     $endpoint = $service->endpoint();
     $endpoint->initializeMetadata();
     $service->save();
+    rules_clear_cache();
+    $service->clearCache();
   }
 }
 
@@ -206,6 +208,8 @@ function wsclient_soap_parse_operations(array $operations) {
  */
 function wsclient_soap_type_mapper($type) {
   switch ($type) {
+    case 'float':
+      return 'decimal';
     case 'int':
       return 'integer';
     case 'string':

@@ -494,22 +494,6 @@ function wsclient_ui_validate_parameters($elements, &$form_state) {
 }
 
 /**
- * Determines and returns a data type from the given service and data info.
- */
-function _wsclient_ui_type_default($types, $service, $data_info) {
-  if (isset($data_info['type'])) {
-    if (isset($types[$data_info['type']])) {
-      return $data_info['type'];
-    }
-    else {
-      // Map the internal type name to the global one.
-      return 'wsclient_' . $service->name . '_' . $data_info['type'];
-    }
-  }
-  return 0;
-}
-
-/**
  * Operation delete confirmation form.
  */
 function wsclient_ui_operation_delete($form, &$form_state, $service, $operation) {

@@ -125,6 +125,7 @@ function wsclient_soap_wsclient_service_form_submit($form, &$form_state) {
     $service->save();
     rules_clear_cache();
     $service->clearCache();
+    drupal_set_message(t('Operations and data types of the SOAP service have been imported automatically. If the service expects data types with properties as lists (multiple values for the property), please check the multiple flag on those properties. This cannot be auto-detected at the moment.'));
   }
 }
 
@@ -207,17 +208,29 @@ function wsclient_soap_parse_operations(array $operations) {
  * Maps data type names from SOAPClient to wsclient/rules internals.
  */
 function wsclient_soap_type_mapper($type) {
-  switch ($type) {
-    case 'float':
-      return 'decimal';
-    case 'int':
-      return 'integer';
-    case 'string':
-      return 'text';
+  $primitive_types = array('string', 'int', 'long', 'float', 'boolean', 'double', 'short', 'decimal');
+  if (in_array($type, $primitive_types)) {
+    switch ($type) {
+      case 'double':
+      case 'float':
+        return 'decimal';
+      case 'int':
+      case 'long':
+      case 'short':
+        return 'integer';
+      case 'string':
+        return 'text';
+    }
   }
   // Check for list types.
   if (strpos($type, 'ArrayOf') === 0) {
-    return 'list<' . substr($type, 7) . '>';
+    $type = substr($type, 7);
+    $primitive = strtolower($type);
+    if (in_array($primitive, $primitive_types)) {
+      return 'list<' . $primitive . '>';
+    }
+    return 'list<' . $type . '>';
   }
+  // Otherwise return the type as is.
   return $type;
 }

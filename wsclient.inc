@@ -380,7 +380,7 @@ abstract class WSClientEndpoint implements WSClientEndpointInterface {
 
   protected $url;
 
-  protected  $client;
+  protected $client;
 
   public function __construct(WSClientServiceDescription $service) {
     $this->service = $service;

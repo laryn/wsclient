@@ -29,10 +29,31 @@ class WSClientSOAPEndpoint extends WSClientEndpoint {
       if (!empty($this->service->settings['options'])) {
         $options += $this->service->settings['options'];
       }
-      // The url has to point to a WSDL file.
+      // The url has to point to a valid WSDL file.
       $this->client = new SOAPClient($this->url, $options);
     }
     return $this->client;
+  }
+
+  /**
+   * Retrieve metadata from the WSDL about available data types and operations.
+   *
+   * @param boolean $reset
+   *   If TRUE, existing data types and operations will be overwritten.
+   */
+  public function initializeMetadata($reset = TRUE) {
+    $client = $this->client();
+    $data_types = wsclient_soap_parse_types($client->__getTypes());
+    $operations = wsclient_soap_parse_operations($client->__getFunctions());
+    if ($reset) {
+      $this->service->datatypes = $data_types;
+      $this->service->operations = $operations;
+    }
+    else {
+      $this->service->datatypes += $data_types;
+      $this->service->operations += $operations;
+    }
+    $this->service->clearCache();
   }
 
   /**
@@ -52,6 +73,56 @@ class WSClientSOAPEndpoint extends WSClientEndpoint {
     catch (SoapFault $e) {
       throw new WSClientException('Error invoking the SOAP service %name, operation %operation: %error', array('%name' => $this->service->label, '%operation' => $operation, '%error' => $e->getMessage()));
     }
+  }
+
+  /**
+   * Reset the SOAPClient.
+   */
+  public function clearCache() {
+    unset($this->client);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function wsclient_soap_form_wsclient_service_form_alter(&$form, &$form_state) {
+  $form['#submit'][] = 'wsclient_soap_wsclient_service_form_submit';
+  $form['#validate'][] = 'wsclient_soap_wsclient_service_form_validate';
+}
+
+/**
+ * Validation callback to check if the SOAP service URL points to a valid WSDL
+ * file.
+ */
+function wsclient_soap_wsclient_service_form_validate($form, $form_state) {
+  $service = $form_state['wsclient_service'];
+  if ($form_state['values']['type'] == 'soap') {
+    try {
+      // If initializing the SOAPClient succeeds we're good, otherwise we catch
+      // the exception below and suppress any further warnings.
+      // WARNING: if you have the xdebug PHP module enabled this can cause a
+      // fatal error on invalid WSDL files (instead of a catchable SoapFault
+      // exception).
+      // xdebug_disable();
+      @$endpoint = new SOAPClient($form_state['values']['url']);
+    }
+    catch (SoapFault $e) {
+      form_set_error('url', t('Error parsing the WSDL file: %message', array('%message' => $e->getMessage())));
+    }
+  }
+}
+
+/**
+ * Submit callback for the web service form to populate operations and data
+ * types of the new SOAP service.
+ */
+function wsclient_soap_wsclient_service_form_submit($form, &$form_state) {
+  if ($form_state['values']['type'] == 'soap' && $form_state['op'] == 'add') {
+    $service = $form_state['wsclient_service'];
+    $endpoint = $service->endpoint();
+    $endpoint->initializeMetadata();
+    $service->save();
   }
 }
 

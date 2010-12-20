@@ -9,4 +9,3 @@ files[] = wsclient.install
 files[] = wsclient.module
 files[] = wsclient.rules.inc
 dependencies[] = entity
-dependencies[] = entity_metadata

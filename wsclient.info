@@ -5,7 +5,4 @@ package = Services
 core = 7.x
 files[] = wsclient.features.inc
 files[] = wsclient.inc
-files[] = wsclient.install
-files[] = wsclient.module
-files[] = wsclient.rules.inc
 dependencies[] = entity

@@ -5,5 +5,4 @@ package = Services
 version = VERSION
 core = 7.x
 hidden = TRUE
-files[] = wsclient_rest_test.module
 dependencies[] = wsclient_rest

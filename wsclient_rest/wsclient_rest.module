@@ -58,7 +58,7 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
    *   Arguments to pass to the service with this operation.
    */
   public function call($operation, $arguments) {
-    $operation_url = $this->service->operations[$operation]['url'];
+    $operation_url = isset($this->service->operations[$operation]['url']) ? $this->service->operations[$operation]['url'] : '';
     $client = $this->client();
     try {
       $response = $client->get($this->service->url . $operation_url, $arguments);

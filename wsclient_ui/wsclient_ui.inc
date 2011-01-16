@@ -221,8 +221,10 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
   // Always add three empty lines.
   $form_state['more'] = isset($form_state['more']) ? $form_state['more'] : 3;
   for ($i = 0; $i < $form_state['more']; $i++) {
-    $form['parameters']['items'][$i] = _wsclient_ui_parameter_row($service, $types);
-    $form['parameters']['items'][$i]['weight']['#default_value'] = $weight++;
+    if (!isset($form['parameters']['items'][$i])) {
+      $form['parameters']['items'][$i] = _wsclient_ui_parameter_row($service, $types);
+      $form['parameters']['items'][$i]['weight']['#default_value'] = $weight++;
+    }
   }
   $form['parameters']['more'] = array(
     '#type' => 'submit',
@@ -550,7 +552,9 @@ function wsclient_ui_type($form, &$form_state, $service, $type, $op = 'edit') {
   // Always add three empty lines.
   $form_state['more'] = isset($form_state['more']) ? $form_state['more'] : 3;
   for ($i = 0; $i < $form_state['more']; $i++) {
-    $form['properties']['items'][$i] = _wsclient_ui_property_row($service, $types);
+    if (!isset($form['properties']['items'][$i])) {
+      $form['properties']['items'][$i] = _wsclient_ui_property_row($service, $types);
+    }
   }
   $form['properties']['more'] = array(
     '#type' => 'submit',

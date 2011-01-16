@@ -60,7 +60,7 @@ function wsclient_rules_data_info() {
       // Prefix the label with the service label.
       $type_info['label'] = $service->label . ': ' . $type_info['label'];
       // Populate labels for properties.
-      wsclient_type_info_add_label($type_info);
+      wsclient_type_info_populate($type_info, $service);
       $types['wsclient_' . $name . '_' . $type] = $type_info;
     }
   }
@@ -69,15 +69,16 @@ function wsclient_rules_data_info() {
 
 /**
  * Helper function to recursively populate label information by defaulting to
- * the machine name.
+ * the machine name. Also maps property type names to the global type names.
  */
-function wsclient_type_info_add_label(array &$type_info) {
+function wsclient_type_info_populate(array &$type_info, $service) {
   if (isset($type_info['property info'])) {
     foreach ($type_info['property info'] as $name => &$info) {
-      if (!isset($info['label'])) {
+      if (!isset($info['label']) || $info['label'] == '') {
         $info['label'] = $name;
       }
-      wsclient_type_info_add_label($info);
+      $info['type'] = wsclient_map_type($service->name, $service->dataTypes(), $info['type']);
+      wsclient_type_info_populate($info, $service);
     }
   }
 }

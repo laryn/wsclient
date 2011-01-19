@@ -81,5 +81,36 @@ function wsclient_examples_default_wsclient_service() {
   $service->operations['geocode_address'] = $operation;
   $services[$service->name] = $service;
 
+  // Twitter search service (REST)
+  $service = new WSClientServiceDescription();
+  $service->name = 'twitter_search';
+  $service->label = 'Twitter Search';
+  $service->url = 'http://search.twitter.com/search.json';
+  $service->type = 'rest';
+
+  $service->datatypes = array(
+    'result' => array(
+      'label' => 'Search result',
+      'property info' => array(
+        'results' => array(
+          'type' => 'list<struct>',
+          'label' => 'Result list',
+          'property info' => array(
+            'text' => array(
+              'type' => 'text',
+              'label' => 'Tweet text',
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  $operation = array();
+  $operation['label'] = 'Search';
+  $operation['parameter']['q'] = array('type' => 'text', 'label' => 'Search text');
+  $operation['result'] = array('type' => 'wsclient_twitter_search_result', 'label' => 'Search result');
+  $service->operations['search'] = $operation;
+  $services[$service->name] = $service;
+
   return $services;
 }

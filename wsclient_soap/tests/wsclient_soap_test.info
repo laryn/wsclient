@@ -1,8 +1,0 @@
-; $Id$
-name = WSClient SOAP test
-description = Helper module to test WSClient SOAP
-package = Services
-version = VERSION
-core = 7.x
-hidden = TRUE
-dependencies[] = wsclient_soap

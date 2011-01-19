@@ -4,6 +4,5 @@ description = Implements a REST endpoint to connect to REST services.
 package = Services
 core = 7.x
 files[] = wsclient_rest.module
-files[] = tests/wsclient_rest.test
 dependencies[] = wsclient
 dependencies[] = http_client

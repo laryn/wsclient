@@ -3,8 +3,66 @@
 
 /**
  * @file
- * Web service client REST test case.
+ * Web service client SOAP/REST Tests.
  */
+
+class WSClientSOAPTestCase extends DrupalWebTestCase {
+
+  static function getInfo() {
+    return array(
+      'name' => 'Web service client SOAP',
+      'description' => 'Tests invoking a SOAP service.',
+      'group' => 'Services',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('wsclient_examples');
+  }
+
+  /**
+   * Tests invoking the geocoder.us service.
+   */
+  function testServiceInvocation() {
+    $service = wsclient_service_load('geocoder');
+    $result = $service->geocode_address('1600 Pennsylvania Av, Washington, DC');
+    $this->assertEqual($result[0]->zip, '20502', 'SOAP service invocation was successful.');
+  }
+}
+
+class WSClientSOAPRulesTestCase extends DrupalWebTestCase {
+
+  static function getInfo() {
+    return array(
+      'name' => 'Web service client SOAP Rules',
+      'description' => 'Tests the Rules integration of the SOAP endpoint.',
+      'group' => 'Services',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('wsclient_examples', 'rules');
+  }
+
+  /**
+   * Tests invoking the geocoder.us service.
+   */
+  function testRulesIntegration() {
+    list($result) = rules_action('wsclient_geocoder_geocode_address', array())
+         ->execute('1600 Pennsylvania Av, Washington, DC');
+    $this->assertEqual($result[0]->zip, '20502', 'SOAP service invoked via the action.');
+
+    $rule = rule(array('address' => array('type' => 'text')));
+    $rule->action('wsclient_geocoder_geocode_address', array('param_address:select' => 'address'))
+         ->action('drupal_message', array('message:select' => 'result:0:zip'))
+         ->execute('1600 Pennsylvania Av, Washington, DC');
+
+    RulesLog::logger()->checkLog();
+    $msg = drupal_get_messages();
+    $this->assertEqual(array_pop($msg['status']), '20502', 'SOAP service has been invoked.');
+  }
+
+}
 
 class WSClientRESTTestCase extends DrupalWebTestCase {
 
@@ -17,7 +75,7 @@ class WSClientRESTTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('wsclient_rest_test');
+    parent::setUp('wsclient_examples');
   }
 
   /**
@@ -41,7 +99,7 @@ class WSClientRESTRulesTestCase extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('rules', 'wsclient_rest_test');
+    parent::setUp('wsclient_examples', 'rules');
   }
 
   /**

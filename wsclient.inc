@@ -139,12 +139,12 @@ class WSClientServiceDescription extends Entity {
    * entities.
    */
   public function dataTypes() {
-    $cached = $this->cache('dataTypes');
-    foreach ($cached as $type => $info) {
+    $types = $this->datatypes + $this->cache('dataTypes');
+    foreach ($types as $type => $info) {
       // Add in the service name so that others know where this type comes from.
-      $cached[$type]['service'] = $this->name;
+      $types[$type]['service'] = $this->name;
     }
-    return $cached;
+    return $types;
   }
 
   /**
@@ -399,11 +399,7 @@ abstract class WSClientEndpoint implements WSClientEndpointInterface {
 
   public function entities() {}
 
-  public function dataTypes() {
-    if (!empty($this->service->datatypes)) {
-      return $this->service->datatypes;
-    }
-  }
+  public function dataTypes() {}
 
   public function formAlter(&$form, &$form_state) {}
 }

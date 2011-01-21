@@ -50,37 +50,76 @@ function wsclient_rules_event_info() {
  */
 function wsclient_rules_data_info() {
   $types = array();
+  // Collect all data types of all services.
+  $all_types = array();
   foreach (entity_load('wsclient_service', FALSE) as $name => $service) {
     foreach ($service->dataTypes() as $type => $type_info) {
-      $type_info = array_intersect_key($type_info, array_flip(array('label', 'property info'))) + array(
-        'wrap' => TRUE,
-        'label' => t('Web service %label %type', array('%label' => $service->label, '%type' => $type)),
-        'creation callback' => 'rules_action_data_create_array',
-      );
       // Prefix the label with the service label.
       $type_info['label'] = $service->label . ': ' . $type_info['label'];
-      // Populate labels for properties.
-      wsclient_type_info_populate($type_info, $service);
-      $types['wsclient_' . $name . '_' . $type] = $type_info;
+      $all_types['wsclient_' . $name . '_' . $type] = $type_info;
     }
+  }
+  // Prepare data type info for Rules.
+  foreach ($all_types as $type => $type_info) {
+    wsclient_type_info_populate($type_info, $type_info['service'], $all_types);
+    $type_info = array_intersect_key($type_info, array_flip(array('label', 'property info'))) + array(
+      'wrap' => TRUE,
+      'creation callback' => 'rules_action_data_create_array',
+    );
+    $types[$type] = $type_info;
   }
   return $types;
 }
 
 /**
- * Helper function to recursively populate label information by defaulting to
- * the machine name. Also maps property type names to the global type names.
+ * Helper function to recursively populate property information in a data type
+ * information array. Also adds a default label from the machine name.
+ *
+ * @param $type_info
+ *   Type information array that describes the type.
+ * @param $service_name
+ *   The name of the web service description where the type information belongs
+ *   to.
+ * @param $all_types
+ *   Array of all data types of all web service descriptions.
+ * @param unknown_type $recursion_stop
+ *   Array of data type names that have already been used to populate property
+ *   information. Used to prevent endless recursion.
  */
-function wsclient_type_info_populate(array &$type_info, $service) {
+function wsclient_type_info_populate(array &$type_info, $service_name, array $all_types, $recursion_stop = array()) {
   if (isset($type_info['property info'])) {
     foreach ($type_info['property info'] as $name => &$info) {
       if (!isset($info['label']) || $info['label'] == '') {
         $info['label'] = $name;
       }
-      $info['type'] = wsclient_map_type($service->name, $service->dataTypes(), $info['type']);
-      wsclient_type_info_populate($info, $service);
+      // Get the global type name.
+      $type = wsclient_global_type_name($info['type'], $service_name, $all_types);
+      // Copy recursion information for this property.
+      $new_recursion_stop = $recursion_stop;
+      if (!isset($info['property info']) && isset($all_types[$type]) && !isset($recursion_stop[$type])) {
+        $info['type'] = strpos($info['type'], 'list<') === 0 ? 'list<struct>' : 'struct';
+        // Copy over the property information.
+        $info['property info'] = $all_types[$type]['property info'];
+        // Mark this type as finished.
+        $new_recursion_stop[$type] = TRUE;
+      }
+      // Also populate nested property info arrays (recursion).
+      wsclient_type_info_populate($info, $service_name, $all_types, $new_recursion_stop);
     }
   }
+}
+
+/**
+ * Map a service specific type name to the global type name.
+ */
+function wsclient_global_type_name($type, $service_name, $all_types) {
+  if (isset($all_types['wsclient_' . $service_name . '_' . $type])) {
+    return 'wsclient_' . $service_name . '_' . $type;
+  }
+  if (strpos($type, 'list<') === 0 && isset($all_types['wsclient_' . $service_name . '_' . substr($type, 5, -1)])) {
+    return 'wsclient_' . $service_name . '_' . substr($type, 5, -1);
+  }
+  return $type;
 }
 
 /**

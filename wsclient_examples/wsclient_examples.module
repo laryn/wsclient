@@ -93,14 +93,17 @@ function wsclient_examples_default_wsclient_service() {
       'label' => 'Search result',
       'property info' => array(
         'results' => array(
-          'type' => 'list<struct>',
-          'label' => 'Result list',
-          'property info' => array(
-            'text' => array(
-              'type' => 'text',
-              'label' => 'Tweet text',
-            ),
-          ),
+          'type' => 'list<tweet>',
+          'label' => 'Tweet list',
+        ),
+      ),
+    ),
+    'tweet' => array(
+      'label' => 'Tweet data',
+      'property info' => array(
+        'text' => array(
+          'type' => 'text',
+          'label' => 'Tweet text',
         ),
       ),
     ),

@@ -97,7 +97,7 @@ function wsclient_type_info_populate(array &$type_info, $service_name, array $al
       // Copy recursion information for this property.
       $new_recursion_stop = $recursion_stop;
       if (!isset($info['property info']) && isset($all_types[$type]) && !isset($recursion_stop[$type])) {
-        $info['type'] = strpos($info['type'], 'list<') === 0 ? 'list<struct>' : 'struct';
+        $info['type'] = strpos($info['type'], 'list<') === 0 ? 'list<' . $type . '>' : $type;
         // Copy over the property information.
         $info['property info'] = $all_types[$type]['property info'];
         // Mark this type as finished.

@@ -161,7 +161,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
 }
 
 /**
- * Submit callback of web service description form.
+ * Submit callback of the web service description form.
  */
 function wsclient_service_form_submit($form, &$form_state) {
   $service = entity_ui_form_submit_build_entity($form, $form_state);

@@ -25,7 +25,7 @@ function wsclient_access($service) {
 }
 
 /**
- * Implements of hook_entity_info().
+ * Implements hook_entity_info().
  */
 function wsclient_entity_info() {
   return array(
@@ -49,7 +49,7 @@ function wsclient_entity_info() {
 }
 
 /**
- * Implements of hook_entity_info_alter().
+ * Implements hook_entity_info_alter().
  */
 function wsclient_entity_info_alter(&$info) {
   $services = entity_load('wsclient_service', FALSE);
@@ -93,7 +93,7 @@ function wsclient_entity_info_alter(&$info) {
 }
 
 /**
- * Implements of hook_entity_property_info().
+ * Implements hook_entity_property_info().
  */
 function wsclient_entity_property_info() {
   $info = array();

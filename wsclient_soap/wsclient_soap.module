@@ -185,7 +185,7 @@ function wsclient_soap_parse_operations(array $operations) {
     $op_name = $name_parts[0];
     $wsclient_operations[$op_name] = array(
       'label' => $op_name,
-      'result' => array('type' => $return_type),
+      'result' => array('type' => $return_type, 'label' => $return_type),
     );
     $parts = explode('(', $operation);
     // Cut off trailing ')'.

@@ -30,7 +30,13 @@ class WSClientSOAPEndpoint extends WSClientEndpoint {
         $options += $this->service->settings['options'];
       }
       // The url has to point to a valid WSDL file.
-      $this->client = new SOAPClient($this->url, $options);
+      $wsdl = file_get_contents($this->url);
+      if ($wsdl) {
+        $this->client = new SOAPClient($this->url, $options);
+      }
+      else {
+        throw new WSClientException('Unable to fetch WSDL file from %wsdl', array('%wsdl' => $this->url));
+      }
     }
     return $this->client;
   }
@@ -98,17 +104,24 @@ function wsclient_soap_form_wsclient_service_form_alter(&$form, &$form_state) {
 function wsclient_soap_wsclient_service_form_validate($form, $form_state) {
   $service = $form_state['wsclient_service'];
   if ($form_state['values']['type'] == 'soap') {
-    try {
-      // If initializing the SOAPClient succeeds we're good, otherwise we catch
-      // the exception below and suppress any further warnings.
-      // WARNING: if you have the xdebug PHP module enabled this can cause a
-      // fatal error on invalid WSDL files (instead of a catchable SoapFault
-      // exception).
-      // xdebug_disable();
-      @$endpoint = new SOAPClient($form_state['values']['url']);
+    // The url has to point to a valid WSDL file.
+    $wsdl = file_get_contents($form_state['values']['url']);
+    if ($wsdl) {
+      try {
+        // If initializing the SOAPClient succeeds we're good, otherwise we catch
+        // the exception below and suppress any further warnings.
+        // WARNING: if you have the xdebug PHP module enabled this can cause a
+        // fatal error on invalid WSDL files (instead of a catchable SoapFault
+        // exception).
+        // xdebug_disable();
+        @$endpoint = new SOAPClient($form_state['values']['url']);
+      }
+      catch (SoapFault $e) {
+        form_set_error('url', t('Error parsing the WSDL file: %message', array('%message' => $e->getMessage())));
+      }
     }
-    catch (SoapFault $e) {
-      form_set_error('url', t('Error parsing the WSDL file: %message', array('%message' => $e->getMessage())));
+    else {
+      form_set_error('url', t('Error downloading the WSDL file.'));
     }
   }
 }

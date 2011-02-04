@@ -30,7 +30,7 @@ class WSClientSOAPEndpoint extends WSClientEndpoint {
         $options += $this->service->settings['options'];
       }
       // The url has to point to a valid WSDL file.
-      $wsdl = file_get_contents($this->url);
+      $wsdl = @file_get_contents($this->url);
       if ($wsdl) {
         $this->client = new SOAPClient($this->url, $options);
       }

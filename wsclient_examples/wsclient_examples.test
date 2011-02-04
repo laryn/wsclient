@@ -125,3 +125,43 @@ class WSClientRESTRulesTestCase extends DrupalWebTestCase {
   }
 
 }
+
+class WSClientRestWSTestCase extends DrupalWebTestCase {
+
+  static function getInfo() {
+    return array(
+      'name' => 'Web service client RestWS',
+      'description' => 'Tests invoking the local RestWS service.',
+      'group' => 'Services',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('restws', 'restws_basic_auth', 'wsclient_examples');
+  }
+
+  /**
+   * Test the RestWS node service.
+   */
+  function testGet() {
+    $title = $this->randomName(8);
+    $node = $this->drupalCreateNode(array('title' => $title));
+    $account = $this->drupalCreateUser(array('access resource node'));
+    $service = wsclient_service_load('restws_node');
+    $this->addSimpletestCurlOptions($service, $account);
+    $result = $service->get($node->nid);
+    $this->assertEqual($node->title, $result['title'], 'Node title received correctly');
+  }
+
+  /**
+   * Helper function to add the right cURL headers so that we connect to the simpletest DB.
+   */
+  protected function addSimpletestCurlOptions($service, $account) {
+    $curl_options[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
+    $curl_options[CURLOPT_USERPWD] = $account->name . ':' . $account->pass_raw;
+    if (preg_match('/simpletest\d+/', $this->databasePrefix, $matches)) {
+      $curl_options[CURLOPT_USERAGENT] = drupal_generate_test_ua($matches[0]);
+    }
+    $service->settings['curl options'] = $curl_options;
+  }
+}

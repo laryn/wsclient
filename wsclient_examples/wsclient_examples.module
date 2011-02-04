@@ -55,8 +55,13 @@ function wsclient_examples_default_wsclient_service() {
   $service->label = 'Geocoder.us';
   $service->url = 'http://geocoder.us/dist/eg/clients/GeoCoderPHP.wsdl';
   $service->type = 'soap';
-  $service->endpoint()->initializeMetaData();
-  $services[$service->name] = $service;
+  try {
+    $service->endpoint()->initializeMetaData();
+    $services[$service->name] = $service;
+  }
+  catch (WSClientException $e) {
+    watchdog('wsclient', $e->__toString());
+  }
 
   // Twitter search service (REST)
   $service = new WSClientServiceDescription();
@@ -91,6 +96,23 @@ function wsclient_examples_default_wsclient_service() {
   $operation['result'] = array('type' => 'wsclient_twitter_search_result', 'label' => 'Search result');
   $service->operations['search'] = $operation;
   $services[$service->name] = $service;
+
+  if (module_exists('restws')) {
+    // Local RestWS node service.
+    $service = new WSClientServiceDescription();
+    $service->name = 'restws_node';
+    $service->label = 'RestWS node service';
+    $service->url = url('<front>', array('absolute' => TRUE));
+    $service->type = 'rest';
+
+    $operation = array();
+    $operation['label'] = 'Get';
+    $operation['url'] = 'node/@nid';
+    $operation['parameter']['nid'] = array('type' => 'integer', 'label' => 'Node id');
+    $operation['result'] = array('type' => 'node', 'label' => 'Node');
+    $service->operations['get'] = $operation;
+    $services[$service->name] = $service;
+  }
 
   return $services;
 }

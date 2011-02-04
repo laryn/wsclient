@@ -551,7 +551,6 @@ class WSClientException extends Exception {
   function __construct($msg, $args = array()) {
     $this->msg = $msg;
     $this->args = $args;
-    unset($this->message);
   }
 
   /**

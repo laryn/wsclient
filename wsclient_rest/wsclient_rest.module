@@ -43,7 +43,7 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
       }
       // Pass through additional curl options.
       if (!empty($this->service->settings['curl options'])) {
-        $this->client->curlOpts = $this->service->settings['curl options'];
+        $this->client->options['curlopts'] = $this->service->settings['curl options'];
       }
     }
     return $this->client;
@@ -59,6 +59,13 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
    */
   public function call($operation, $arguments) {
     $operation_url = isset($this->service->operations[$operation]['url']) ? $this->service->operations[$operation]['url'] : '';
+    // Replace argument patterns in the operation URL.
+    foreach ($arguments as $key => $value) {
+      if (strpos($operation_url, '@' . $key) !== FALSE) {
+        $operation_url = str_replace('@' . $key, $value, $operation_url);
+        unset($arguments[$key]);
+      }
+    }
     $client = $this->client();
     try {
       $response = $client->get($this->service->url . $operation_url, $arguments);

@@ -37,6 +37,7 @@ class WSClientSOAPRulesTestCase extends DrupalWebTestCase {
       'name' => 'Web service client SOAP Rules',
       'description' => 'Tests the Rules integration of the SOAP endpoint.',
       'group' => 'Services',
+      'dependencies' => array('rules'),
     );
   }
 
@@ -95,6 +96,7 @@ class WSClientRESTRulesTestCase extends DrupalWebTestCase {
       'name' => 'Web service client REST Rules',
       'description' => 'Tests the Rules integration of the REST endpoint.',
       'group' => 'Services',
+      'dependencies' => array('rules'),
     );
   }
 
@@ -133,6 +135,7 @@ class WSClientRestWSTestCase extends DrupalWebTestCase {
       'name' => 'Web service client RestWS',
       'description' => 'Tests invoking the local RestWS service.',
       'group' => 'Services',
+      'dependencies' => array('restws', 'restws_basic_auth'),
     );
   }
 

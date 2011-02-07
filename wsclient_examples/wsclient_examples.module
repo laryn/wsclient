@@ -105,12 +105,40 @@ function wsclient_examples_default_wsclient_service() {
     $service->url = url('<front>', array('absolute' => TRUE));
     $service->type = 'rest';
 
+    $service->datatypes = array(
+      'result' => array(
+        'label' => 'Create result',
+        'property info' => array(
+          'id' => array(
+            'type' => 'integer',
+            'label' => 'resource id',
+          ),
+          'uri' => array(
+            'type' => 'uri',
+            'label' => 'resource URI',
+          ),
+          'resource' => array(
+            'type' => 'text',
+            'label' => 'resource type',
+          ),
+        ),
+      ),
+    );
+
     $operation = array();
     $operation['label'] = 'Get';
     $operation['url'] = 'node/@nid';
     $operation['parameter']['nid'] = array('type' => 'integer', 'label' => 'Node id');
     $operation['result'] = array('type' => 'node', 'label' => 'Node');
     $service->operations['get'] = $operation;
+    $operation = array();
+    $operation['label'] = 'Create';
+    $operation['url'] = 'node';
+    $operation['type'] = 'PUT';
+    $operation['data'] = 'node';
+    $operation['parameter']['node'] = array('type' => 'node', 'label' => 'Node');
+    $operation['result'] = array('type' => 'result', 'label' => 'Create result');
+    $service->operations['create'] = $operation;
     $services[$service->name] = $service;
   }
 

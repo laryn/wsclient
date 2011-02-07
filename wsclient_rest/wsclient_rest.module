@@ -58,7 +58,8 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
    *   Arguments to pass to the service with this operation.
    */
   public function call($operation, $arguments) {
-    $operation_url = isset($this->service->operations[$operation]['url']) ? $this->service->operations[$operation]['url'] : '';
+    $operation = $this->service->operations[$operation];
+    $operation_url = isset($operation['url']) ? $operation['url'] : '';
     // Replace argument patterns in the operation URL.
     foreach ($arguments as $key => $value) {
       if (strpos($operation_url, '@' . $key) !== FALSE) {
@@ -67,8 +68,20 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
       }
     }
     $client = $this->client();
+    $type = isset($operation['type']) ? $operation['type'] : 'GET';
     try {
-      $response = $client->get($this->service->url . $operation_url, $arguments);
+      switch ($type) {
+        case 'PUT':
+          $data = NULL;
+          if (isset($operation['data'])) {
+            $data = $arguments[$operation['data']];
+            unset($arguments[$operation['data']]);
+          }
+          $response = $client->put($this->service->url . $operation_url, $data, $arguments);
+          break;
+        default:
+          $response = $client->get($this->service->url . $operation_url, $arguments);
+      }
       return $response;
     }
     catch (HttpClientException $e) {

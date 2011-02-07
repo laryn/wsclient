@@ -146,7 +146,8 @@ class WSClientRestWSTestCase extends DrupalWebTestCase {
   /**
    * Test the RestWS node service.
    */
-  function testGet() {
+  function testCRUD() {
+    // Get.
     $title = $this->randomName(8);
     $node = $this->drupalCreateNode(array('title' => $title));
     $account = $this->drupalCreateUser(array('access resource node'));
@@ -154,6 +155,24 @@ class WSClientRestWSTestCase extends DrupalWebTestCase {
     $this->addSimpletestCurlOptions($service, $account);
     $result = $service->get($node->nid);
     $this->assertEqual($node->title, $result['title'], 'Node title received correctly');
+
+    // Create.
+    // Requires patch from #722886 for http_client.
+    $account = $this->drupalCreateUser(array('access resource node', 'access content', 'bypass node access'));
+    $this->addSimpletestCurlOptions($service, $account);
+    $service->clearCache();
+    $node = array(
+      'type' => $node->title,
+      'title' => $title,
+      'author' => $node->uid,
+    );
+    $result = $service->create($node);
+    $nid = $result['id'];
+    // Clear the static cache, otherwise we won't see the update.
+    $created_node = node_load($nid, NULL, TRUE);
+    $this->assertEqual($created_node->title, $title, 'Created node title is correct.');
+    $this->assertEqual($result['uri'], url('node/' . $nid, array('absolute' => TRUE)), 'Returned URI is correct.');
+    $this->assertEqual($result['resource'], 'node', 'Returned resource is correct.');
   }
 
   /**

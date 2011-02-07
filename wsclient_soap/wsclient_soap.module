@@ -80,13 +80,6 @@ class WSClientSOAPEndpoint extends WSClientEndpoint {
       throw new WSClientException('Error invoking the SOAP service %name, operation %operation: %error', array('%name' => $this->service->label, '%operation' => $operation, '%error' => $e->getMessage()));
     }
   }
-
-  /**
-   * Reset the SOAPClient.
-   */
-  public function clearCache() {
-    unset($this->client);
-  }
 }
 
 /**

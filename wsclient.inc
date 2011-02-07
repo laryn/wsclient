@@ -196,6 +196,7 @@ class WSClientServiceDescription extends Entity {
 
   public function clearCache() {
     $this->refreshInfo();
+    $this->endpoint()->clearCache();
   }
 
   public function isSubscribedTo($event) {
@@ -366,6 +367,11 @@ interface WSClientEndpointInterface {
    */
   public function formAlter(&$form, &$form_state);
 
+  /**
+   * Clear any caches the endpoint maintains.
+   */
+  public function clearCache();
+
 }
 
 /**
@@ -402,6 +408,10 @@ abstract class WSClientEndpoint implements WSClientEndpointInterface {
   public function dataTypes() {}
 
   public function formAlter(&$form, &$form_state) {}
+
+  public function clearCache() {
+    unset($this->client);
+  }
 }
 
 /**

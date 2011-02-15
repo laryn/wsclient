@@ -35,7 +35,7 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
 
   public function client() {
     if (!isset($this->client)) {
-      if (!empty($this->service->settings['formatter'])) {
+      if (isset($this->service->settings['formatter'])) {
         $this->client = new HttpClient(NULL, $this->service->settings['formatter']);
       }
       else {

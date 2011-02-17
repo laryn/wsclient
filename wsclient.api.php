@@ -143,7 +143,7 @@ function hook_default_wsclient_service() {
   $service->name = 'master';
   $service->label = 'The master site.';
   $service->url = 'http://master.example.com';
-  $service->type = 'REST';
+  $service->type = 'rest';
   $services[$service->name] = $service;
   return $services;
 }

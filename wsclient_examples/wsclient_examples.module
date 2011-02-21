@@ -124,13 +124,14 @@ function wsclient_examples_default_wsclient_service() {
         ),
       ),
     );
-
+    // Node get operation.
     $operation = array();
     $operation['label'] = 'Get';
     $operation['url'] = 'node/@nid';
     $operation['parameter']['nid'] = array('type' => 'integer', 'label' => 'Node id');
     $operation['result'] = array('type' => 'node', 'label' => 'Node');
     $service->operations['get'] = $operation;
+    // Node create operation.
     $operation = array();
     $operation['label'] = 'Create';
     $operation['url'] = 'node';
@@ -139,6 +140,15 @@ function wsclient_examples_default_wsclient_service() {
     $operation['parameter']['node'] = array('type' => 'node', 'label' => 'Node');
     $operation['result'] = array('type' => 'result', 'label' => 'Create result');
     $service->operations['create'] = $operation;
+    // Node update operation.
+    $operation = array();
+    $operation['label'] = 'Update';
+    $operation['url'] = 'node/@nid';
+    $operation['type'] = 'POST';
+    $operation['data'] = 'node';
+    $operation['parameter']['node'] = array('type' => 'node', 'label' => 'Node');
+    $operation['parameter']['nid'] = array('type' => 'integer', 'label' => 'Node id');
+    $service->operations['update'] = $operation;
     $services[$service->name] = $service;
   }
 

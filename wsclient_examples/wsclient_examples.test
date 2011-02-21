@@ -173,6 +173,14 @@ class WSClientRestWSTestCase extends DrupalWebTestCase {
     $this->assertEqual($created_node->title, $title, 'Created node title is correct.');
     $this->assertEqual($result['uri'], url('node/' . $nid, array('absolute' => TRUE)), 'Returned URI is correct.');
     $this->assertEqual($result['resource'], 'node', 'Returned resource is correct.');
+
+    // Update.
+    $new_title = $this->randomName();
+    $node = array('title' => $new_title);
+    $service->update($node, $nid);
+    // Clear the static cache, otherwise we won't see the update.
+    $updated_node = node_load($nid, NULL, TRUE);
+    $this->assertEqual($new_title, $updated_node->title, 'Node title has been updated sucessfully');
   }
 
   /**

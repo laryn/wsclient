@@ -69,15 +69,18 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
     }
     $client = $this->client();
     $type = isset($operation['type']) ? $operation['type'] : 'GET';
+    $data = NULL;
+    if (isset($operation['data'])) {
+      $data = $arguments[$operation['data']];
+      unset($arguments[$operation['data']]);
+    }
     try {
       switch ($type) {
         case 'PUT':
-          $data = NULL;
-          if (isset($operation['data'])) {
-            $data = $arguments[$operation['data']];
-            unset($arguments[$operation['data']]);
-          }
           $response = $client->put($this->service->url . $operation_url, $data, $arguments);
+          break;
+        case 'POST':
+          $response = $client->post($this->service->url . $operation_url, $data, $arguments);
           break;
         default:
           $response = $client->get($this->service->url . $operation_url, $arguments);

@@ -181,6 +181,14 @@ class WSClientRestWSTestCase extends DrupalWebTestCase {
     // Clear the static cache, otherwise we won't see the update.
     $updated_node = node_load($nid, NULL, TRUE);
     $this->assertEqual($new_title, $updated_node->title, 'Node title has been updated sucessfully');
+
+    // Delete.
+    // We cannot directly call the method delete() as it is used for another
+    // purpose.
+    $service->invoke('delete', array($nid));
+    // Clear the static cache, otherwise we won't see the update.
+    $deleted_node = node_load($nid, NULL, TRUE);
+    $this->assertFalse($deleted_node, 'Node is not in the DB anymore.');
   }
 
   /**

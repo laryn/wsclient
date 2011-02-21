@@ -24,7 +24,7 @@ function wsclient_rest_wsclient_endpoint_types() {
 class WSClientRESTEndpoint extends WSClientEndpoint {
 
   /**
-   * @var RestClient
+   * @var HttpClient
    */
   protected $client;
 
@@ -33,6 +33,9 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
     $this->url = $service->url;
   }
 
+  /**
+   * @return HttpClient
+   */
   public function client() {
     if (!isset($this->client)) {
       if (isset($this->service->settings['formatter'])) {
@@ -75,16 +78,11 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
       unset($arguments[$operation['data']]);
     }
     try {
-      switch ($type) {
-        case 'PUT':
-          $response = $client->put($this->service->url . $operation_url, $data, $arguments);
-          break;
-        case 'POST':
-          $response = $client->post($this->service->url . $operation_url, $data, $arguments);
-          break;
-        default:
-          $response = $client->get($this->service->url . $operation_url, $arguments);
-      }
+      $response = $client->execute(new HttpClientRequest($this->service->url . $operation_url, array(
+        'method' => $type,
+        'parameters' => $arguments,
+        'data' => $data,
+      )));
       return $response;
     }
     catch (HttpClientException $e) {

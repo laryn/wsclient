@@ -150,6 +150,14 @@ function wsclient_examples_default_wsclient_service() {
     $operation['parameter']['nid'] = array('type' => 'integer', 'label' => 'Node id');
     $service->operations['update'] = $operation;
     $services[$service->name] = $service;
+    // Node delete operation.
+    $operation = array();
+    $operation['label'] = 'Delete';
+    $operation['url'] = 'node/@nid';
+    $operation['type'] = 'DELETE';
+    $operation['parameter']['nid'] = array('type' => 'integer', 'label' => 'Node id');
+    $service->operations['delete'] = $operation;
+    $services[$service->name] = $service;
   }
 
   return $services;

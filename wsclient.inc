@@ -49,7 +49,7 @@ class WSClientServiceDescription extends Entity {
    *   do not match the parameter information, the array values are assigned in
    *   sequential order according to the order of parameters.
    */
-  public function invoke($operation, $arguments) {
+  public function invoke($operation, array $arguments) {
     if (!isset($this->operations[$operation])) {
       throw new WSClientException('Operation %operation does not exist for web service %service.', array('%operation' => $operation, '%service' => $this->name));
     }

@@ -166,7 +166,12 @@ function wsclient_service_action($arguments, RulesPlugin $element) {
         $args[substr($name, 6)] = $data;
       }
     }
-    $return = $service->invoke($arguments['operation'], $args);
+    try {
+      $return = $service->invoke($arguments['operation'], $args);
+    }
+    catch (Exception $e) {
+      throw new RulesException($e->getMessage(), array(), $element, RulesLog::ERROR);
+    }
     return array('result' => $return);
   }
   else {

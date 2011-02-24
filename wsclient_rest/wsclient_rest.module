@@ -55,13 +55,13 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
   /**
    * Calls the REST service.
    *
-   * @param string $operation
+   * @param string $operation_name
    *   The name of the operation to execute.
    * @param array $arguments
    *   Arguments to pass to the service with this operation.
    */
-  public function call($operation, $arguments) {
-    $operation = $this->service->operations[$operation];
+  public function call($operation_name, $arguments) {
+    $operation = $this->service->operations[$operation_name];
     $operation_url = isset($operation['url']) ? $operation['url'] : '';
     // Replace argument patterns in the operation URL.
     foreach ($arguments as $key => $value) {
@@ -86,7 +86,7 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
       return $response;
     }
     catch (HttpClientException $e) {
-      throw new WSClientException('Error invoking the REST service %name, operation %operation: %error', array('%name' => $this->service->label, '%operation' => $operation, '%error' => $e->getMessage()));
+      throw new WSClientException('Error invoking the REST service %name, operation %operation: %error', array('%name' => $this->service->label, '%operation' => $operation_name, '%error' => $e->getMessage()));
     }
   }
 

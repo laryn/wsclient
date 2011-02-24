@@ -550,8 +550,6 @@ function wsclient_valid_message($service, $data) {
  */
 class WSClientException extends Exception {
 
-  public $msg, $args;
-
   /**
    * @param $msg
    *   The exception message containing placeholder as t().
@@ -559,22 +557,7 @@ class WSClientException extends Exception {
    *   Replacement arguments such as for t().
    */
   function __construct($msg, $args = array()) {
-    $this->msg = $msg;
-    $this->args = $args;
-  }
-
-  /**
-   * The getMessage() method cannot be overriden, so this is the only
-   * possibility to override its output.
-   */
-  public function __get($name) {
-    if ($name == 'message') {
-      return $this->__toString();
-    }
-    return parent::$name;
-  }
-
-  public function __toString() {
-    return t($this->msg, $this->args);
+    $message = t($msg, $args);
+    parent::__construct($message);
   }
 }

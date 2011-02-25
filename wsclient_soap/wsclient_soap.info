@@ -1,4 +1,3 @@
-; $Id$
 name = Web service client SOAP
 description = Implements a SOAP endpoint to connect to SOAP services.
 package = Services

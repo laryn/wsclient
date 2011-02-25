@@ -1,4 +1,3 @@
-; $Id$
 name = Web service client
 description = Interact with remote sites, provides Rules integration.
 package = Services

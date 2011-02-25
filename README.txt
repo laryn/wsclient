@@ -1,4 +1,3 @@
-$Id$
 
 Web Service Client Module (wsclient)
 ------------------------------------

@@ -1,4 +1,3 @@
-; $Id$
 name = Web service client REST
 description = Implements a REST endpoint to connect to REST services.
 package = Services

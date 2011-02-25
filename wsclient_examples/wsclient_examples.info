@@ -1,4 +1,3 @@
-; $Id$
 name = Web service client examples
 description = Example web services.
 package = Services

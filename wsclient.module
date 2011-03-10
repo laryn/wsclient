@@ -193,7 +193,7 @@ function wsclient_rules_event_set_alter($event_name, RulesEventSet $event_set) {
   // If a remote event is used make sure we are subscribed to it.
   if (strpos($event_name, 'wsclient_') === 0) {
     $info = $event_set->info();
-    if ($service = wsclient_service_load($info['wsclient']['remote'])) {
+    if (isset($info['wsclient']['remote']) && $service = wsclient_service_load($info['wsclient']['remote'])) {
       $event = $info['wsclient']['event'];
       if (!$service->isSubscribedTo($event)) {
         $service->subscribe($event);

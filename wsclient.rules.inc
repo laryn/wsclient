@@ -12,7 +12,7 @@ function wsclient_rules_event_info() {
   $events = array();
   $valid_types = rules_fetch_data('data_info');
 
-  foreach (entity_load('wsclient_service', FALSE) as $name => $service) {
+  foreach (entity_load_multiple_by_name('wsclient_service', FALSE) as $name => $service) {
     $service_types = $service->entities() + $service->dataTypes();
     foreach ($service->events() as $event => $event_info) {
       $is_valid = array_diff_key(array_flip(array('label', 'variables')), $event_info) == array();
@@ -51,7 +51,7 @@ function wsclient_rules_data_info() {
   $types = array();
   // Collect all data types of all services.
   $all_types = array();
-  foreach (entity_load('wsclient_service', FALSE) as $name => $service) {
+  foreach (entity_load_multiple_by_name('wsclient_service', FALSE) as $name => $service) {
     foreach ($service->dataTypes() as $type => $type_info) {
       // Prefix the label with the service label.
       $type_info['label'] = $service->label . ': ' . $type_info['label'];
@@ -130,7 +130,7 @@ function wsclient_global_type_name($type, $service_name, $all_types) {
  */
 function wsclient_rules_action_info() {
   $return = array();
-  foreach (entity_load('wsclient_service', FALSE) as $name => $service) {
+  foreach (entity_load_multiple_by_name('wsclient_service', FALSE) as $name => $service) {
     $service_types = $service->entities() + $service->dataTypes();
     foreach ($service->actions() as $item_name => $info) {
       $info += array(

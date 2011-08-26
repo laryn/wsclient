@@ -157,6 +157,8 @@ function wsclient_soap_parse_types(array $types) {
       $properties = explode(';', $property_string);
       // Remove last empty element
       array_pop($properties);
+      // Initialize empty property information.
+      $wsclient_types[$type_name]['property info'] = array();
       foreach ($properties as $property_string) {
         // Cut off white spaces.
         $property_string = trim($property_string);

@@ -200,6 +200,7 @@ function wsclient_soap_parse_operations(array $operations) {
     if ($param_string) {
       $parameters = explode(',', $param_string);
       foreach ($parameters as $parameter) {
+        $parameter = trim($parameter);
         $parts = explode(' ', $parameter);
         $param_type = $parts[0];
         // Remove leading '$' from parameter name.

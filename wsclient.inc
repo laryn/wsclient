@@ -423,7 +423,7 @@ abstract class WSClientEndpoint implements WSClientEndpointInterface {
 }
 
 /**
- * A controller for loading web service descriptions.
+ * A controller for loading remote data as entities.
  */
 class WSClientServiceEntityController extends DrupalDefaultEntityController {
 

@@ -276,15 +276,17 @@ class WSClientServiceDescription extends Entity {
 
   /**
    * Loads the stored info for the given web service objects.
+   *
+   * @see wsclient_wsclient_service_load()
    */
   public static function attachLoad($services) {
     if (empty($services)) {
       return;
     }
     $result = db_select('wsclient_info', 'r')
-    ->fields('r')
-    ->condition('name', array(array_keys($services)))
-    ->execute();
+      ->fields('r')
+      ->condition('name', array(array_keys($services)))
+      ->execute();
 
     foreach ($result as $record) {
       $services[$record->name]->cache = unserialize($record->info);
@@ -293,9 +295,9 @@ class WSClientServiceDescription extends Entity {
 
     // Load subscribed events.
     $result = db_select('wsclient_subscriptions', 'r')
-    ->fields('r')
-    ->condition('name', array(array_keys($services)))
-    ->execute();
+      ->fields('r')
+      ->condition('name', array(array_keys($services)))
+      ->execute();
     foreach ($result as $record) {
       $services[$record->name]->subscriptions[$record->event] = TRUE;
     }
@@ -306,13 +308,6 @@ class WSClientServiceDescription extends Entity {
  * Implements hook_wsclient_service_load().
  */
 function wsclient_wsclient_service_load($services) {
-  WSClientServiceDescription::attachLoad($services);
-}
-
-/**
- * Implements hook_default_wsclient_service_alter().
- */
-function wsclient_default_wsclient_service_alter($services) {
   WSClientServiceDescription::attachLoad($services);
 }
 

@@ -94,4 +94,27 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
       return $this->service->settings['resources'];
     }
   }
+
+  public function formAlter(&$form, &$form_state) {
+    if ($form_state['form'] == 'operation') {
+      $operation = $form_state['operation'];
+
+      $form['url'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Path'),
+        '#default_value' => isset($operation['url']) ? $operation['url'] : '',
+        '#description' => t('The path to append to the services base URL. In order to construct the path using parameter values make use of replacements in the form "@parameter-name". E.g. the path "node/@nid" together with a "nid" parameter could be used to construct the path to a Drupal node.'),
+        '#weight' => -5,
+      );
+      $form['#submit'][] = 'wsclient_rest_operation_form_submit';
+    }
+  }
+
+}
+
+/**
+ * Form submit callback for the operation form.
+ */
+function wsclient_rest_operation_form_submit($form, &$form_state) {
+  $form_state['operation']['url'] = $form_state['values']['url'];
 }

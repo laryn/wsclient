@@ -262,6 +262,15 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     '#type' => 'submit',
     '#value' => t('Save'),
   );
+
+  // Allow the endpoint to make alterations to the form.
+  $form_state['form'] = 'main';
+  if ($service->type) {
+    $service->endpoint()->formAlter($form, $form_state);
+  }
+
+  $form['#submit'][] = 'wsclient_service_form_submit';
+
   return $form;
 }
 
@@ -312,6 +321,7 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     '#default_value' => isset($operation['label']) ? $operation['label'] : '',
     '#required' => TRUE,
     '#description' => t('The human-readable name of the operation.'),
+    '#weight' => -10,
   );
   $form['name'] = array(
     '#type' => 'textfield',
@@ -320,6 +330,7 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     '#required' => TRUE,
     '#description' => t('The machine-readable name of this operation is used internally to identify the operation.'),
     '#element_validate' => array('wsclient_ui_operation_name_validate'),
+    '#weight' => -10,
   );
   $form['parameters'] = array(
     '#tree' => TRUE,
@@ -388,6 +399,12 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
   );
   $form_state['service'] = $service;
   $form_state['operation'] = $operation;
+
+  // Allow the endpoint to make alterations to the form.
+  $form_state['form'] = 'operation';
+  $service->endpoint()->formAlter($form, $form_state);
+
+  $form['#submit'][] = 'wsclient_ui_operation_submit';
   return $form;
 }
 
@@ -477,7 +494,10 @@ function wsclient_ui_more_submit($form, &$form_state) {
  */
 function wsclient_ui_operation_submit($form, &$form_state) {
   $service = $form_state['service'];
+  $operation = $form_state['operation'];
+
   $operation['label'] = $form_state['values']['label'];
+  $operation['parameter'] = array();
   foreach ($form_state['values']['parameters']['items'] as $key => $item) {
     if (!empty($item['name'])) {
       // Unmap the data type if it is local to this service.
@@ -766,6 +786,13 @@ function wsclient_ui_type($form, &$form_state, $service, $type, $op = 'edit') {
   );
   $form_state['service'] = $service;
   $form_state['type'] = $type;
+
+  // Allow the endpoint to make alterations to the form.
+  $form_state['form'] = 'type';
+  $service->endpoint()->formAlter($form, $form_state);
+
+  $form['#submit'][] = 'wsclient_ui_type_submit';
+
   return $form;
 }
 
@@ -774,7 +801,10 @@ function wsclient_ui_type($form, &$form_state, $service, $type, $op = 'edit') {
  */
 function wsclient_ui_type_submit($form, &$form_state) {
   $service = $form_state['service'];
+  $type = $form_state['type'];
   $type['label'] = $form_state['values']['label'];
+
+  $type['property info'] = array();
   foreach ($form_state['values']['properties']['items'] as $key => $item) {
     if (!empty($item['name'])) {
       $unmapped_type = _wsclient_ui_unmap_type($item['type'], $service);

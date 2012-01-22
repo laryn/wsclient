@@ -366,7 +366,6 @@ interface WSClientEndpointInterface {
   /**
    * Allows altering the configuration form of web service definitions, such
    * that the form can include endpoint type specific configuration settings.
-   * @todo call from wsclient_ui
    */
   public function formAlter(&$form, &$form_state);
 

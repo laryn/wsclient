@@ -3,6 +3,6 @@ description = Provides a user interface to administer web service descriptions.
 package = Services
 core = 7.x
 configure = admin/config/services/wsclient
-files[] = wsclient_ui.module
+files[] = wsclient_ui.inc
 dependencies[] = wsclient
 dependencies[] = rules

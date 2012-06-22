@@ -45,12 +45,14 @@ function wsclient_schema() {
         'type' => 'text',
         'not null' => FALSE,
         'serialize' => TRUE,
+        'size' => 'medium',
         'description' => 'The operations this web service offers.',
       ),
       'datatypes' => array(
         'type' => 'text',
         'not null' => FALSE,
         'serialize' => TRUE,
+        'size' => 'medium',
         'description' => 'The complex data types used in the operations.',
       ),
       'global_parameters' => array(
@@ -179,4 +181,24 @@ function wsclient_update_7101() {
       'description' => 'The global parameters definition of this web service.',
     ));
   }
+}
+
+/**
+ * Increase size of datatypes and operations columns to medium.
+ */
+function wsclient_update_7102() {
+  db_change_field('wsclient_service', 'datatypes', 'datatypes', array(
+    'type' => 'text',
+    'not null' => FALSE,
+    'serialize' => TRUE,
+    'size' => 'medium',
+    'description' => 'The complex data types used in the operations.',
+  ));
+  db_change_field('wsclient_service', 'operations', 'operations', array(
+    'type' => 'text',
+    'not null' => FALSE,
+    'serialize' => TRUE,
+    'size' => 'medium',
+    'description' => 'The operations this web service offers.',
+  ));
 }

@@ -14,7 +14,7 @@ function wsclient_tester_operation_test($form, $form_state, $service, $operation
     '!service_label' => $service->label,
     '!operation_label' => $operation['label'],
   );
-  drupal_set_title(t("Testing Web Service : !service_label : !operation_label()" , $strings));
+  drupal_set_title(t("Testing Web Service : !service_label : !operation_label()", $strings));
   $form  = array();
 
   $form['uri'] = array(
@@ -132,12 +132,12 @@ function wsclient_tester_prepare_request_callback($form, $form_state) {
   $element = $form['transaction'];
 
   /*
-  dpm($service);
-  dpm($service->endpoint());
-  dpm($service->endpoint()->client());
-  dpm($service->endpoint()->client()->__getLastRequest());
-  dpm($response);
-  */
+   dpm($service);
+   dpm($service->endpoint());
+   dpm($service->endpoint()->client());
+   dpm($service->endpoint()->client()->__getLastRequest());
+   dpm($response);
+   */
 
   // Place the trace data into the display.
   $element['request']['header']['#markup'] = $service->endpoint()->client()->__getLastRequestHeaders();
@@ -188,7 +188,7 @@ function wsclient_tester_data_entry_form($label, $type, $data, $datatypes) {
       '#type' => 'fieldset',
       '#title' => check_plain("$label ({$datatype['label']})"),
       '#collapsible' => TRUE,
-      );
+    );
     foreach ($datatype['property info'] as $field_id => $field_info) {
       // Recurse and get each bit to render its own input element.
       $element[$field_id] = wsclient_tester_data_entry_form($field_id, $field_info['type'], $data[$field_id], $datatypes);

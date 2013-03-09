@@ -78,6 +78,10 @@ function wsclient_examples_default_wsclient_service() {
           'type' => 'list<tweet>',
           'label' => 'Tweet list',
         ),
+        'query' => array(
+          'type' => 'text',
+          'label' => 'Requested query text',
+        ),
       ),
     ),
     'tweet' => array(

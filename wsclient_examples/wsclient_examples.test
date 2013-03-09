@@ -107,22 +107,19 @@ class WSClientRESTRulesTestCase extends DrupalWebTestCase {
    * Tests invoking the google translation service.
    */
   function testRulesIntegration() {
-    list($result) = rules_action('wsclient_google_translate', array(
-           'param_langpair' => 'de|en',
-         ))->execute('Hallo Welt');
-    $this->assertEqual(drupal_strtolower($result['responseData']['translatedText']), 'hello world', 'REST service invoked via the action.');
+    list($result) = rules_action('wsclient_twitter_search_search', array('param_q' => 'drupal'))->execute();
+    $this->assertEqual($result['query'], 'drupal', 'REST service invoked via the action.');
 
     // Test making use of the provided variable.
     $rule = rule(array('text' => array('type' => 'text')));
-    $rule->action('wsclient_google_translate', array(
+    $rule->action('wsclient_twitter_search_search', array(
            'param_q:select' => 'text',
-           'param_langpair' => 'de|en',
          ))
-         ->action('drupal_message', array('message:select' => 'result:responseData:translatedText'))
-         ->execute('Hallo Welt');
+         ->action('drupal_message', array('message:select' => 'result:query'))
+         ->execute('drupal');
     RulesLog::logger()->checkLog();
     $msg = drupal_get_messages();
-    $this->assertEqual(drupal_strtolower(array_pop($msg['status'])), 'hello world', 'REST service has been invoked.');
+    $this->assertEqual(drupal_strtolower(array_pop($msg['status'])), 'drupal', 'REST service has been invoked.');
   }
 
 }

@@ -10,6 +10,7 @@
  */
 function wsclient_examples_default_wsclient_service() {
   // Google Translate service (REST)
+  // Note that this service does not seem to work anymore :-(
   $service = new WSClientServiceDescription();
   $service->name = 'google';
   $service->label = 'Google Ajax APIs';

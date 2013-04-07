@@ -128,7 +128,7 @@ class WSClientRestWSTestCase extends DrupalWebTestCase {
 
   static function getInfo() {
     return array(
-      'name' => 'Web service client RestWS',
+      'name' => 'Web service client RestWS (2.x)',
       'description' => 'Tests invoking the local RestWS service.',
       'group' => 'Services',
       'dependencies' => array('restws', 'restws_basic_auth'),
@@ -137,6 +137,8 @@ class WSClientRestWSTestCase extends DrupalWebTestCase {
 
   function setUp() {
     parent::setUp('restws', 'restws_basic_auth', 'wsclient_examples');
+    // Allow any user name to use HTTP basic auth.
+    variable_set('restws_basic_auth_user_regex', '/^.*/');
   }
 
   /**
@@ -153,7 +155,6 @@ class WSClientRestWSTestCase extends DrupalWebTestCase {
     $this->assertEqual($node->title, $result['title'], 'Node title received correctly');
 
     // Create.
-    // Requires patch from #722886 for http_client.
     $account = $this->drupalCreateUser(array('access resource node', 'access content', 'bypass node access'));
     $this->addSimpletestCurlOptions($service, $account);
     $service->clearCache();

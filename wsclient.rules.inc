@@ -6,45 +6,6 @@
  */
 
 /**
- * Implements hook_rules_event_info().
- */
-function wsclient_rules_event_info() {
-  $events = array();
-  $valid_types = rules_fetch_data('data_info');
-
-  foreach (entity_load_multiple_by_name('wsclient_service', FALSE) as $name => $service) {
-    $service_types = $service->entities() + $service->dataTypes();
-    foreach ($service->events() as $event => $event_info) {
-      $is_valid = array_diff_key(array_flip(array('label', 'variables')), $event_info) == array();
-      // Don't add in events, that stem from another site.
-      if (strpos($event, 'wsclient_') !== 0 && $is_valid) {
-        // Transform data types of the variables
-        foreach ($event_info['variables'] as $var_name => &$var_info) {
-          // Make sure the info is complete and contains known types.
-          if (array_diff_key(array_flip(array('label', 'type')), $var_info) !== array()) {
-            continue 2;
-          }
-          // Map the type name of types defined by the remote.
-          $var_info['type'] = wsclient_map_type($name, $service_types, $var_info['type']);
-
-          if (!isset($valid_types[$var_info['type']])) {
-            continue 2;
-          }
-          // We don't support loading via handler for remote variables.
-          unset($var_info['handler']);
-        }
-        $event_info['group'] = t('Web service @label', array('@label' => $service->label));
-        // Add some info so we can easily get the remote for an event later on.
-        $event_info['wsclient']['remote'] = $name;
-        $event_info['wsclient']['event'] = $event;
-        $events['wsclient_' . $name . '_' . $event] = $event_info;
-      }
-    }
-  }
-  return $events;
-}
-
-/**
  * Implements hook_rules_data_info().
  */
 function wsclient_rules_data_info() {
@@ -131,7 +92,7 @@ function wsclient_global_type_name($type, $service_name, $all_types) {
 function wsclient_rules_action_info() {
   $return = array();
   foreach (entity_load_multiple_by_name('wsclient_service', FALSE) as $name => $service) {
-    $service_types = $service->entities() + $service->dataTypes();
+    $service_types = $service->dataTypes();
     foreach ($service->actions() as $item_name => $info) {
       $info += array(
         'parameter' => array(),

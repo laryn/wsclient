@@ -89,12 +89,6 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
     }
   }
 
-  public function entities() {
-    if (!empty($this->service->settings['resources'])) {
-      return $this->service->settings['resources'];
-    }
-  }
-
   public function formAlter(&$form, &$form_state) {
     if ($form_state['form'] == 'operation') {
       $operation = $form_state['operation'];

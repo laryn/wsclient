@@ -34,7 +34,7 @@ function wsclient_entity_info() {
       'controller class' => 'EntityAPIControllerExportable',
       'base table' => 'wsclient_service',
       'module' => 'wsclient',
-      'fieldable' => TRUE,
+      'fieldable' => FALSE,
       'entity keys' => array(
         'id' => 'id',
         'name' => 'name',

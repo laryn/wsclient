@@ -35,7 +35,7 @@ function wsclient_tester_operation_test($form, $form_state, $service, $operation
   // and these may be nested.
   $datatypes = $service->datatypes;
   foreach ($operation['parameter'] as $param => $info) {
-    $form['parameters'][$param] = wsclient_tester_data_entry_form($param, $info['type'], $form_values['parameters'], $datatypes);
+    $form['parameters'][$param] = wsclient_tester_data_entry_form($param, $info['type'], @$form_values['parameters'], $datatypes);
   }
 
   $form['execute'] = array(
@@ -110,8 +110,11 @@ function wsclient_tester_prepare_request_callback($form, $form_state) {
   // Magic?
   // service::invoke will cast this array into the correct paramaterized objects
   // According to the $operation['parameter'] schema. Nifty.
-  $args = $form_state['values']['parameters'];
-
+  $args = array();
+  if (!empty($form_state['values']['parameters'])) {
+    $args = $form_state['values']['parameters'];
+  }
+  
   // The service will have an endpoint that will have a SOAPClient.
   // Settings on the service->options may be passed to the SOAPClient.
   // @see WSClientSOAPEndpoint::client()

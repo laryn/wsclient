@@ -21,6 +21,9 @@
  *
  * If you have devel.module enabled, a rendered dump of the data structure
  * (PHP objects constructed by the wsclient) will also be displayed.
+ *
+ * A number of webservices that can be used for testing can be found at 
+ * http://www.webservicex.net/
  */
 
 
@@ -32,7 +35,15 @@
  */
 function wsclient_tester_form_wsclient_service_form_alter(&$form, &$form_state) {
   $service = $form_state['build_info']['args'][0];
+  // Avoid doing anything on new services that have no operation yet.
+  if (empty($form['operations'])) {
+    return;
+  }
   foreach ($form['operations']['#rows'] as $operation => $row) {
+    if (!array_key_exists(0, $row)) {
+      // This is an additional non-data row in the table, contains extra operations.
+      continue;
+    } 
     $name = $row[0]['data']['#name'];
     $form['operations']['#rows'][$operation][] = l(t('Test'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name . '/test');
   }

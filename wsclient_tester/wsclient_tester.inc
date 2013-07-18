@@ -35,9 +35,8 @@ function wsclient_tester_operation_test($form, $form_state, $service, $operation
   // and these may be nested.
   $datatypes = $service->datatypes;
   foreach ($operation['parameter'] as $param => $info) {
-    $form['parameters'][$param] = wsclient_tester_data_entry_form($param, $info['type'], @$form_values['parameters'], $datatypes);
+    $form['parameters'][$param] = wsclient_tester_data_entry_form($param, $info['type'], @$form_state['values']['parameters'], $datatypes);
   }
-
   $form['execute'] = array(
     '#type' => 'submit',
     '#value' => 'Execute request',

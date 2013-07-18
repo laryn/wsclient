@@ -142,17 +142,29 @@ function wsclient_tester_prepare_request_callback($form, $form_state) {
    */
 
   // Place the trace data into the display.
-  $element['request']['header']['#markup'] = $service->endpoint()->client()->__getLastRequestHeaders();
-  $element['request']['packet']['#markup'] = htmlspecialchars(wsclient_tester_prettify_xml($service->endpoint()->client()->__getLastRequest()));
+  if ($service->type=='rest') {
+    $operation = $service->operations[$operation['name']];
+    foreach($args as $para_name=>$para_value) {
+      $parameters.=$para_name.'='.$para_value.'<br>';
+    }
+    $reqInfo = 'Uri:'.$service->url.$operation['url'].'<br>'.
+    'Method:'.(isset($operation['type']) ? $operation['type'] : 'GET').'<br>'.
+    'Parameter:'.$parameters;
+    $element['request']['packet']['#markup'] = $reqInfo;
+    $element['response']['header']['#markup'] = $service->endpoint()->client()->lastResponse->headers;
+    $element['response']['packet']['#markup'] = $service->endpoint()->client()->lastResponse->body;
+  } 
+  elseif ($service->type=='soap') {
+    $element['request']['header']['#markup'] = $service->endpoint()->client()->__getLastRequestHeaders();
+    $element['request']['packet']['#markup'] = htmlspecialchars(wsclient_tester_prettify_xml($service->endpoint()->client()->__getLastRequest()));
+    $element['response']['header']['#markup'] = $service->endpoint()->client()->__getLastResponseHeaders();
+    $element['response']['packet']['#markup'] = htmlspecialchars(wsclient_tester_prettify_xml($service->endpoint()->client()->__getLastResponse()));
+  }
+  
   if (module_exists('devel')) {
     $element['request']['data']['#markup'] = kpr($args, 1);
-  }
-
-  $element['response']['header']['#markup'] = $service->endpoint()->client()->__getLastResponseHeaders();
-  $element['response']['packet']['#markup'] = htmlspecialchars(wsclient_tester_prettify_xml($service->endpoint()->client()->__getLastResponse()));
-  if (module_exists('devel')) {
     $element['response']['data']['#markup'] = kpr($response, 1);
-  }
+   }
 
   $element['#value'] = t("Ran at %time, took %duration to execute", array(
     '%time' => time(),

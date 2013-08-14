@@ -113,12 +113,14 @@ function wsclient_tester_prepare_request_callback($form, $form_state) {
   if (!empty($form_state['values']['parameters'])) {
     $args = $form_state['values']['parameters'];
   }
-  
+
   // The service will have an endpoint that will have a SOAPClient.
   // Settings on the service->options may be passed to the SOAPClient.
   // @see WSClientSOAPEndpoint::client()
   // @see http://www.php.net/manual/en/soapclient.soapclient.php
   $service->settings['options']['trace'] = TRUE;
+  // disable cache when testing!
+  $service->settings['options']['cache_wsdl'] = WSDL_CACHE_NONE;
 
   // Ready to actually invoke the call
   $timer_before = microtime();
@@ -153,14 +155,14 @@ function wsclient_tester_prepare_request_callback($form, $form_state) {
     $element['request']['packet']['#markup'] = $reqInfo;
     $element['response']['header']['#markup'] = $service->endpoint()->client()->lastResponse->headers;
     $element['response']['packet']['#markup'] = $service->endpoint()->client()->lastResponse->body;
-  } 
+  }
   elseif ($service->type=='soap') {
     $element['request']['header']['#markup'] = $service->endpoint()->client()->__getLastRequestHeaders();
     $element['request']['packet']['#markup'] = htmlspecialchars(wsclient_tester_prettify_xml($service->endpoint()->client()->__getLastRequest()));
     $element['response']['header']['#markup'] = $service->endpoint()->client()->__getLastResponseHeaders();
     $element['response']['packet']['#markup'] = htmlspecialchars(wsclient_tester_prettify_xml($service->endpoint()->client()->__getLastResponse()));
   }
-  
+
   if (module_exists('devel')) {
     $element['request']['data']['#markup'] = kpr($args, 1);
     $element['response']['data']['#markup'] = kpr($response, 1);

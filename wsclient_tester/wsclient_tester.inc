@@ -101,7 +101,6 @@ function wsclient_tester_operation_test($form, $form_state, $service, $operation
  * Callback for the test from 'prepare' button.
  */
 function wsclient_tester_prepare_request_callback($form, $form_state) {
-
   $service = $form_state['build_info']['args'][0];
   $operation = $form_state['build_info']['args'][1];
 
@@ -114,49 +113,43 @@ function wsclient_tester_prepare_request_callback($form, $form_state) {
     $args = $form_state['values']['parameters'];
   }
 
-  // The service will have an endpoint that will have a SOAPClient.
-  // Settings on the service->options may be passed to the SOAPClient.
-  // @see WSClientSOAPEndpoint::client()
-  // @see http://www.php.net/manual/en/soapclient.soapclient.php
-  $service->settings['options']['trace'] = TRUE;
-  // disable cache when testing!
-  $service->settings['options']['cache_wsdl'] = WSDL_CACHE_NONE;
+  if ($service->type == 'soap') {
+    // The service will have an endpoint that will have a SOAPClient.
+    // Settings on the service->options may be passed to the SOAPClient.
+    // @see WSClientSOAPEndpoint::client()
+    // @see http://www.php.net/manual/en/soapclient.soapclient.php
+    $service->settings['options']['trace'] = TRUE;
+    // disable cache when testing!
+    $service->settings['options']['cache_wsdl'] = WSDL_CACHE_NONE;
+  }
 
   // Ready to actually invoke the call
   $timer_before = microtime();
   try {
     $response = $service->invoke($operation['name'], $args);
-    $return = print_r($response, 1);
   }
   catch (Exception $e) {
-    $return = $e->getMessage();
+    $response = $e->getMessage();
   }
   $timer_duration = $timer_before - microtime();
 
   $element = $form['transaction'];
 
-  /*
-   dpm($service);
-   dpm($service->endpoint());
-   dpm($service->endpoint()->client());
-   dpm($service->endpoint()->client()->__getLastRequest());
-   dpm($response);
-   */
-
   // Place the trace data into the display.
-  if ($service->type=='rest') {
+  if ($service->type == 'rest') {
     $operation = $service->operations[$operation['name']];
-    foreach($args as $para_name=>$para_value) {
-      $parameters.=$para_name.'='.$para_value.'<br>';
+    $parameters = '';
+    foreach ($args as $para_name => $para_value) {
+      $parameters .= $para_name . '=' . $para_value . '<br>';
     }
-    $reqInfo = 'Uri:'.$service->url.$operation['url'].'<br>'.
-    'Method:'.(isset($operation['type']) ? $operation['type'] : 'GET').'<br>'.
-    'Parameter:'.$parameters;
+    $reqInfo = 'Uri:' . $service->url . $operation['url'] . '<br>' .
+      'Method:' . (isset($operation['type']) ? $operation['type'] : 'GET') . '<br>' .
+      'Parameter:' . $parameters;
     $element['request']['packet']['#markup'] = $reqInfo;
     $element['response']['header']['#markup'] = $service->endpoint()->client()->lastResponse->headers;
     $element['response']['packet']['#markup'] = $service->endpoint()->client()->lastResponse->body;
   }
-  elseif ($service->type=='soap') {
+  elseif ($service->type == 'soap') {
     $element['request']['header']['#markup'] = $service->endpoint()->client()->__getLastRequestHeaders();
     $element['request']['packet']['#markup'] = htmlspecialchars(wsclient_tester_prettify_xml($service->endpoint()->client()->__getLastRequest()));
     $element['response']['header']['#markup'] = $service->endpoint()->client()->__getLastResponseHeaders();

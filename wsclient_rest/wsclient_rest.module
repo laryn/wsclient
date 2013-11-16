@@ -93,7 +93,19 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
   public function formAlter(&$form, &$form_state) {
     if ($form_state['form'] == 'operation') {
       $operation = $form_state['operation'];
-
+      $form['type'] = array(
+        '#type' => 'select',
+        '#title' => t('HTTP Method'),
+        '#default_value' => isset($operation['type']) ? $operation['type'] : 'GET',
+        '#description' => t('Specify the HTTP request method used for this operation.'),
+        '#options' => array(
+          'GET' => 'GET',
+          'POST' => 'POST',
+          'PUT' => 'PUT',
+          'DELETE' => 'DELETE',
+        ),
+        '#weight' => -5,
+      );
       $form['url'] = array(
         '#type' => 'textfield',
         '#title' => t('Path'),
@@ -111,5 +123,6 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
  * Form submit callback for the operation form.
  */
 function wsclient_rest_operation_form_submit($form, &$form_state) {
+  $form_state['operation']['type'] = $form_state['values']['type'];
   $form_state['operation']['url'] = $form_state['values']['url'];
 }

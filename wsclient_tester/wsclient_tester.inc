@@ -222,8 +222,24 @@ function wsclient_tester_data_entry_form($label, $type, $data, $datatypes) {
     }
     return $element;
   }
+  elseif ($type == 'text_formatted') {
+    return array(
+      '#type' => 'textarea',
+      '#title' => t("%label (%type)", array('%label' => $label, '%type' => $type)),
+      '#default_value' => $data,
+    );
+  }
+  elseif ($type == 'boolean') {
+    return array(
+      '#type' => 'select',
+      '#title' => t("%label (%type)", array('%label' => $label, '%type' => $type)),
+      '#default_value' => $data,
+      // Defining false first so it's the default when setting up a form.
+      '#options' => array('false' => 'false', 'true' => 'true'),
+    );
+  }
   else {
-    // A textfield will normally do for primitives.
+    // A textfield will normally do for any other primitives.
     return array(
       '#type' => 'textfield',
       '#title' => t("%label (%type)", array('%label' => $label, '%type' => $type)),

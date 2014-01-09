@@ -25,6 +25,11 @@ class WSClientSOAPEndpoint extends WSClientEndpoint {
   public function client() {
     if (!isset($this->client)) {
       $options['exceptions'] = TRUE;
+      // Handle Basic HTTP authentication.
+      if (!empty($this->service->settings['authentication']['basic'])) {
+        $this->service->settings['options']['login'] = $this->service->settings['authentication']['basic']['username'];
+        $this->service->settings['options']['password'] = $this->service->settings['authentication']['basic']['password'];
+      }
       if (!empty($this->service->settings['options'])) {
         $options += $this->service->settings['options'];
       }

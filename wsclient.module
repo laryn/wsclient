@@ -93,19 +93,6 @@ function wsclient_service_load($name) {
 }
 
 /**
- * Gets configured http auth settings.
- */
-function wsclient_get_http_auth() {
-  if (($username = variable_get('wsclient_httpauth_username', NULL)) && $password = variable_get('wsclient_httpauth_password', NULL)) {
-    return array(
-      'method' => variable_get('wsclient_httpauth_method', CURLAUTH_BASIC),
-      'username' => $username,
-      'password' => $password,
-    );
-  }
-}
-
-/**
  * Access callback for operations on wsclient entities.
  *
  * @see entity_access()

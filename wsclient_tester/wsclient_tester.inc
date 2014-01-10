@@ -35,7 +35,7 @@ function wsclient_tester_operation_test($form, $form_state, $service, $operation
   // and these may be nested.
   $datatypes = $service->datatypes;
   foreach ($operation['parameter'] as $param => $info) {
-    $form['parameters'][$param] = wsclient_tester_data_entry_form($param, $info['type'], @$form_state['values']['parameters'], $datatypes);
+    $form['parameters'][$param] = wsclient_tester_data_entry_form($param, $info['type'], @$info['description'], @$form_state['values']['parameters'], $datatypes);
   }
   $form['execute'] = array(
     '#type' => 'submit',
@@ -189,7 +189,7 @@ function wsclient_tester_prettify_xml($xml) {
  *
  * @return a FAPI form fragment.
  */
-function wsclient_tester_data_entry_form($label, $type, $data, $datatypes) {
+function wsclient_tester_data_entry_form($label, $type, $description, $data, $datatypes) {
   if (isset($datatypes[$type])) {
     // Build a complex type.
     $datatype = $datatypes[$type];
@@ -200,7 +200,7 @@ function wsclient_tester_data_entry_form($label, $type, $data, $datatypes) {
     );
     foreach ($datatype['property info'] as $field_id => $field_info) {
       // Recurse and get each bit to render its own input element.
-      $element[$field_id] = wsclient_tester_data_entry_form($field_id, $field_info['type'], $data[$field_id], $datatypes);
+      $element[$field_id] = wsclient_tester_data_entry_form($field_id, $field_info['type'], @$field_info['description'], $data[$field_id], $datatypes);
     }
     return $element;
   }
@@ -217,7 +217,7 @@ function wsclient_tester_data_entry_form($label, $type, $data, $datatypes) {
     );
     for ($field_id = 0; $field_id < 3; $field_id++) {
       // Recurse and get each bit to render its own input element
-      $element[$field_id] = wsclient_tester_data_entry_form($field_id, $actual_type, $data[$field_id], $datatypes);
+      $element[$field_id] = wsclient_tester_data_entry_form($field_id, $actual_type, NULL, $data[$field_id], $datatypes);
       $element[$field_id]['#collapsed'] = TRUE;
     }
     return $element;
@@ -227,6 +227,7 @@ function wsclient_tester_data_entry_form($label, $type, $data, $datatypes) {
       '#type' => 'textarea',
       '#title' => t("%label (%type)", array('%label' => $label, '%type' => $type)),
       '#default_value' => $data,
+      '#description' => $description,
     );
   }
   elseif ($type == 'boolean') {
@@ -236,6 +237,7 @@ function wsclient_tester_data_entry_form($label, $type, $data, $datatypes) {
       '#default_value' => $data,
       // Defining false first so it's the default when setting up a form.
       '#options' => array('false' => 'false', 'true' => 'true'),
+      '#description' => $description,
     );
   }
   else {
@@ -245,6 +247,7 @@ function wsclient_tester_data_entry_form($label, $type, $data, $datatypes) {
       '#title' => t("%label (%type)", array('%label' => $label, '%type' => $type)),
       '#default_value' => $data,
       '#size' => 20,
+      '#description' => $description,
     );
   }
 }

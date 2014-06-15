@@ -48,6 +48,10 @@ function wsclient_tester_form_wsclient_service_form_alter(&$form, &$form_state) 
     $form['operations']['#rows'][$operation][] = l(t('Test'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name . '/test');
   }
   $form['operations']['#header'][1]['colspan'] += 1;
+  $last = count($form['operations']['#rows']) ? count($form['operations']['#rows']) - 1 : NULL;
+  if (!is_null($last) && is_numeric($last)) {
+    $form['operations']['#rows'][$last]['data'][0]['colspan'] += 1;
+  }
 }
 
 

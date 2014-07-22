@@ -74,6 +74,15 @@ class WSClientServiceDescription extends Entity {
       }
     }
 
+    // Unless explicitly permitted by 'allow null', unset optional parameters
+    // with NULL or empty ('') values.
+    if (isset($this->operations[$operation]['parameter'])) {
+      foreach ($this->operations[$operation]['parameter'] as $param => $info) {
+        if ((isset($info['optional']) && $info['optional']) && (!isset($info['allow null']) || !$info['allow null']) && ($named_arguments[$param] === '' || !isset($named_arguments[$param]))) {
+          unset($named_arguments[$param]);
+        }
+      }
+    }
     return $this->endpoint()->call($operation, $named_arguments);
   }
 

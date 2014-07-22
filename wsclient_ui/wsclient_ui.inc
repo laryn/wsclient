@@ -337,7 +337,7 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     '#element_validate' => array('wsclient_ui_validate_parameters'),
     '#theme' => 'wsclient_ui_parameter_form',
     '#title' => t('Parameters'),
-    '#description' => t('Specify the parameters for the operation. For each parameter you have to specify a certain data type and a unique name containing only alphanumeric characters and underscores. You can also specify a default value for the parameter and if it is required.'),
+    '#description' => t('Specify the parameters for the operation. For each parameter you have to specify a certain data type and a unique name containing only alphanumeric characters and underscores. You can also specify a default value for the parameter, if the parameter is required, and if null values are allowed.'),
   );
   $weight = 0;
   $types = wsclient_ui_types(TRUE);
@@ -466,6 +466,10 @@ function _wsclient_ui_parameter_row($service, $types, $name = '', $info = array(
     '#type' => 'checkbox',
     '#default_value' => isset($info['optional']) ? !$info['optional'] : TRUE,
   );
+  $parameter['allow_null'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => isset($info['allow null']) ? $info['allow null'] : FALSE,
+  );
   $parameter['weight'] = array(
     '#type' => 'weight',
   );
@@ -514,6 +518,7 @@ function wsclient_ui_operation_submit($form, &$form_state) {
       if (!$item['required']) {
         $operation['parameter'][$item['name']]['optional'] = TRUE;
       }
+      $operation['parameter'][$item['name']]['allow null'] = $item['allow_null'];
     }
   }
   if (!empty($form_state['values']['result_type'])) {
@@ -555,7 +560,7 @@ function theme_wsclient_ui_parameter_form($variables) {
   $elements = $variables['element'];
 
   $table['#theme'] = 'table';
-  $table['#header'] = array(t('Data type'), t('Multiple'), t('Name'), t('Default value'), t('Required'), array('data' => t('Weight'), 'class' => array('tabledrag-hide')));
+  $table['#header'] = array(t('Data type'), t('Multiple'), t('Name'), t('Default value'), t('Required'), t('Allow Null'), array('data' => t('Weight'), 'class' => array('tabledrag-hide')));
   $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
 
   foreach (element_children($elements['items']) as $key) {
@@ -569,6 +574,7 @@ function theme_wsclient_ui_parameter_form($variables) {
     $row[] = array('data' => $element['name']);
     $row[] = array('data' => $element['default_value']);
     $row[] = array('data' => $element['required']);
+    $row[] = array('data' => $element['allow_null']);
     $row[] = array('data' => $element['weight']);
     $row = array('data' => $row) + $element['#attributes'];
     $row['class'][] = 'draggable';
@@ -759,7 +765,7 @@ function wsclient_ui_type($form, &$form_state, $service, $type, $op = 'edit') {
     '#element_validate' => array('wsclient_ui_validate_parameters'),
     '#theme' => 'wsclient_ui_property_form',
     '#title' => t('Properties'),
-    '#description' => t('Specify the properties for the data type. For each property you have to specify a certain data type and a unique name containing only alphanumeric characters and underscores.'),
+    '#description' => t('Specify the properties for the data type. For each property you have to specify a certain data type and a unique name containing only alphanumeric characters and underscores. You can also specify if null values are allowed.'),
   );
   $types = wsclient_ui_types();
   if (isset($type['property info'])) {
@@ -811,6 +817,7 @@ function wsclient_ui_type_submit($form, &$form_state) {
       $type['property info'][$item['name']] = array(
         'type' => $unmapped_type,
         'label' => $item['label'],
+        'allow null' => $item['allow_null'],
       );
       if ($item['multiple']) {
         $type['property info'][$item['name']] = array('type' => 'list<' . $unmapped_type . '>');
@@ -911,6 +918,10 @@ function _wsclient_ui_property_row($service, $types, $name = '', $info = array()
     '#size' => 40,
     '#default_value' => isset($info['label']) ? $info['label'] : '',
   );
+  $property['allow_null'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => isset($info['allow null']) ? $info['allow null'] : FALSE,
+  );
   return $property;
 }
 
@@ -923,7 +934,7 @@ function theme_wsclient_ui_property_form($variables) {
   $elements = $variables['element'];
 
   $table['#theme'] = 'table';
-  $table['#header'] = array(t('Data type'), t('Multiple'), t('Name'), t('Label'));
+  $table['#header'] = array(t('Data type'), t('Multiple'), t('Name'), t('Label'), t('Allow Null'));
   $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
 
   foreach (element_children($elements['items']) as $key) {
@@ -934,6 +945,7 @@ function theme_wsclient_ui_property_form($variables) {
     $row[] = array('data' => $element['multiple']);
     $row[] = array('data' => $element['name']);
     $row[] = array('data' => $element['label']);
+    $row[] = array('data' => $element['allow_null']);
     $row = array('data' => $row) + $element['#attributes'];
     $table['#rows'][] = $row;
   }

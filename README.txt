@@ -68,3 +68,11 @@ Usage for developers
 
      $service = wsclient_service_load('google');
      $result = $service->translate('Hallo Welt', 'de|en');
+
+ * Hooks are available for altering requests before and after they are sent
+   to the endpoint. See wsclient.api.inc for examples.
+   This can be useful for:
+   * Adding extra programatic encryption keys if needed by the service to 'sign'
+     a request https://www.drupal.org/node/2462103
+   * Manipulating parameters such as the endpoint URL when you need to get
+     through a firewall or for other reasons https://www.drupal.org/node/2428053

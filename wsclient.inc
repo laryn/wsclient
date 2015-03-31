@@ -83,7 +83,14 @@ class WSClientServiceDescription extends Entity {
         }
       }
     }
-    return $this->endpoint()->call($operation, $named_arguments);
+
+    drupal_alter('wsclient_invoke_arguments', $named_arguments, $operation, $this);
+
+    $response = $this->endpoint()->call($operation, $named_arguments);
+
+    drupal_alter('wsclient_invoke_response', $response, $operation, $this);
+
+    return $response;
   }
 
   /**

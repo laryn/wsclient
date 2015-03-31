@@ -160,6 +160,44 @@ function hook_default_wsclient_service_alter(&$services) {
   $services['master']->label = 'New fancy mster site.';
 }
 
+
+/**
+ * Alter arguments before they are sent to the endpoint.
+ *
+ * @param $arguments
+ *   The named arguments array that's sent to the endpoint
+ *
+ * @param $operation
+ *   The name of the operation
+ *
+ * @param $service
+ *   The instance of WSClientServiceDescription that's invoking the hook.
+ *
+ * @see WSClientServiceDescription::invoke()
+ */
+function hook_wsclient_invoke_arguments_alter(&$arguments, $operation, $service) {
+  $arguments['new_arg'] = TRUE;
+}
+
+
+/**
+ * Alter the response back from the endpoint.
+ *
+ * @param $response
+ *   The named arguments array that's sent to the endpoint
+ *
+ * @param $operation
+ *   The name of the operation
+ *
+ * @param $service
+ *   The instance of WSClientServiceDescription that's invoking the hook.
+ *
+ * @see WSClientServiceDescription::invoke()
+ */
+function hook_wsclient_invoke_response_alter(&$response, $operation, $service) {
+  $response['wsclient_status'] = 'OK!';
+}
+
 /**
  * @}
  */

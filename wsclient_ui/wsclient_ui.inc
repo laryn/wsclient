@@ -105,6 +105,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     '#default_value' => $service->label,
     '#required' => TRUE,
     '#description' => t('The human-readable name.'),
+    '#weight' => 10,
   );
   $form['name'] = array(
     '#type' => 'machine_name',
@@ -117,6 +118,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     '#required' => TRUE,
     '#description' => t('The machine-readable name of this service is used internally to identify the service. This name must contain only lowercase letters, numbers, and underscores and must be unique.'),
     '#element_validate' => array('form_validate_machine_name', 'entity_ui_validate_machine_name'),
+    '#weight' => 20,
   );
   $form['url'] = array(
     '#type' => 'textfield',
@@ -125,6 +127,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     '#required' => TRUE,
     '#description' => t('The URL of the web service.'),
     '#element_validate' => array('wsclient_ui_element_url_validate'),
+    '#weight' => 30,
   );
   $form['type'] = array(
     '#type' => 'select',
@@ -133,6 +136,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     '#options' => $types,
     '#required' => TRUE,
     '#description' => t('The type of the web service.'),
+    '#weight' => 40,
   );
   if ($op == 'edit') {
     // Operations of the web service in a table
@@ -177,6 +181,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       '#caption' => t('Operations'),
       '#rows' => $rows,
       '#header' => $header,
+      '#weight' => 50,
     );
     // Add some table styling from Rules.
     $form['operations']['#attributes']['class'][] = 'rules-elements-table';
@@ -223,6 +228,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       '#caption' => t('Data types'),
       '#rows' => $rows,
       '#header' => $header,
+      '#weight' => 60,
     );
 
     // Input for global service parameters.
@@ -232,6 +238,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       '#theme' => 'wsclient_ui_global_parameter_form',
       '#title' => t('Input for global service parameters'),
       '#description' => t('Specify the global parameters for the service. Global parameters will be used if the value of an operation parameter with the same name is empty.'),
+      '#weight' => 70,
     );
 
     $weight = 0;
@@ -261,8 +268,9 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
+    '#weight' => 80,
   );
-
+  $form_state['service'] = $service;
   // Allow the endpoint to make alterations to the form.
   $form_state['form'] = 'main';
   if ($service->type) {

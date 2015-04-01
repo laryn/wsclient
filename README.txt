@@ -63,6 +63,7 @@ Usage for developers
 
  * You can create web service descriptions in code, see for example
    wsclient_examples.module
+
  * You can easily invoke web services by loading the description and executing
    an operation (the operation name can be used a dynamic method name):
 
@@ -76,3 +77,20 @@ Usage for developers
      a request https://www.drupal.org/node/2462103
    * Manipulating parameters such as the endpoint URL when you need to get
      through a firewall or for other reasons https://www.drupal.org/node/2428053
+
+ * Authentication is possible by setting the services 'authentication' setting.
+
+   'Basic' (htauth) authentication parameters can be set with
+
+     $service->settings['authentication']['basic'] = array(
+       'username' => 'AzureDiamond',
+       'password' => 'hunter2',
+     );
+
+    "Web Service Security" protocol is available in the same way.
+    See https://www.drupal.org/node/2420779
+
+     $service->settings['authentication']['wss'] = array(
+       'username' => 'AzureDiamond',
+       'password' => 'hunter2',
+     );

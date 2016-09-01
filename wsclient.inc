@@ -14,6 +14,7 @@ class WSClientServiceDescription extends Entity {
   public $operations = array();
   public $datatypes = array();
   public $global_parameters = array();
+  public $global_header_parameters = array();
   public $name;
   public $label;
   public $url;
@@ -87,7 +88,6 @@ class WSClientServiceDescription extends Entity {
     drupal_alter('wsclient_invoke_arguments', $named_arguments, $operation, $this);
 
     $response = $this->endpoint()->call($operation, $named_arguments);
-
     drupal_alter('wsclient_invoke_response', $response, $operation, $this);
 
     return $response;

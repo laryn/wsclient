@@ -241,6 +241,15 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       '#weight' => 70,
     );
 
+    // Input for global SOAP service header parameters.
+    $form['global_header_parameters'] = array(
+      '#tree' => TRUE,
+      '#theme' => 'wsclient_ui_global_header_parameter_form',
+      '#title' => t('Input for global SOAP header parameters'),
+      '#description' => t('Specify the global header parameters for the SOAP header. Global header parameters will be added to the SOAP header for all SOAP service operations.'),
+      '#weight' => 71,
+    );
+
     $weight = 0;
     foreach ($service->global_parameters as $name => $info) {
       $form['global_parameters']['items'][$name] = _wsclient_ui_global_parameter_row($service, $datatypes, $name, $info);
@@ -255,6 +264,30 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       }
     }
     $form['global_parameters']['more'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add more'),
+      '#limit_validation_errors' => array(array('properties')),
+      '#submit' => array('wsclient_ui_more_submit'),
+    );
+
+    $types = array();
+    foreach ($service->datatypes as $type_name => $item) {
+      $types[$type_name] = $item['label'];
+    }
+
+    // Add rows to global header parameter rows.
+    foreach ($service->global_header_parameters as $name => $info) {
+      $form['global_header_parameters']['items'][$name] = _wsclient_ui_global_header_parameter_row($service, $types, $name, $info);
+      $form['global_header_parameters']['items'][$name]['weight']['#default_value'] = $weight++;
+    }
+
+    // Always add three empty lines for global header parameters input.
+    for ($i = 0; $i < $form_state['more']; $i++) {
+      if (!isset($form['global_header_parameters']['items'][$i])) {
+        $form['global_header_parameters']['items'][$i] = _wsclient_ui_global_header_parameter_row($service, $types);
+      }
+    }
+    $form['global_header_parameters']['more'] = array(
       '#type' => 'submit',
       '#value' => t('Add more'),
       '#limit_validation_errors' => array(array('properties')),
@@ -295,6 +328,19 @@ function wsclient_service_form_submit($form, &$form_state) {
       if (!empty($item['name'])) {
         $service->global_parameters[$item['name']] = array(
           'default value' => $item['default_value']
+        );
+      }
+    }
+  }
+
+  // Save global header paramters.
+  if (isset($form_state['values']['global_header_parameters'])) {
+    $service->global_header_parameters = array();
+
+    foreach ($form_state['values']['global_header_parameters']['items'] as $key => $item) {
+      if (!empty($item['data_type'])) {
+        $service->global_header_parameters[$item['data_type']] = array(
+          'name space url' => $item['name_space'],
         );
       }
     }
@@ -434,6 +480,27 @@ function _wsclient_ui_global_parameter_row($service, $types, $name = '', $info =
     '#default_value' => isset($info['default value']) ? $info['default value'] : '',
   );
   return $parameter;
+}
+
+/**
+ * Generates a row in the global parameter table.
+ */
+function _wsclient_ui_global_header_parameter_row($service, $types, $name = '', $info = array()) {
+  if (isset($name)) {
+    $parameter['data_type'] = array(
+      '#type' => 'select',
+      '#options' => array(0 => '--') + $types,
+      '#default_value' => $name,
+    );
+
+    $parameter['name_space'] = array(
+      '#type' => 'textfield',
+      '#size' => 255,
+      '#default_value' => isset($info['name space url']) ? $info['name space url'] : '',
+    );
+
+    return $parameter;
+  }
 }
 
 /**
@@ -656,6 +723,50 @@ function theme_wsclient_ui_global_parameter_form($variables) {
 }
 
 /**
+ * Themes the global header parameters form for editing the used parameters.
+ *
+ * @ingroup themeable
+ */
+function theme_wsclient_ui_global_header_parameter_form($variables) {
+  $elements = $variables['element'];
+
+  $table['#theme'] = 'table';
+  $table['#header'] = array(t('Data Type'), t('Name Space URL'));
+  $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
+
+  foreach (element_children($elements['items']) as $key) {
+    $element = &$elements['items'][$key];
+    // Add special classes to be used for tabledrag.js.
+    $element['weight']['#attributes']['class'] = array('rules-element-weight');
+
+    $row = array();
+    $row[] = array('data' => $element['data_type']);
+    $row[] = array('data' => $element['name_space']);
+    $row = array('data' => $row) + $element['#attributes'];
+    $row['class'][] = 'draggable';
+    $table['#rows'][] = $row;
+  }
+  $elements['items']['#printed'] = TRUE;
+
+  // Theme it like a form item, but with the description above the content.
+  $attributes['class'][] = 'form-item';
+  $attributes['class'][] = 'rules-variables-form';
+
+  $output = '<div' . drupal_attributes($attributes) . '>' . "\n";
+  $output .= theme('form_element_label', $variables);
+  if (!empty($elements['#description'])) {
+    $output .= ' <div class="description">' . $elements['#description'] . "</div>\n";
+  }
+  $output .= ' ' . drupal_render($table) . "\n";
+  // Add in any further children elements.
+  foreach (element_children($elements, TRUE) as $key) {
+    $output .= drupal_render($elements[$key]);
+  }
+  $output .= "</div>\n";
+  return $output;
+}
+
+/**
  * Returns a list of available data types for service parameters, return
  * values or data type properties. Entities are excluded.
  *
@@ -826,6 +937,7 @@ function wsclient_ui_type_submit($form, &$form_state) {
         'type' => $unmapped_type,
         'label' => $item['label'],
         'allow null' => $item['allow_null'],
+        'default value' => $item['default_value'],
       );
       if ($item['multiple']) {
         $type['property info'][$item['name']] = array('type' => 'list<' . $unmapped_type . '>');
@@ -921,10 +1033,15 @@ function _wsclient_ui_property_row($service, $types, $name = '', $info = array()
     '#default_value' => $name,
     '#element_validate' => array('wsclient_ui_name_validate'),
   );
+  $property['default_value'] = array(
+    '#type' => 'textfield',
+    '#size' => 30,
+    '#default_value' => isset($info['default value']) ? $info['default value'] : '',
+  );
   $property['label'] = array(
     '#type' => 'textfield',
     '#size' => 40,
-    '#default_value' => isset($info['label']) ? $info['label'] : '',
+    '#default_value' => isset($info['label']) ? $info['label'] : $name,
   );
   $property['allow_null'] = array(
     '#type' => 'checkbox',
@@ -942,7 +1059,14 @@ function theme_wsclient_ui_property_form($variables) {
   $elements = $variables['element'];
 
   $table['#theme'] = 'table';
-  $table['#header'] = array(t('Data type'), t('Multiple'), t('Name'), t('Label'), t('Allow Null'));
+  $table['#header'] = array(
+    t('Data type'),
+    t('Multiple'),
+    t('Name'),
+    t('Default value'),
+    t('Label'),
+    t('Allow Null'),
+  );
   $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
 
   foreach (element_children($elements['items']) as $key) {
@@ -952,6 +1076,7 @@ function theme_wsclient_ui_property_form($variables) {
     $row[] = array('data' => $element['type']);
     $row[] = array('data' => $element['multiple']);
     $row[] = array('data' => $element['name']);
+    $row[] = array('data' => $element['default_value']);
     $row[] = array('data' => $element['label']);
     $row[] = array('data' => $element['allow_null']);
     $row = array('data' => $row) + $element['#attributes'];

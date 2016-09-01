@@ -61,6 +61,12 @@ function wsclient_schema() {
         'serialize' => TRUE,
         'description' => 'The global parameters definition of this web service.',
       ),
+      'global_header_parameters' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'serialize' => TRUE,
+        'description' => 'The global header parameters definition of this web service.',
+      ),
       'type' => array(
         'type' => 'varchar',
         'length' => '255',
@@ -162,4 +168,18 @@ function wsclient_update_7102() {
 function wsclient_update_7103() {
   db_drop_table('wsclient_info');
   db_drop_table('wsclient_subscriptions');
+}
+
+/**
+ * Add global_header_parameters column.
+ */
+function wsclient_update_7104() {
+  if (!db_field_exists('wsclient_service', 'global_header_parameters')) {
+    db_add_field('wsclient_service', 'global_header_parameters', array(
+      'type' => 'text',
+      'not null' => FALSE,
+      'serialize' => TRUE,
+      'description' => 'The global header parameters definition of this web service.',
+    ));
+  }
 }

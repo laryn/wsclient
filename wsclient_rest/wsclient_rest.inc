@@ -99,8 +99,12 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
     }
     // Services module compliance: post fields should be in the $data array
     // instead of $arguments.
-    if ($type == 'POST') {
+    if ($type == 'POST' || $type == 'PUT') {
       $data = array_merge((array) $data, $arguments);
+      if (empty($data)) {
+        unset($data);
+      }
+      unset($arguments);
     }
     try {
       $response = $client->execute(new HttpClientRequest($this->service->url . $operation_url, array(

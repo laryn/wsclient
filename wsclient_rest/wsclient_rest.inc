@@ -33,17 +33,33 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
       if (isset($settings['authentication'])) {
         // Handle each type of authentication.
         foreach ($settings['authentication'] as $auth => $auth_settings) {
-          // @todo Allow multiple authentications by implementing and using HttpClientCompositeAuth.
-          switch ($auth) {
-            case 'basic':
-            default:
-              $username = $auth_settings['username'];
-              $password = $auth_settings['password'];
-              $authentication = new HttpClientBasicAuth($username, $password);
-              break;
-            case 'oauth2':
-              $authentication = new HttpClientOAuth2($auth_settings);
-              break;
+          // @todo Remove this check once multiple authentications are
+          // implemented.
+          if ($auth == 'type') {
+            continue;
+          }
+
+          // @todo Remove this check once multiple authentications are
+          // implemeted. For now the switch would cause the last configured
+          // authentication type to be taken.
+          if ($auth == $settings['authentication']['type']) {
+            // @todo Allow multiple authentications by implementing and using
+            // HttpClientCompositeAuth.
+            switch ($auth) {
+              // OAuth v2 support using the http_client module.
+              case 'oauth2':
+                $authentication = new HttpClientOAuth2($auth_settings);
+                break;
+
+              // Default authentication options from the http_client module.
+              case 'basic':
+              case 'wss':
+              default:
+                $username = $auth_settings['username'];
+                $password = $auth_settings['password'];
+                $authentication = new HttpClientBasicAuth($username, $password);
+                break;
+            }
           }
         }
       }
@@ -146,21 +162,21 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
             case 'send_formatter':
               $title = t('Request formatter (send_formatter)');
               $description = t('Choose how to serialize the request.');
-              $weight = 45;
+              $weight = 50;
               break;
             case 'receive_formatter':
               $title = t('Response formatter (receive_formatter)');
               $description = t('Choose how to parse the response.');
-              $weight = 50;
+              $weight = 55;
               break;
           }
-          $form[$formatter_type] = array(
+          $form['settings'][$formatter_type] = array(
             '#type' => 'fieldset',
             '#title' => $title,
             '#tree' => TRUE,
             '#weight' => $weight,
           );
-          $form[$formatter_type]['formatter'] = array(
+          $form['settings'][$formatter_type]['class'] = array(
             '#type' => 'select',
             '#title' => t('Formatter'),
             '#default_value' => $default_formatter,
@@ -266,18 +282,18 @@ class WsclientRestXMLFormatter extends HttpClientXMLFormatter {
             ? $service->settings[$formatter_type]['settings']
             : array();
           // UI for settings.
-          $form[$formatter_type]['settings']['default_root'] = array(
+          $form['settings'][$formatter_type]['settings']['default_root'] = array(
             '#type' => 'textfield',
             '#title' => t('Default root'),
             '#default_value' => isset($formatter_settings['default_root']) ? $formatter_settings['default_root'] : $default_formatter_settings['default_root'],
             '#description' => t('Default root for created XML documents.'),
             '#states' => array(
               'visible' => array(
-                'select[name="' . $formatter_type . '[formatter]"]' => array('value' => 'WsclientRestXMLFormatter'),
+                'select[name="settings[' . $formatter_type . '][class]"]' => array('value' => 'WsclientRestXMLFormatter'),
               ),
             ),
           );
-          $form[$formatter_type]['settings']['adaptive_root'] = array(
+          $form['settings'][$formatter_type]['settings']['adaptive_root'] = array(
             '#type' => 'checkbox',
             '#title' => t('Adaptive root'),
             '#default_value' => isset($formatter_settings['adaptive_root']) ? $formatter_settings['adaptive_root'] : $default_formatter_settings['adaptive_root'],
@@ -290,7 +306,7 @@ class WsclientRestXMLFormatter extends HttpClientXMLFormatter {
             ),
             '#states' => array(
               'visible' => array(
-                'select[name="' . $formatter_type . '[formatter]"]' => array('value' => 'WsclientRestXMLFormatter'),
+                'select[name="settings[' . $formatter_type . '][class]"]' => array('value' => 'WsclientRestXMLFormatter'),
               ),
             ),
           );
@@ -304,9 +320,12 @@ class WsclientRestXMLFormatter extends HttpClientXMLFormatter {
       case 'main':
         // Remove XML settings from the formatters that are not XML.
         foreach (array('send_formatter', 'receive_formatter') as $formatter_type) {
-          if ($form_state['values'][$formatter_type]['formatter'] != 'WsclientRestXMLFormatter') {
+          if (empty($form_state['values']['settings'][$formatter_type]['formatter'])) {
+            continue;
+          }
+          if ($form_state['values']['settings'][$formatter_type]['formatter'] != 'WsclientRestXMLFormatter') {
             foreach (array('default_root', 'adaptive_root') as $setting) {
-              unset($form_state['values'][$formatter_type]['settings'][$setting]);
+              unset($form_state['values']['settings'][$formatter_type]['settings'][$setting]);
             }
           }
         }

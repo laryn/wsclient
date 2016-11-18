@@ -101,7 +101,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
 
   $form['label'] = array(
     '#type' => 'textfield',
-    '#title' => 'Label',
+    '#title' => t('Label'),
     '#default_value' => $service->label,
     '#required' => TRUE,
     '#description' => t('The human-readable name.'),
@@ -122,7 +122,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
   );
   $form['url'] = array(
     '#type' => 'textfield',
-    '#title' => 'URL',
+    '#title' => t('URL'),
     '#default_value' => $service->url,
     '#required' => TRUE,
     '#description' => t('The URL of the web service.'),
@@ -131,7 +131,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
   );
   $form['type'] = array(
     '#type' => 'select',
-    '#title' => 'Type',
+    '#title' => t('Type'),
     '#default_value' => $service->type,
     '#options' => $types,
     '#required' => TRUE,
@@ -181,7 +181,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       '#caption' => t('Operations'),
       '#rows' => $rows,
       '#header' => $header,
-      '#weight' => 50,
+      '#weight' => 65,
     );
     // Add some table styling from Rules.
     $form['operations']['#attributes']['class'][] = 'rules-elements-table';
@@ -228,8 +228,188 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
       '#caption' => t('Data types'),
       '#rows' => $rows,
       '#header' => $header,
+      '#weight' => 70,
+    );
+
+    $settings = $service->settings;
+    // Simply naming the settings here to reflect the internal entity
+    // structure is enough to mean we don't need to worry about serializing
+    // it ourself.
+    $form['settings'] = array(
+      '#tree' => TRUE,
+      '#weight' => 45,
+    );
+    // Input for Authentication options.
+    $form['settings']['authentication'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Authentication'),
       '#weight' => 60,
     );
+
+    // @todo Remove authentication type once multiple authentications is implemented
+    // @see WSClientRESTEndpoint::client() => Allow multiple authentications by implementing and using HttpClientCompositeAuth.
+    $form['settings']['authentication']['type'] = array(
+      '#type' => 'select',
+      '#options' => array(
+        'none' => t('None'),
+        'basic' => t('Basic (htauth)'),
+        'wss' => t('WSS (Web Service Security)'),
+        'oauth2' => t('OAuth 2.0'),
+      ),
+      '#default_value' => isset($settings['authentication']['type']) ? $settings['authentication']['type'] : 'none',
+    );
+
+    $xpath = ':input[name="settings[authentication][type]"]';
+
+    $basic_states = array(
+      '#states' => array(
+        'visible' => array(
+          $xpath => array('value' => 'basic'),
+        ),
+      ),
+    );
+
+    $basic_settings = isset($settings['authentication']['basic']) ? $settings['authentication']['basic'] : array();
+
+    $form['settings']['authentication']['basic'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Basic HTAuth'),
+      '#description' => t('HTAuth requires http_client.module > 7.x-2.4'),
+    ) + $basic_states;
+    $form['settings']['authentication']['basic']['username'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Username'),
+      '#default_value' => isset($basic_settings['username'])? $basic_settings['username'] : '',
+    );
+    $form['settings']['authentication']['basic']['password'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Password'),
+      '#default_value' => isset($basic_settings['password'])? $basic_settings['password'] : '',
+    );
+
+    $wss_settings = isset($settings['authentication']['wss']) ? $settings['authentication']['wss'] : array();
+
+    $form['settings']['authentication']['wss'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('WSS (Web Services Security)'),
+      '#states' => array(
+        'visible' => array(
+          $xpath => array('value' => 'wss'),
+        ),
+      ),
+    );
+    $form['settings']['authentication']['wss']['username'] = array(
+      '#type' => 'textfield',
+      '#title' => ('Username'),
+      '#default_value' => isset($wss_settings['username'])? $wss_settings['username'] : '',
+    );
+    $form['settings']['authentication']['wss']['password'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Password'),
+      '#default_value' => isset($wss_settings['password'])? $wss_settings['password'] : '',
+    );
+
+    $oauth2_states = array(
+      '#states' => array(
+        'visible' => array(
+          $xpath => array('value' => 'oauth2'),
+        ),
+      ),
+    );
+
+    $xpath_auth_flow = ':input[name="settings[authentication][oauth2][auth_flow]"]';
+
+    $oauth2_states_server_side = array(
+      '#states' => array(
+        'visible' => array(
+          $xpath => array('value' => 'oauth2'),
+          $xpath_auth_flow => array('value' => 'server-side'),
+        ),
+      ),
+    );
+
+    $oauth2_states_user_password = array(
+      '#states' => array(
+        'visible' => array(
+          $xpath => array('value' => 'oauth2'),
+          $xpath_auth_flow => array('value' => 'user-password'),
+        ),
+      ),
+    );
+
+    $form['settings']['authentication']['oauth2'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('OAuth 2.0'),
+    ) + $oauth2_states;
+
+    $oauth_settings = isset($settings['authentication']['oauth2']) ? $settings['authentication']['oauth2'] : array();
+
+    $form['settings']['authentication']['oauth2']['auth_flow'] = array(
+      '#type' => 'select',
+      '#title' => t('Auth flow'),
+      '#options' => array(
+        'client-credentials' => t('Client credentials'),
+        'server-side' => t('Server side'),
+        'user-password' => t('User password'),
+      ),
+      '#default_value' => isset($oauth_settings['auth_flow']) ? $oauth_settings['auth_flow'] : '',
+    );
+    $form['settings']['authentication']['oauth2']['token_endpoint'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Token endpoint'),
+      '#default_value' => isset($oauth_settings['token_endpoint']) ? $oauth_settings['token_endpoint'] : '',
+      '#description' => t('E.g. https://server.org/oauth2/token.'),
+      // '#element_validate' => array('wsclient_ui_element_url_validate'),
+    );
+    $form['settings']['authentication']['oauth2']['client_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Client ID'),
+      '#default_value' => isset($oauth_settings['client_id']) ? $oauth_settings['client_id'] : '',
+      '#description' => t('The client ID as registered on the OAuth 2.0 server.'),
+    );
+    $form['settings']['authentication']['oauth2']['client_secret'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Client secret'),
+      '#default_value' => isset($oauth_settings['client_secret']) ? $oauth_settings['client_secret'] : '',
+      '#description' => t('The client secret as registered on the OAuth 2.0 server.'),
+    );
+    $form['settings']['authentication']['oauth2']['scope'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Scope'),
+      '#default_value' => isset($oauth_settings['scope']) ? $oauth_settings['scope'] : '',
+      '#description' => t('Space separated list of scopes.'),
+    );
+    $form['settings']['authentication']['oauth2']['query_auth'] = array(
+      '#type' => 'select',
+      '#title' => t('Query auth'),
+      '#options' => array(0 => t('No'), 1 => t('Yes')),
+      '#default_value' => isset($oauth_settings['query_auth']) ? $oauth_settings['query_auth'] : 0,
+      '#description' => t("Yes will make the access token be set on the query, otherwise it'll be set on the headers."),
+    );
+    $form['settings']['authentication']['oauth2']['redirect_uri'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Redirect URI'),
+      '#default_value' => isset($oauth_settings['redirect_uri']) ? $oauth_settings['redirect_uri'] : '',
+      '#description' => t('E.g. https://client.org/oauth2/authorized. Only needed for server-side auth flow.'),
+    ) + $oauth2_states_server_side;
+    $form['settings']['authentication']['oauth2']['authorization_endpoint'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Authorization endpoint'),
+      '#default_value' => isset($oauth_settings['authorization_endpoint']) ? $oauth_settings['authorization_endpoint'] : '',
+      '#description' => t('E.g. https://server.org/oauth2/authorize. Only needed for server-side auth flow.'),
+    ) + $oauth2_states_server_side;
+    $form['settings']['authentication']['oauth2']['username'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Username'),
+      '#default_value' => isset($oauth_settings['username']) ? $oauth_settings['username'] : '',
+      '#description' => t('Username of resource owner on the OAuth 2.0 server. Only needed for user-password auth flow.'),
+    ) + $oauth2_states_user_password;
+    $form['settings']['authentication']['oauth2']['password'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Password'),
+      '#default_value' => isset($oauth_settings['password']) ? $oauth_settings['password'] : '',
+      '#description' => t('Password of resource owner on the OAuth 2.0 server. Only needed for user-password auth flow.'),
+    ) + $oauth2_states_user_password;
 
     // Input for global service parameters.
     $form['global_parameters'] = array(

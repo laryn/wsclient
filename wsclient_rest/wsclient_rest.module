@@ -46,19 +46,12 @@ function wsclient_rest_form_submit($form, &$form_state) {
 }
 
 /**
- * Form submit callback for the operation form.
- */
-function wsclient_rest_operation_form_submit($form, &$form_state) {
-  $form_state['operation']['type'] = $form_state['values']['type'];
-  $form_state['operation']['url'] = $form_state['values']['url'];
-}
-
-/**
  * Form submit callback for the main form.
  */
 function wsclient_rest_main_form_submit($form, &$form_state) {
   foreach (array('send_formatter', 'receive_formatter') as $formatter_type) {
-    // Make sure to avoid overridding of the custom formatter, defined in the settings.
+    // Make sure to avoid overridding of the custom formatter, defined in the
+    // settings.
     if ($form_state['values'][$formatter_type]['formatter'] === 'custom') {
       continue;
     }
@@ -69,6 +62,14 @@ function wsclient_rest_main_form_submit($form, &$form_state) {
       $formatter_settings['settings'] = $form_state['values'][$formatter_type]['settings'];
     }
   }
+}
+
+/**
+ * Form submit callback for the operation form.
+ */
+function wsclient_rest_operation_form_submit($form, &$form_state) {
+  $form_state['operation']['type'] = $form_state['values']['type'];
+  $form_state['operation']['url'] = $form_state['values']['url'];
 }
 
 /**

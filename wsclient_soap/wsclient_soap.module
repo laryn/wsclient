@@ -14,6 +14,10 @@ function wsclient_soap_wsclient_endpoint_types() {
       'label' => t('SOAP'),
       'class' => 'WSClientSOAPEndpoint',
     ),
+    'soap 1.2' => array(
+      'label' => t('SOAP 1.2'),
+      'class' => 'WSClientSOAPEndpoint',
+    ),
   );
 }
 
@@ -26,6 +30,9 @@ class WSClientSOAPEndpoint extends WSClientEndpoint {
   public function client() {
     if (!isset($this->client)) {
       $options['exceptions'] = TRUE;
+      if ($this->service->type == 'soap 1.2') {
+        $options['soap_version'] = SOAP_1_2;
+      }
       // Handle Basic HTTP authentication.
       if (!empty($this->service->settings['authentication']['basic'])) {
         $this->service->settings['options']['login'] = $this->service->settings['authentication']['basic']['username'];
@@ -106,6 +113,22 @@ class WSClientSOAPEndpoint extends WSClientEndpoint {
    */
   public function call($operation, $arguments) {
     $client = $this->client();
+
+    // Soap endpoints MAY also have 'headers' set on a per-operation basis.
+    $operation_settings = $this->service->operations[$operation];
+    if (!empty($operation_settings['header'])) {
+      $headers = array();
+      foreach ($operation_settings['header'] as $header_settings) {
+        if (!empty($header_settings['actor'])) {
+          $headers[] = new SoapHeader($header_settings['namespace'], $header_settings['name'], $header_settings['data'], $header_settings['mustunderstand'], $header_settings['actor']);
+        }
+        else {
+          $headers[] = new SoapHeader($header_settings['namespace'], $header_settings['name'], $header_settings['data'], $header_settings['mustunderstand']);
+        }
+      }
+      $client->__setSoapHeaders($headers);
+    }
+
     try {
       $response = $client->__soapCall($operation, $arguments);
       return $response;
@@ -168,7 +191,7 @@ function wsclient_soap_form_wsclient_service_form_alter(&$form, &$form_state) {
  */
 function wsclient_soap_wsclient_service_form_validate($form, $form_state) {
   $service = $form_state['wsclient_service'];
-  if ($form_state['values']['type'] == 'soap') {
+  if ($form_state['values']['type'] == 'soap' || $form_state['values']['type'] == 'soap 1.2') {
     // The url has to point to a valid WSDL file.
     try {
       // If initializing the SOAPClient succeeds we're good, otherwise we catch
@@ -190,7 +213,7 @@ function wsclient_soap_wsclient_service_form_validate($form, $form_state) {
  * types of the new SOAP service.
  */
 function wsclient_soap_wsclient_service_form_submit($form, &$form_state) {
-  if ($form_state['values']['type'] == 'soap' && $form_state['op'] == 'add') {
+  if (($form_state['values']['type'] == 'soap' || $form_state['values']['type'] == 'soap 1.2') && $form_state['op'] == 'add') {
     $service = $form_state['wsclient_service'];
     $endpoint = $service->endpoint();
     $endpoint->initializeMetadata();

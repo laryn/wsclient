@@ -113,7 +113,7 @@ function wsclient_tester_prepare_request_callback($form, $form_state) {
     $args = $form_state['values']['parameters'];
   }
 
-  if ($service->type == 'soap') {
+  if ($service->type == 'soap' || $service->type == 'soap 1.2') {
     // The service will have an endpoint that will have a SOAPClient.
     // Settings on the service->options may be passed to the SOAPClient.
     // @see WSClientSOAPEndpoint::client()
@@ -149,7 +149,7 @@ function wsclient_tester_prepare_request_callback($form, $form_state) {
     $element['response']['header']['#markup'] = $service->endpoint()->client()->lastResponse->headers;
     $element['response']['packet']['#markup'] = $service->endpoint()->client()->lastResponse->body;
   }
-  elseif ($service->type == 'soap') {
+  elseif ($service->type=='soap' || $service->type=='soap 1.2') {
     $element['request']['header']['#markup'] = $service->endpoint()->client()->__getLastRequestHeaders();
     $element['request']['packet']['#markup'] = htmlspecialchars(wsclient_tester_prettify_xml($service->endpoint()->client()->__getLastRequest()));
     $element['response']['header']['#markup'] = $service->endpoint()->client()->__getLastResponseHeaders();

@@ -595,6 +595,28 @@ function wsclient_ui_operation($form, &$form_state, $service, $operation, $op = 
     '#limit_validation_errors' => array(array('parameters')),
     '#submit' => array('wsclient_ui_more_submit'),
   );
+
+  // SOAP 1.2 etc may also require additional headers.
+  if ($service->type == 'soap 1.2') {
+    $form['headers'] = array(
+      '#tree' => TRUE,
+      '#theme' => 'wsclient_ui_header_form',
+      '#title' => t('Soap 1.2 Headers'),
+      '#description' => t('Some services may also require specific headers to be set, such as "To" for their internal routing, or the SOAP_1_2 "mustunderstand" flag.'),
+    );
+    $weight = 0;
+    $types = wsclient_ui_types(TRUE);
+    if (isset($operation['header'])) {
+      foreach ($operation['header'] as $name => $info) {
+        $form['headers']['items'][$name] = _wsclient_ui_header_row($info);
+        $form['headers']['items'][$name]['weight']['#default_value'] = $weight++;
+      }
+    }
+    // Always add an empty line.
+    $form['headers']['items'][$i] = _wsclient_ui_header_row(array());
+    $form['headers']['items'][$i]['weight']['#default_value'] = $weight++;
+  }
+
   // Exclude the hidden data type for result types.
   unset($types['hidden']);
 
@@ -732,6 +754,40 @@ function _wsclient_ui_parameter_row($service, $types, $name = '', $info = array(
 }
 
 /**
+ * Generates a row in the header table.
+ */
+function _wsclient_ui_header_row($info = array()) {
+  $parameter['namespace'] = array(
+    '#type' => 'textfield',
+    '#size' => 40,
+    '#default_value' => isset($info['namespace']) ? $info['namespace'] : '',
+  );
+  $parameter['name'] = array(
+    '#type' => 'textfield',
+    '#size' => 10,
+    '#default_value' => isset($info['name']) ? $info['name'] : '',
+  );
+  $parameter['data'] = array(
+    '#type' => 'textfield',
+    '#size' => 40,
+    '#default_value' => isset($info['data']) ? $info['data'] : '',
+  );
+  $parameter['mustunderstand'] = array(
+    '#type' => 'checkbox',
+    '#default_value' => isset($info['mustunderstand']) ? $info['mustunderstand'] : FALSE,
+  );
+  $parameter['actor'] = array(
+    '#type' => 'textfield',
+    '#size' => 10,
+    '#default_value' => isset($info['actor']) ? $info['actor'] : '',
+  );
+  $parameter['weight'] = array(
+    '#type' => 'weight',
+  );
+  return $parameter;
+}
+
+/**
  * Validation callback for machine names of parameters or properties.
  */
 function wsclient_ui_name_validate($element, &$form_state) {
@@ -776,6 +832,17 @@ function wsclient_ui_operation_submit($form, &$form_state) {
       $operation['parameter'][$item['name']]['allow null'] = $item['allow_null'];
     }
   }
+
+  // SOAP 1.2 etc may also require additional headers.
+  if ($service->type == 'soap 1.2' && !empty($form_state['values']['headers'])) {
+    $operation['header'] = array();
+    foreach ($form_state['values']['headers']['items'] as $key => $item) {
+      if (!empty($item['name'])) {
+        $operation['header'][$item['name']] = $item;
+      }
+    }
+  }
+
   if (!empty($form_state['values']['result_type'])) {
     $unmapped_type = _wsclient_ui_unmap_type($form_state['values']['result_type'], $service);
     $operation['result'] = array(
@@ -830,6 +897,59 @@ function theme_wsclient_ui_parameter_form($variables) {
     $row[] = array('data' => $element['default_value']);
     $row[] = array('data' => $element['required']);
     $row[] = array('data' => $element['allow_null']);
+    $row[] = array('data' => $element['weight']);
+    $row = array('data' => $row) + $element['#attributes'];
+    $row['class'][] = 'draggable';
+    $table['#rows'][] = $row;
+  }
+  $elements['items']['#printed'] = TRUE;
+  if (!empty($table['#rows'])) {
+    drupal_add_tabledrag($table['#attributes']['id'], 'order', 'sibling', 'rules-element-weight');
+  }
+
+  // Theme it like a form item, but with the description above the content.
+  $attributes['class'][] = 'form-item';
+  $attributes['class'][] = 'rules-variables-form';
+
+  $output = '<div' . drupal_attributes($attributes) . '>' . "\n";
+  $output .= theme('form_element_label', $variables);
+  if (!empty($elements['#description'])) {
+    $output .= ' <div class="description">' . $elements['#description'] . "</div>\n";
+  }
+  $output .= ' ' . drupal_render($table) . "\n";
+  // Add in any further children elements.
+  foreach (element_children($elements, TRUE) as $key) {
+    $output .= drupal_render($elements[$key]);
+  }
+  $output .= "</div>\n";
+  return $output;
+}
+
+/**
+ * Themes the operation form for editing the used headers.
+ *
+ * Just cloned from theme_wsclient_ui_parameter_form()
+ *
+ * @ingroup themeable
+ */
+function theme_wsclient_ui_header_form($variables) {
+  $elements = $variables['element'];
+
+  $table['#theme'] = 'table';
+  $table['#header'] = array(t('Namespace'), t('Name'), t('Data'), t('Mustunderstand'), t('Actor'), array('data' => t('Weight'), 'class' => array('tabledrag-hide')));
+  $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
+
+  foreach (element_children($elements['items']) as $key) {
+    $element = &$elements['items'][$key];
+    // Add special classes to be used for tabledrag.js.
+    $element['weight']['#attributes']['class'] = array('rules-element-weight');
+
+    $row = array();
+    $row[] = array('data' => $element['namespace']);
+    $row[] = array('data' => $element['name']);
+    $row[] = array('data' => $element['data']);
+    $row[] = array('data' => $element['mustunderstand']);
+    $row[] = array('data' => $element['actor']);
     $row[] = array('data' => $element['weight']);
     $row = array('data' => $row) + $element['#attributes'];
     $row['class'][] = 'draggable';

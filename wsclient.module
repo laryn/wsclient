@@ -35,7 +35,7 @@ function wsclient_entity_info() {
     'wsclient_service' => array(
       'label' => t('Web service description'),
       'entity class' => 'WSClientServiceDescription',
-      'controller class' => 'EntityAPIControllerExportable',
+      'controller class' => 'EntityPlusControllerExportable',
       'base table' => 'wsclient_service',
       'module' => 'wsclient',
       'fieldable' => FALSE,
@@ -143,7 +143,6 @@ function wsclient_map_type($service_name, $service_types, $type) {
  */
 function wsclient_autoload_info() {
   return array(
-    'WSClientFeaturesController' => 'wsclient.features.inc',
     'WSClientServiceDescription' => 'wsclient.inc',
     'WSClientEndpointInterface' => 'wsclient.inc',
     'WSClientEndpoint' => 'wsclient.inc',

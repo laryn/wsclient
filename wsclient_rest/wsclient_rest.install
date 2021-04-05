@@ -5,5 +5,9 @@
  * Web service client REST - installation file.
  */
 
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function wsclient_rest_update_7100() { }
+/**
+ * Implements hook_update_last_removed().
+ */
+function wsclient_rest_update_last_removed() {
+  return 7100;
+}

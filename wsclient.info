@@ -3,4 +3,5 @@ description = Interact with remote sites, provides Rules integration.
 package = Services
 backdrop = 1.x
 type = module
-dependencies[] = entity
+
+dependencies[] = entity_plus

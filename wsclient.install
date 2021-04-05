@@ -113,17 +113,9 @@ function wsclient_schema() {
   return $schema;
 }
 
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function wsclient_update_7100() { }
-
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function wsclient_update_7101() { }
-
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function wsclient_update_7102() { }
-
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function wsclient_update_7103() { }
-
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function wsclient_update_7104() { }
+/**
+ * Implements hook_update_last_removed().
+ */
+function wsclient_update_last_removed() {
+  return 7104;
+}

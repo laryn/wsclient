@@ -20,12 +20,12 @@ Installation
  * The WSClient user interface depends on Rules, download and install it from
    http://drupal.org/project/rules
  * Copy the whole wsclient directory to your modules directory
-   (e.g. DRUPAL_ROOT/sites/all/modules) and activate the Web service client and
+   (e.g. BACKDROP_ROOT/sites/all/modules) and activate the Web service client and
    Web service client UI modules.
  * The administrative user interface can be found at
    admin/config/services/wsclient
  * If you want to use REST services you have to download and install the
-   http_client module (http://drupal.org/project/http_client) and you need to
+   http_client module and you need to
    activate the Web service client REST module.
  * If you want to use SOAP services you have to activate the Web service client
    SOAP module.

@@ -51,7 +51,7 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
                 $authentication = new HttpClientOAuth2($auth_settings);
                 break;
 
-              // Default authentication options from the http_client module.
+                // Default authentication options from the http_client module.
               case 'basic':
               case 'wss':
               default:
@@ -204,7 +204,7 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
           '#type' => 'textfield',
           '#title' => t('Path'),
           '#default_value' => isset($operation['url']) ? $operation['url'] : '',
-          '#description' => t('The path to append to the services base URL. In order to construct the path using parameter values make use of replacements in the form "@parameter-name". E.g. the path "node/@nid" together with a "nid" parameter could be used to construct the path to a Drupal node.'),
+          '#description' => t('The path to append to the services base URL. In order to construct the path using parameter values make use of replacements in the form "@parameter-name". E.g. the path "node/@nid" together with a "nid" parameter could be used to construct the path to a Backdrop node.'),
           '#weight' => -5,
         );
         break;
@@ -229,7 +229,7 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
    * Alters the given request.
    *
    * The public alterRequest method supported by Hugo Wetterberg's HttpClient.
-   * The request to be altered is passed to drupal_alter() with the service
+   * The request to be altered is passed to backdrop_alter() with the service
    * definition as a context.
    *
    * @param HttpClientRequest $request
@@ -239,7 +239,7 @@ class WSClientRESTEndpoint extends WSClientEndpoint {
    * @see hook_wsclient_rest_request_alter()
    */
   public function alterRequest($request) {
-    drupal_alter('wsclient_rest_request', $request, $this->service);
+    backdrop_alter('wsclient_rest_request', $request, $this->service);
   }
 }
 
@@ -299,10 +299,10 @@ class WsclientRestXMLFormatter extends HttpClientXMLFormatter {
             '#default_value' => isset($formatter_settings['adaptive_root']) ? $formatter_settings['adaptive_root'] : $default_formatter_settings['adaptive_root'],
             '#description' => t('If it is set to TRUE and the source data has a single root attribute the formatter will use that attribute as root. The object %foo_object would be serialized to %foo_wrapped instead of %foo_wrapped_result.',
               array(
-                '%foo_object' => '{"foo":"bar"}',
-                '%foo_wrapped' => '<foo>bar</foo>',
-                '%foo_wrapped_result' => '<result><foo>bar</foo></result>',
-              )
+              '%foo_object' => '{"foo":"bar"}',
+              '%foo_wrapped' => '<foo>bar</foo>',
+              '%foo_wrapped_result' => '<result><foo>bar</foo></result>',
+            )
             ),
             '#states' => array(
               'visible' => array(

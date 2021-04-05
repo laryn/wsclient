@@ -5,6 +5,10 @@
  * Web service client - installation file.
  */
 
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
 function wsclient_enable() {
   // Force clearing module implements cache.
   module_implements('services_resources', FALSE, TRUE);
@@ -109,77 +113,17 @@ function wsclient_schema() {
   return $schema;
 }
 
-/**
- * Add in the exportable entity db columns as required by the entity API.
- */
-function wsclient_update_7100() {
-  db_add_field('wsclient_service', 'status', array(
-    'type' => 'int',
-    'not null' => TRUE,
-    'default' => ENTITY_CUSTOM,
-    'size' => 'tiny',
-    'description' => 'The exportable status of the entity.',
-  ));
-  db_add_field('wsclient_service', 'module', array(
-    'description' => 'The name of the providing module if the entity has been defined in code.',
-    'type' => 'varchar',
-    'length' => 255,
-    'not null' => FALSE,
-  ));
-}
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function wsclient_update_7100() { }
 
-/**
- * Add global_parameters column.
- */
-function wsclient_update_7101() {
-  if (!db_field_exists('wsclient_service', 'global_parameters')) {
-    db_add_field('wsclient_service', 'global_parameters', array(
-      'type' => 'text',
-      'not null' => FALSE,
-      'serialize' => TRUE,
-      'description' => 'The global parameters definition of this web service.',
-    ));
-  }
-}
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function wsclient_update_7101() { }
 
-/**
- * Increase size of datatypes and operations columns to medium.
- */
-function wsclient_update_7102() {
-  db_change_field('wsclient_service', 'datatypes', 'datatypes', array(
-    'type' => 'text',
-    'not null' => FALSE,
-    'serialize' => TRUE,
-    'size' => 'medium',
-    'description' => 'The complex data types used in the operations.',
-  ));
-  db_change_field('wsclient_service', 'operations', 'operations', array(
-    'type' => 'text',
-    'not null' => FALSE,
-    'serialize' => TRUE,
-    'size' => 'medium',
-    'description' => 'The operations this web service offers.',
-  ));
-}
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function wsclient_update_7102() { }
 
-/**
- * Remove unused subscription database tables.
- */
-function wsclient_update_7103() {
-  db_drop_table('wsclient_info');
-  db_drop_table('wsclient_subscriptions');
-}
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function wsclient_update_7103() { }
 
-/**
- * Add global_header_parameters column.
- */
-function wsclient_update_7104() {
-  if (!db_field_exists('wsclient_service', 'global_header_parameters')) {
-    db_add_field('wsclient_service', 'global_header_parameters', array(
-      'type' => 'text',
-      'not null' => FALSE,
-      'serialize' => TRUE,
-      'description' => 'The global header parameters definition of this web service.',
-    ));
-  }
-}
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function wsclient_update_7104() { }

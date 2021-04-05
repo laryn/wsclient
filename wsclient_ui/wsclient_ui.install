@@ -5,9 +5,5 @@
  * Web service client UI - installation file.
  */
 
-/**
- * Clear caches to register the new WSClientUIController class.
- */
-function wsclient_ui_update_7101() {
-  // Nothing to do, as update.php clears caches anyway.
-}
+// TODO The old hook_update_N functions cannot be applied to Backdrop.
+function wsclient_ui_update_7101() { }

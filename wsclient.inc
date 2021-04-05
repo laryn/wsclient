@@ -85,10 +85,10 @@ class WSClientServiceDescription extends Entity {
       }
     }
 
-    drupal_alter('wsclient_invoke_arguments', $named_arguments, $operation, $this);
+    backdrop_alter('wsclient_invoke_arguments', $named_arguments, $operation, $this);
 
     $response = $this->endpoint()->call($operation, $named_arguments);
-    drupal_alter('wsclient_invoke_response', $response, $operation, $this);
+    backdrop_alter('wsclient_invoke_response', $response, $operation, $this);
 
     return $response;
   }
@@ -226,11 +226,11 @@ abstract class WSClientEndpoint implements WSClientEndpointInterface {
     $this->url = $service->url;
   }
 
-  public function call($operation, $arguments) {}
+  public function call($operation, $arguments) { }
 
-  public function dataTypes() {}
+  public function dataTypes() { }
 
-  public function formAlter(&$form, &$form_state) {}
+  public function formAlter(&$form, &$form_state) { }
 
   public function clearCache() {
     unset($this->client);

@@ -16,7 +16,7 @@ function wsclient_ui_entity_info_alter(&$entity_info) {
     'controller class' => 'WSClientUIController',
     'path' => WSCLIENT_UI_PATH,
     'file' => 'wsclient_ui.inc',
-    'file path' => drupal_get_path('module', 'wsclient_ui'),
+    'file path' => backdrop_get_path('module', 'wsclient_ui'),
   );
   // Enable URI callback.
   $entity_info['wsclient_service']['uri callback'] = 'wsclient_ui_uri';
@@ -80,5 +80,14 @@ function wsclient_ui_theme() {
       'render element' => 'element',
       'file' => 'wsclient_ui.inc',
     ),
+  );
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function wsclient_ui_autoload_info() {
+  return array(
+    'WSClientUIController' => 'wsclient_ui.inc',
   );
 }

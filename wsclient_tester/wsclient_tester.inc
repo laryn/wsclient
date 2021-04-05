@@ -14,7 +14,7 @@ function wsclient_tester_operation_test($form, $form_state, $service, $operation
     '!service_label' => $service->label,
     '!operation_label' => $operation['label'],
   );
-  drupal_set_title(t("Testing Web Service : !service_label : !operation_label()", $strings));
+  backdrop_set_title(t("Testing Web Service : !service_label : !operation_label()", $strings));
   $form  = array();
 
   $form['uri'] = array(
@@ -149,7 +149,7 @@ function wsclient_tester_prepare_request_callback($form, $form_state) {
     $element['response']['header']['#markup'] = $service->endpoint()->client()->lastResponse->headers;
     $element['response']['packet']['#markup'] = $service->endpoint()->client()->lastResponse->body;
   }
-  elseif ($service->type=='soap' || $service->type=='soap 1.2') {
+  elseif ($service->type == 'soap' || $service->type == 'soap 1.2') {
     $element['request']['header']['#markup'] = $service->endpoint()->client()->__getLastRequestHeaders();
     $element['request']['packet']['#markup'] = htmlspecialchars(wsclient_tester_prettify_xml($service->endpoint()->client()->__getLastRequest()));
     $element['response']['header']['#markup'] = $service->endpoint()->client()->__getLastResponseHeaders();
@@ -159,7 +159,7 @@ function wsclient_tester_prepare_request_callback($form, $form_state) {
   if (module_exists('devel')) {
     $element['request']['data']['#markup'] = kpr($args, 1);
     $element['response']['data']['#markup'] = kpr($response, 1);
-   }
+  }
 
   $element['#value'] = t("Ran at %time, took %duration to execute", array(
     '%time' => time(),
@@ -236,7 +236,10 @@ function wsclient_tester_data_entry_form($label, $type, $description, $data, $da
       '#title' => t("%label (%type)", array('%label' => $label, '%type' => $type)),
       '#default_value' => $data,
       // Defining false first so it's the default when setting up a form.
-      '#options' => array('false' => 'false', 'true' => 'true'),
+      '#options' => array(
+        'false' => 'false',
+        'true' => 'true',
+      ),
       '#description' => $description,
     );
   }

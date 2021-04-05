@@ -23,57 +23,57 @@ class WSClientUIController extends EntityDefaultUIController {
     $id_count = count(explode('/', $this->path)) + 1;
     $items[$this->path . '/manage/%wsclient_service/add/operation'] = array(
       'title' => 'Add operation',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('wsclient_ui_operation', $id_count, NULL, 'add'),
       'access arguments' => array('administer web services'),
       'file' => 'wsclient_ui.inc',
-      'file path' => drupal_get_path('module', 'wsclient_ui'),
+      'file path' => backdrop_get_path('module', 'wsclient_ui'),
     );
     $op_count = $id_count + 2;
     $items[$this->path . '/manage/%wsclient_service/operation/%wsclient_ui_operation'] = array(
       'title' => 'Edit operation',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('wsclient_ui_operation', $id_count, $op_count, 'edit'),
       'load arguments' => array($id_count),
       'access arguments' => array('administer web services'),
       'file' => 'wsclient_ui.inc',
-      'file path' => drupal_get_path('module', 'wsclient_ui'),
+      'file path' => backdrop_get_path('module', 'wsclient_ui'),
     );
     $items[$this->path . '/manage/%wsclient_service/operation/%wsclient_ui_operation/delete'] = array(
       'title' => 'Delete operation',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('wsclient_ui_operation_delete', $id_count, $op_count),
       'load arguments' => array($id_count),
       'access arguments' => array('administer web services'),
       'file' => 'wsclient_ui.inc',
-      'file path' => drupal_get_path('module', 'wsclient_ui'),
+      'file path' => backdrop_get_path('module', 'wsclient_ui'),
     );
     // Menu items to manage data types.
     $items[$this->path . '/manage/%wsclient_service/add/type'] = array(
       'title' => 'Add data type',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('wsclient_ui_type', $id_count, NULL, 'add'),
       'access arguments' => array('administer web services'),
       'file' => 'wsclient_ui.inc',
-      'file path' => drupal_get_path('module', 'wsclient_ui'),
+      'file path' => backdrop_get_path('module', 'wsclient_ui'),
     );
     $items[$this->path . '/manage/%wsclient_service/type/%wsclient_ui_type'] = array(
       'title' => 'Edit data type',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('wsclient_ui_type', $id_count, $op_count, 'edit'),
       'load arguments' => array($id_count),
       'access arguments' => array('administer web services'),
       'file' => 'wsclient_ui.inc',
-      'file path' => drupal_get_path('module', 'wsclient_ui'),
+      'file path' => backdrop_get_path('module', 'wsclient_ui'),
     );
     $items[$this->path . '/manage/%wsclient_service/type/%wsclient_ui_type/delete'] = array(
       'title' => 'Delete data type',
-      'page callback' => 'drupal_get_form',
+      'page callback' => 'backdrop_get_form',
       'page arguments' => array('wsclient_ui_type_delete', $id_count, $op_count),
       'load arguments' => array($id_count),
       'access arguments' => array('administer web services'),
       'file' => 'wsclient_ui.inc',
-      'file path' => drupal_get_path('module', 'wsclient_ui'),
+      'file path' => backdrop_get_path('module', 'wsclient_ui'),
     );
 
     // Overrides the default description of the top level menu item.
@@ -92,7 +92,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
   }
   $type_info = wsclient_get_types();
   if (empty($type_info)) {
-    drupal_set_message(t('No service types were found, please enable a module that provides a service type.'), 'warning');
+    backdrop_set_message(t('No service types were found, please enable a module that provides a service type.'), 'warning');
   }
   $types = array();
   foreach ($type_info as $type => $info) {
@@ -145,19 +145,22 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     foreach ($operations as $name => $operation) {
       $row = array();
       $row[] = array('data' => array(
-        '#theme' => 'entity_ui_overview_item',
-        '#label' => $operation['label'],
-        '#name' => $name,
-        '#url' => array(
-          'path' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name,
-          'options' => array(),
-        ),
-      ));
+          '#theme' => 'entity_ui_overview_item',
+          '#label' => $operation['label'],
+          '#name' => $name,
+          '#url' => array(
+            'path' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name,
+            'options' => array(),
+          ),
+        ));
       $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name);
       $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/operation/' . $name . '/delete');
       $rows[] = $row;
     }
-    $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
+    $header = array(t('Label'), array(
+        'data' => t('Operations'),
+        'colspan' => 3,
+      ));
     $add_operation = array(
       '#theme' => 'links__wsclient',
       '#links' => array(
@@ -170,8 +173,14 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     $add_operation['#attributes']['class'][] = 'rules-operations-add';
     $add_operation['#attributes']['class'][] = 'action-links';
     $row = array();
-    $row[] = array('data' => $add_operation, 'colspan' => 3);
-    $rows[] = array('data' => $row, 'class' => array('rules-elements-add'));
+    $row[] = array(
+      'data' => $add_operation,
+      'colspan' => 3,
+    );
+    $rows[] = array(
+      'data' => $row,
+      'class' => array('rules-elements-add'),
+    );
     // @todo description help text for operations, data types
     $form['operations'] = array(
       '#access' => TRUE,
@@ -185,7 +194,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     );
     // Add some table styling from Rules.
     $form['operations']['#attributes']['class'][] = 'rules-elements-table';
-    $form['operations']['#attached']['css'][] = drupal_get_path('module', 'rules') . '/ui/rules.ui.css';
+    $form['operations']['#attached']['css'][] = backdrop_get_path('module', 'rules') . '/ui/rules.ui.css';
 
     // Data types of the web service in a table
     $rows = array();
@@ -193,19 +202,22 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     foreach ($datatypes as $name => $datatype) {
       $row = array();
       $row[] = array('data' => array(
-        '#theme' => 'entity_ui_overview_item',
-        '#label' => $datatype['label'],
-        '#name' => $name,
-        '#url' => array(
-          'path' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name,
-          'options' => array(),
-        ),
-      ));
+          '#theme' => 'entity_ui_overview_item',
+          '#label' => $datatype['label'],
+          '#name' => $name,
+          '#url' => array(
+            'path' => WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name,
+            'options' => array(),
+          ),
+        ));
       $row[] = l(t('Edit'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name);
       $row[] = l(t('Delete'), WSCLIENT_UI_PATH . '/manage/' . $service->name . '/type/' . $name . '/delete');
       $rows[] = $row;
     }
-    $header = array(t('Label'), array('data' => t('Operations'), 'colspan' => 3));
+    $header = array(t('Label'), array(
+        'data' => t('Operations'),
+        'colspan' => 3,
+      ));
     $add_type = array(
       '#theme' => 'links__wsclient',
       '#links' => array(
@@ -218,8 +230,14 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     $add_type['#attributes']['class'][] = 'rules-operations-add';
     $add_type['#attributes']['class'][] = 'action-links';
     $row = array();
-    $row[] = array('data' => $add_type, 'colspan' => 3);
-    $rows[] = array('data' => $row, 'class' => array('rules-elements-add'));
+    $row[] = array(
+      'data' => $add_type,
+      'colspan' => 3,
+    );
+    $rows[] = array(
+      'data' => $row,
+      'class' => array('rules-elements-add'),
+    );
     $form['datatypes'] = array(
       '#access' => TRUE,
       '#tree' => TRUE,
@@ -279,12 +297,12 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     $form['settings']['authentication']['basic']['username'] = array(
       '#type' => 'textfield',
       '#title' => t('Username'),
-      '#default_value' => isset($basic_settings['username'])? $basic_settings['username'] : '',
+      '#default_value' => isset($basic_settings['username']) ? $basic_settings['username'] : '',
     );
     $form['settings']['authentication']['basic']['password'] = array(
       '#type' => 'textfield',
       '#title' => t('Password'),
-      '#default_value' => isset($basic_settings['password'])? $basic_settings['password'] : '',
+      '#default_value' => isset($basic_settings['password']) ? $basic_settings['password'] : '',
     );
 
     $wss_settings = isset($settings['authentication']['wss']) ? $settings['authentication']['wss'] : array();
@@ -301,12 +319,12 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     $form['settings']['authentication']['wss']['username'] = array(
       '#type' => 'textfield',
       '#title' => ('Username'),
-      '#default_value' => isset($wss_settings['username'])? $wss_settings['username'] : '',
+      '#default_value' => isset($wss_settings['username']) ? $wss_settings['username'] : '',
     );
     $form['settings']['authentication']['wss']['password'] = array(
       '#type' => 'textfield',
       '#title' => t('Password'),
-      '#default_value' => isset($wss_settings['password'])? $wss_settings['password'] : '',
+      '#default_value' => isset($wss_settings['password']) ? $wss_settings['password'] : '',
     );
 
     $oauth2_states = array(
@@ -382,7 +400,10 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
     $form['settings']['authentication']['oauth2']['query_auth'] = array(
       '#type' => 'select',
       '#title' => t('Query auth'),
-      '#options' => array(0 => t('No'), 1 => t('Yes')),
+      '#options' => array(
+        0 => t('No'),
+        1 => t('Yes'),
+      ),
       '#default_value' => isset($oauth_settings['query_auth']) ? $oauth_settings['query_auth'] : 0,
       '#description' => t("Yes will make the access token be set on the query, otherwise it'll be set on the headers."),
     );
@@ -476,7 +497,7 @@ function wsclient_service_form($form, &$form_state, $service, $op = 'edit') {
 
     // Add some table styling from Rules.
     $form['datatypes']['#attributes']['class'][] = 'rules-elements-table';
-    $form['datatypes']['#attached']['css'][] = drupal_get_path('module', 'rules') . '/ui/rules.ui.css';
+    $form['datatypes']['#attached']['css'][] = backdrop_get_path('module', 'rules') . '/ui/rules.ui.css';
   }
   $form['submit'] = array(
     '#type' => 'submit',
@@ -507,7 +528,7 @@ function wsclient_service_form_submit($form, &$form_state) {
     foreach ($form_state['values']['global_parameters']['items'] as $key => $item) {
       if (!empty($item['name'])) {
         $service->global_parameters[$item['name']] = array(
-          'default value' => $item['default_value']
+          'default value' => $item['default_value'],
         );
       }
     }
@@ -527,7 +548,7 @@ function wsclient_service_form_submit($form, &$form_state) {
   }
 
   $service->save();
-  drupal_set_message(t('Web service description %service has been saved.', array('%service' => $service->label)));
+  backdrop_set_message(t('Web service description %service has been saved.', array('%service' => $service->label)));
   if ($form_state['op'] == 'add') {
     $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
   }
@@ -856,7 +877,7 @@ function wsclient_ui_operation_submit($form, &$form_state) {
   unset($service->operations[$form_state['operation']['name']]);
   $service->operations[$form_state['values']['name']] = $operation;
   $service->save();
-  drupal_set_message(t('Operation %operation has been saved.', array('%operation' => $operation['label'])));
+  backdrop_set_message(t('Operation %operation has been saved.', array('%operation' => $operation['label'])));
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
   rules_clear_cache();
 }
@@ -882,8 +903,11 @@ function theme_wsclient_ui_parameter_form($variables) {
   $elements = $variables['element'];
 
   $table['#theme'] = 'table';
-  $table['#header'] = array(t('Data type'), t('Multiple'), t('Name'), t('Default value'), t('Required'), t('Allow Null'), array('data' => t('Weight'), 'class' => array('tabledrag-hide')));
-  $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
+  $table['#header'] = array(t('Data type'), t('Multiple'), t('Name'), t('Default value'), t('Required'), t('Allow Null'), array(
+      'data' => t('Weight'),
+      'class' => array('tabledrag-hide'),
+    ));
+  $table['#attributes']['id'] = 'rules-' . backdrop_html_id($elements['#title']) . '-id';
 
   foreach (element_children($elements['items']) as $key) {
     $element = &$elements['items'][$key];
@@ -904,22 +928,22 @@ function theme_wsclient_ui_parameter_form($variables) {
   }
   $elements['items']['#printed'] = TRUE;
   if (!empty($table['#rows'])) {
-    drupal_add_tabledrag($table['#attributes']['id'], 'order', 'sibling', 'rules-element-weight');
+    backdrop_add_tabledrag($table['#attributes']['id'], 'order', 'sibling', 'rules-element-weight');
   }
 
   // Theme it like a form item, but with the description above the content.
   $attributes['class'][] = 'form-item';
   $attributes['class'][] = 'rules-variables-form';
 
-  $output = '<div' . drupal_attributes($attributes) . '>' . "\n";
+  $output = '<div' . backdrop_attributes($attributes) . '>' . "\n";
   $output .= theme('form_element_label', $variables);
   if (!empty($elements['#description'])) {
     $output .= ' <div class="description">' . $elements['#description'] . "</div>\n";
   }
-  $output .= ' ' . drupal_render($table) . "\n";
+  $output .= ' ' . backdrop_render($table) . "\n";
   // Add in any further children elements.
   foreach (element_children($elements, TRUE) as $key) {
-    $output .= drupal_render($elements[$key]);
+    $output .= backdrop_render($elements[$key]);
   }
   $output .= "</div>\n";
   return $output;
@@ -936,8 +960,11 @@ function theme_wsclient_ui_header_form($variables) {
   $elements = $variables['element'];
 
   $table['#theme'] = 'table';
-  $table['#header'] = array(t('Namespace'), t('Name'), t('Data'), t('Mustunderstand'), t('Actor'), array('data' => t('Weight'), 'class' => array('tabledrag-hide')));
-  $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
+  $table['#header'] = array(t('Namespace'), t('Name'), t('Data'), t('Mustunderstand'), t('Actor'), array(
+      'data' => t('Weight'),
+      'class' => array('tabledrag-hide'),
+    ));
+  $table['#attributes']['id'] = 'rules-' . backdrop_html_id($elements['#title']) . '-id';
 
   foreach (element_children($elements['items']) as $key) {
     $element = &$elements['items'][$key];
@@ -957,22 +984,22 @@ function theme_wsclient_ui_header_form($variables) {
   }
   $elements['items']['#printed'] = TRUE;
   if (!empty($table['#rows'])) {
-    drupal_add_tabledrag($table['#attributes']['id'], 'order', 'sibling', 'rules-element-weight');
+    backdrop_add_tabledrag($table['#attributes']['id'], 'order', 'sibling', 'rules-element-weight');
   }
 
   // Theme it like a form item, but with the description above the content.
   $attributes['class'][] = 'form-item';
   $attributes['class'][] = 'rules-variables-form';
 
-  $output = '<div' . drupal_attributes($attributes) . '>' . "\n";
+  $output = '<div' . backdrop_attributes($attributes) . '>' . "\n";
   $output .= theme('form_element_label', $variables);
   if (!empty($elements['#description'])) {
     $output .= ' <div class="description">' . $elements['#description'] . "</div>\n";
   }
-  $output .= ' ' . drupal_render($table) . "\n";
+  $output .= ' ' . backdrop_render($table) . "\n";
   // Add in any further children elements.
   foreach (element_children($elements, TRUE) as $key) {
-    $output .= drupal_render($elements[$key]);
+    $output .= backdrop_render($elements[$key]);
   }
   $output .= "</div>\n";
   return $output;
@@ -988,7 +1015,7 @@ function theme_wsclient_ui_global_parameter_form($variables) {
 
   $table['#theme'] = 'table';
   $table['#header'] = array(t('Name'), t('Default value'));
-  $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
+  $table['#attributes']['id'] = 'rules-' . backdrop_html_id($elements['#title']) . '-id';
 
   foreach (element_children($elements['items']) as $key) {
     $element = &$elements['items'][$key];
@@ -1008,15 +1035,15 @@ function theme_wsclient_ui_global_parameter_form($variables) {
   $attributes['class'][] = 'form-item';
   $attributes['class'][] = 'rules-variables-form';
 
-  $output = '<div' . drupal_attributes($attributes) . '>' . "\n";
+  $output = '<div' . backdrop_attributes($attributes) . '>' . "\n";
   $output .= theme('form_element_label', $variables);
   if (!empty($elements['#description'])) {
     $output .= ' <div class="description">' . $elements['#description'] . "</div>\n";
   }
-  $output .= ' ' . drupal_render($table) . "\n";
+  $output .= ' ' . backdrop_render($table) . "\n";
   // Add in any further children elements.
   foreach (element_children($elements, TRUE) as $key) {
-    $output .= drupal_render($elements[$key]);
+    $output .= backdrop_render($elements[$key]);
   }
   $output .= "</div>\n";
   return $output;
@@ -1032,7 +1059,7 @@ function theme_wsclient_ui_global_header_parameter_form($variables) {
 
   $table['#theme'] = 'table';
   $table['#header'] = array(t('Data Type'), t('Name Space URL'));
-  $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
+  $table['#attributes']['id'] = 'rules-' . backdrop_html_id($elements['#title']) . '-id';
 
   foreach (element_children($elements['items']) as $key) {
     $element = &$elements['items'][$key];
@@ -1052,15 +1079,15 @@ function theme_wsclient_ui_global_header_parameter_form($variables) {
   $attributes['class'][] = 'form-item';
   $attributes['class'][] = 'rules-variables-form';
 
-  $output = '<div' . drupal_attributes($attributes) . '>' . "\n";
+  $output = '<div' . backdrop_attributes($attributes) . '>' . "\n";
   $output .= theme('form_element_label', $variables);
   if (!empty($elements['#description'])) {
     $output .= ' <div class="description">' . $elements['#description'] . "</div>\n";
   }
-  $output .= ' ' . drupal_render($table) . "\n";
+  $output .= ' ' . backdrop_render($table) . "\n";
   // Add in any further children elements.
   foreach (element_children($elements, TRUE) as $key) {
-    $output .= drupal_render($elements[$key]);
+    $output .= backdrop_render($elements[$key]);
   }
   $output .= "</div>\n";
   return $output;
@@ -1106,7 +1133,10 @@ function wsclient_ui_validate_parameters($elements, &$form_state) {
   foreach (element_children($elements['items']) as $item_key) {
     $element = &$elements['items'][$item_key];
     if ($element['name']['#value'] || $element['type']['#value']) {
-      foreach (array('name' => t('Name'), 'type' => t('Data type')) as $key => $title) {
+      foreach (array(
+        'name' => t('Name'),
+        'type' => t('Data type'),
+      ) as $key => $title) {
         if (!$element[$key]['#value']) {
           form_error($element[$key], t('!name field is required.', array('!name' => $title)));
         }
@@ -1156,7 +1186,7 @@ function wsclient_ui_operation_delete_submit($form, &$form_state) {
   $operation = $form_state['operation'];
   unset($service->operations[$operation['name']]);
   $service->save();
-  drupal_set_message(t('Deleted operation %operation.', array('%operation' => $operation['label'])));
+  backdrop_set_message(t('Deleted operation %operation.', array('%operation' => $operation['label'])));
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
 }
 
@@ -1247,7 +1277,7 @@ function wsclient_ui_type_submit($form, &$form_state) {
   unset($service->datatypes[$form_state['type']['name']]);
   $service->datatypes[$form_state['values']['name']] = $type;
   $service->save();
-  drupal_set_message(t('Data type %type has been saved.', array('%type' => $type['label'])));
+  backdrop_set_message(t('Data type %type has been saved.', array('%type' => $type['label'])));
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
   // Clear caches so that the new type is made available immediately.
   rules_clear_cache();
@@ -1300,7 +1330,7 @@ function wsclient_ui_type_delete_submit($form, &$form_state) {
   $type = $form_state['type'];
   unset($service->datatypes[$type['name']]);
   $service->save();
-  drupal_set_message(t('Deleted data type %type.', array('%type' => $type['label'])));
+  backdrop_set_message(t('Deleted data type %type.', array('%type' => $type['label'])));
   $form_state['redirect'] = WSCLIENT_UI_PATH . '/manage/' . $service->name;
 }
 
@@ -1367,7 +1397,7 @@ function theme_wsclient_ui_property_form($variables) {
     t('Label'),
     t('Allow Null'),
   );
-  $table['#attributes']['id'] = 'rules-' . drupal_html_id($elements['#title']) . '-id';
+  $table['#attributes']['id'] = 'rules-' . backdrop_html_id($elements['#title']) . '-id';
 
   foreach (element_children($elements['items']) as $key) {
     $element = &$elements['items'][$key];
@@ -1388,15 +1418,15 @@ function theme_wsclient_ui_property_form($variables) {
   $attributes['class'][] = 'form-item';
   $attributes['class'][] = 'rules-variables-form';
 
-  $output = '<div' . drupal_attributes($attributes) . '>' . "\n";
+  $output = '<div' . backdrop_attributes($attributes) . '>' . "\n";
   $output .= theme('form_element_label', $variables);
   if (!empty($elements['#description'])) {
     $output .= ' <div class="description">' . $elements['#description'] . "</div>\n";
   }
-  $output .= ' ' . drupal_render($table) . "\n";
+  $output .= ' ' . backdrop_render($table) . "\n";
   // Add in any further children elements.
   foreach (element_children($elements, TRUE) as $key) {
-    $output .= drupal_render($elements[$key]);
+    $output .= backdrop_render($elements[$key]);
   }
   $output .= "</div>\n";
   return $output;

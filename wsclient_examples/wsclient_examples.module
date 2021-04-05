@@ -37,15 +37,24 @@ function wsclient_examples_default_wsclient_service() {
   );
   $operation['label'] = 'Translate text';
   $operation['url'] = 'language/translate';
-  $operation['parameter']['q'] = array('type' => 'text', 'label' => 'Text');
+  $operation['parameter']['q'] = array(
+    'type' => 'text',
+    'label' => 'Text',
+  );
   $operation['parameter']['langpair'] = array(
     'type' => 'text',
     'label' => 'Language pair',
     'description' => 'The language pair used for translating, such as de|en.',
   );
   // We have to specify the version 1.0
-  $operation['parameter']['v'] = array('type' => 'hidden', 'default value' => '1.0');
-  $operation['result'] = array('type' => 'wsclient_google_translation_result', 'label' => 'Translation result');
+  $operation['parameter']['v'] = array(
+    'type' => 'hidden',
+    'default value' => '1.0',
+  );
+  $operation['result'] = array(
+    'type' => 'wsclient_google_translation_result',
+    'label' => 'Translation result',
+  );
   $service->operations['translate'] = $operation;
   $services[$service->name] = $service;
 
@@ -96,8 +105,14 @@ function wsclient_examples_default_wsclient_service() {
   );
   $operation = array();
   $operation['label'] = 'Search';
-  $operation['parameter']['q'] = array('type' => 'text', 'label' => 'Search text');
-  $operation['result'] = array('type' => 'wsclient_twitter_search_result', 'label' => 'Search result');
+  $operation['parameter']['q'] = array(
+    'type' => 'text',
+    'label' => 'Search text',
+  );
+  $operation['result'] = array(
+    'type' => 'wsclient_twitter_search_result',
+    'label' => 'Search result',
+  );
   $service->operations['search'] = $operation;
   $services[$service->name] = $service;
 
@@ -132,8 +147,14 @@ function wsclient_examples_default_wsclient_service() {
     $operation = array();
     $operation['label'] = 'Get';
     $operation['url'] = 'node/@nid.json';
-    $operation['parameter']['nid'] = array('type' => 'integer', 'label' => 'Node id');
-    $operation['result'] = array('type' => 'node', 'label' => 'Node');
+    $operation['parameter']['nid'] = array(
+      'type' => 'integer',
+      'label' => 'Node id',
+    );
+    $operation['result'] = array(
+      'type' => 'node',
+      'label' => 'Node',
+    );
     $service->operations['get'] = $operation;
     // Node create operation.
     $operation = array();
@@ -141,8 +162,14 @@ function wsclient_examples_default_wsclient_service() {
     $operation['url'] = 'node';
     $operation['type'] = 'POST';
     $operation['data'] = 'node';
-    $operation['parameter']['node'] = array('type' => 'node', 'label' => 'Node');
-    $operation['result'] = array('type' => 'result', 'label' => 'Create result');
+    $operation['parameter']['node'] = array(
+      'type' => 'node',
+      'label' => 'Node',
+    );
+    $operation['result'] = array(
+      'type' => 'result',
+      'label' => 'Create result',
+    );
     $service->operations['create'] = $operation;
     // Node update operation.
     $operation = array();
@@ -150,8 +177,14 @@ function wsclient_examples_default_wsclient_service() {
     $operation['url'] = 'node/@nid';
     $operation['type'] = 'PUT';
     $operation['data'] = 'node';
-    $operation['parameter']['node'] = array('type' => 'node', 'label' => 'Node');
-    $operation['parameter']['nid'] = array('type' => 'integer', 'label' => 'Node id');
+    $operation['parameter']['node'] = array(
+      'type' => 'node',
+      'label' => 'Node',
+    );
+    $operation['parameter']['nid'] = array(
+      'type' => 'integer',
+      'label' => 'Node id',
+    );
     $service->operations['update'] = $operation;
     $services[$service->name] = $service;
     // Node delete operation.
@@ -159,10 +192,21 @@ function wsclient_examples_default_wsclient_service() {
     $operation['label'] = 'Delete';
     $operation['url'] = 'node/@nid';
     $operation['type'] = 'DELETE';
-    $operation['parameter']['nid'] = array('type' => 'integer', 'label' => 'Node id');
+    $operation['parameter']['nid'] = array(
+      'type' => 'integer',
+      'label' => 'Node id',
+    );
     $service->operations['delete'] = $operation;
     $services[$service->name] = $service;
   }
 
   return $services;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function wsclient_examples_autoload_info() {
+  return array(
+  );
 }

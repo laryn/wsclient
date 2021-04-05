@@ -55,7 +55,7 @@ function wsclient_type_info_populate(array &$type_info, $service_name, array $al
       // Get the global type name.
       $type = wsclient_global_type_name($info['type'], $service_name, $all_types);
       // Date values are converted from ISO strings to timestamp, if needed.
-      if($type == 'date') {
+      if ($type == 'date') {
         $info['getter callback'] = 'entity_property_verbatim_date_get';
       }
       // Copy recursion information for this property.

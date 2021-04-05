@@ -1,7 +1,7 @@
 name = Web service client REST
 description = Implements a REST endpoint to connect to REST services.
 package = Services
-core = 7.x
-files[] = wsclient_rest.inc
+backdrop = 1.x
+type = module
 dependencies[] = wsclient
 dependencies[] = http_client

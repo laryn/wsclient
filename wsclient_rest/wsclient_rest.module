@@ -166,3 +166,16 @@ function wsclient_rest_has_custom_formatter($settings, $formatter_type) {
 function wsclient_rest_has_old_formatter($settings) {
   return !empty($settings['formatter']) && (new $settings['formatter']() instanceof HttpClientFormatter);
 }
+
+/**
+ * Implements hook_autoload_info().
+ */
+function wsclient_rest_autoload_info() {
+  return array(
+    'WSClientRESTEndpoint' => 'wsclient_rest.inc',
+    'WsclientRestFormFormatter' => 'wsclient_rest.inc',
+    'WsclientRestJSONFormatter' => 'wsclient_rest.inc',
+    'WsclientRestPHPFormatter' => 'wsclient_rest.inc',
+    'WsclientRestXMLFormatter' => 'wsclient_rest.inc',
+  );
+}

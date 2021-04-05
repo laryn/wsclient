@@ -161,9 +161,9 @@ class WSSESecurityHeader extends SoapHeader {
     $security = new SoapVar(
       array(new SoapVar(
         array(
-          new SoapVar($username, XSD_STRING, NULL, NULL, 'Username', $wsse_ns),
-          new SoapVar($password, XSD_STRING, NULL, NULL, 'Password', $wsse_ns),
-        ),
+        new SoapVar($username, XSD_STRING, NULL, NULL, 'Username', $wsse_ns),
+        new SoapVar($password, XSD_STRING, NULL, NULL, 'Password', $wsse_ns),
+      ),
         SOAP_ENC_OBJECT,
         NULL,
         NULL,
@@ -220,7 +220,7 @@ function wsclient_soap_wsclient_service_form_submit($form, &$form_state) {
     $service->save();
     rules_clear_cache();
     $service->clearCache();
-    drupal_set_message(t('Operations and data types of the SOAP service have been imported automatically. If the service expects data types with properties as lists (multiple values for the property), please check the multiple flag on those properties. This cannot be auto-detected at the moment.'));
+    backdrop_set_message(t('Operations and data types of the SOAP service have been imported automatically. If the service expects data types with properties as lists (multiple values for the property), please check the multiple flag on those properties. This cannot be auto-detected at the moment.'));
   }
 }
 
@@ -282,7 +282,10 @@ function wsclient_soap_parse_operations(array $operations) {
     $op_name = $name_parts[0];
     $wsclient_operations[$op_name] = array(
       'label' => $op_name,
-      'result' => array('type' => $return_type, 'label' => $return_type),
+      'result' => array(
+        'type' => $return_type,
+        'label' => $return_type,
+      ),
     );
     $parts = explode('(', $operation);
     // Cut off trailing ')'.
@@ -333,4 +336,14 @@ function wsclient_soap_type_mapper($type) {
   }
   // Otherwise return the type as is.
   return $type;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function wsclient_soap_autoload_info() {
+  return array(
+    'WSClientSOAPEndpoint' => 'wsclient_soap.module',
+    'WSSESecurityHeader' => 'wsclient_soap.module',
+  );
 }

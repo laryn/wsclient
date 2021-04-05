@@ -1,0 +1,30 @@
+[WSClientSOAPTestCase]
+name = Web service client SOAP
+description = Tests invoking a SOAP service.
+group = Services
+file = wsclient_examples.test
+
+[WSClientSOAPRulesTestCase]
+name = Web service client SOAP Rules
+description = Tests the Rules integration of the SOAP endpoint.
+group = Services
+file = wsclient_examples.test
+
+[WSClientRESTTestCase]
+name = Web service client REST
+description = Tests invoking a RESTful service.
+group = Services
+file = wsclient_examples.test
+
+[WSClientRESTRulesTestCase]
+name = Web service client REST Rules
+description = Tests the Rules integration of the REST endpoint.
+group = Services
+file = wsclient_examples.test
+
+[WSClientRestWSTestCase]
+name = Web service client RestWS (2.x)
+description = Tests invoking the local RestWS service.
+group = Services
+file = wsclient_examples.test
+

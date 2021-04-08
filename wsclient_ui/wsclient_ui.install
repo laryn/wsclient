@@ -1,9 +1,0 @@
-<?php
-
-/**
- * @file
- * Web service client UI - installation file.
- */
-
-// TODO The old hook_update_N functions cannot be applied to Backdrop.
-function wsclient_ui_update_7101() { }

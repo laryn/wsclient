@@ -5,7 +5,7 @@
  * Web service client SOAP/REST Tests.
  */
 
-class WSClientSOAPTestCase extends DrupalWebTestCase {
+class WSClientSOAPTestCase extends BackdropWebTestCase {
 
   static function getInfo() {
     return array(
@@ -29,7 +29,7 @@ class WSClientSOAPTestCase extends DrupalWebTestCase {
   }
 }
 
-class WSClientSOAPRulesTestCase extends DrupalWebTestCase {
+class WSClientSOAPRulesTestCase extends BackdropWebTestCase {
 
   static function getInfo() {
     return array(
@@ -64,7 +64,7 @@ class WSClientSOAPRulesTestCase extends DrupalWebTestCase {
 
 }
 
-class WSClientRESTTestCase extends DrupalWebTestCase {
+class WSClientRESTTestCase extends BackdropWebTestCase {
 
   static function getInfo() {
     return array(
@@ -88,7 +88,7 @@ class WSClientRESTTestCase extends DrupalWebTestCase {
   }
 }
 
-class WSClientRESTRulesTestCase extends DrupalWebTestCase {
+class WSClientRESTRulesTestCase extends BackdropWebTestCase {
 
   static function getInfo() {
     return array(
@@ -124,7 +124,7 @@ class WSClientRESTRulesTestCase extends DrupalWebTestCase {
 
 }
 
-class WSClientRestWSTestCase extends DrupalWebTestCase {
+class WSClientRestWSTestCase extends BackdropWebTestCase {
 
   static function getInfo() {
     return array(

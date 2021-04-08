@@ -8,7 +8,7 @@
 /**
  * Class representing web service descriptions.
  */
-class WSClientServiceDescription extends Entity {
+abstract class WSClientServiceDescription extends Entity {
 
   public $settings = array();
   public $operations = array();

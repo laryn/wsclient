@@ -8,7 +8,7 @@
 /**
  * Class representing web service descriptions.
  */
-abstract class WSClientServiceDescription extends Entity {
+class WSClientServiceDescription extends Entity {
 
   public $settings = array();
   public $operations = array();
@@ -22,9 +22,53 @@ abstract class WSClientServiceDescription extends Entity {
 
   protected $endpoint = NULL;
 
-  function __construct($values = array(), $entity_type = 'wsclient_service') {
+  public function __construct($values = array(), $entity_type = 'wsclient_service') {
     parent::__construct($values, $entity_type);
   }
+
+   /**
+   * Returns the entity identifier (the entity's machine name or numeric ID).
+   *
+   * @return
+   *   The identifier of the entity, or NULL if the entity does not yet have
+   *   an identifier.
+   */
+  public function id() {
+    return NULL;
+  }
+
+  /**
+   * Returns the type of the entity.
+   *
+   * @return
+   *   The type of the entity.
+   */
+  public function entityType() {
+    return 'wsclient_service';
+  }
+
+  /**
+   * Returns the label of the entity.
+   *
+   * @return
+   *   The label of the entity, or NULL if there is no label defined.
+   */
+  public function label() {
+    return NULL;
+  }
+
+  /**
+   * Returns the URI elements of the entity.
+   *
+   * @return
+   *   An array containing the 'path' and 'options' keys used to build the URI
+   *   of the entity, and matching the signature of url(). NULL if the entity
+   *   has no URI of its own.
+   */
+  public function uri() {
+    return NULL;
+  }
+
 
   /**
    * Magic method to catch service invocations.

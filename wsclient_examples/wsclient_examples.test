@@ -54,11 +54,11 @@ class WSClientSOAPRulesTestCase extends BackdropWebTestCase {
 
     $rule = rule(array('address' => array('type' => 'text')));
     $rule->action('wsclient_geocoder_geocode_address', array('param_address:select' => 'address'))
-         ->action('drupal_message', array('message:select' => 'result:0:zip'))
+         ->action('backdrop_message', array('message:select' => 'result:0:zip'))
          ->execute('1600 Pennsylvania Av, Washington, DC');
 
     RulesLog::logger()->checkLog();
-    $msg = drupal_get_messages();
+    $msg = backdrop_get_messages();
     $this->assertEqual(array_pop($msg['status']), '20502', 'SOAP service has been invoked.');
   }
 
@@ -83,8 +83,8 @@ class WSClientRESTTestCase extends BackdropWebTestCase {
    */
   function testServiceInvocation() {
     $service = wsclient_service_load('twitter_search');
-    $result = $service->search('drupal');
-    $this->assertEqual($result['query'], 'drupal', 'REST service invocation was successful.');
+    $result = $service->search('backdrop');
+    $this->assertEqual($result['query'], 'backdrop', 'REST service invocation was successful.');
   }
 }
 
@@ -107,19 +107,19 @@ class WSClientRESTRulesTestCase extends BackdropWebTestCase {
    * Tests invoking the google translation service.
    */
   function testRulesIntegration() {
-    list($result) = rules_action('wsclient_twitter_search_search', array('param_q' => 'drupal'))->execute();
-    $this->assertEqual($result['query'], 'drupal', 'REST service invoked via the action.');
+    list($result) = rules_action('wsclient_twitter_search_search', array('param_q' => 'backdrop'))->execute();
+    $this->assertEqual($result['query'], 'backdrop', 'REST service invoked via the action.');
 
     // Test making use of the provided variable.
     $rule = rule(array('text' => array('type' => 'text')));
     $rule->action('wsclient_twitter_search_search', array(
            'param_q:select' => 'text',
          ))
-         ->action('drupal_message', array('message:select' => 'result:query'))
-         ->execute('drupal');
+         ->action('backdrop_message', array('message:select' => 'result:query'))
+         ->execute('backdrop');
     RulesLog::logger()->checkLog();
-    $msg = drupal_get_messages();
-    $this->assertEqual(drupal_strtolower(array_pop($msg['status'])), 'drupal', 'REST service has been invoked.');
+    $msg = backdrop_get_messages();
+    $this->assertEqual(backdrop_strtolower(array_pop($msg['status'])), 'backdrop', 'REST service has been invoked.');
   }
 
 }
@@ -147,15 +147,15 @@ class WSClientRestWSTestCase extends BackdropWebTestCase {
   function testCRUD() {
     // Get.
     $title = $this->randomName(8);
-    $node = $this->drupalCreateNode(array('title' => $title));
-    $account = $this->drupalCreateUser(array('access resource node'));
+    $node = $this->backdropCreateNode(array('title' => $title));
+    $account = $this->backdropCreateUser(array('access resource node'));
     $service = wsclient_service_load('restws_node');
     $this->addSimpletestCurlOptions($service, $account);
     $result = $service->get($node->nid);
     $this->assertEqual($node->title, $result['title'], 'Node title received correctly');
 
     // Create.
-    $account = $this->drupalCreateUser(array('access resource node', 'access content', 'bypass node access'));
+    $account = $this->backdropCreateUser(array('access resource node', 'access content', 'bypass node access'));
     $this->addSimpletestCurlOptions($service, $account);
     $service->clearCache();
     $node = array(
@@ -195,7 +195,7 @@ class WSClientRestWSTestCase extends BackdropWebTestCase {
     $curl_options[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
     $curl_options[CURLOPT_USERPWD] = $account->name . ':' . $account->pass_raw;
     if (preg_match('/simpletest\d+/', $this->databasePrefix, $matches)) {
-      $curl_options[CURLOPT_USERAGENT] = drupal_generate_test_ua($matches[0]);
+      $curl_options[CURLOPT_USERAGENT] = backdrop_generate_test_ua($matches[0]);
     }
     $service->settings['curl options'] = $curl_options;
   }

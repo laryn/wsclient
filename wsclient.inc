@@ -96,7 +96,7 @@ class WSClientServiceDescription extends Entity {
   /**
    * Determines access to the web service.
    */
-  public function access($account = NULL) {
+  public function access($op, $account = NULL) {
     if (method_exists($this->endpoint(), 'access')) {
       return $this->endpoint()->access($account);
     }
